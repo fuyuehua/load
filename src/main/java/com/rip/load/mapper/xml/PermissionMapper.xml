@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rip.load.mapper.PermissionMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rip.load.pojo.Permission">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="desc" property="desc" />
+        <result column="url" property="url" />
+    </resultMap>
+
+    <select id="getUserPermission" resultMap="BaseResultMap">
+        select p.* from rip_permission p
+        join rip_role_permission rp on p.id = rp.pid
+        join rip_user_role ur on ur.rid = rp.rid
+        where ur.uid = #{userId}
+    </select>
+
+    <select id="getByRoleId" resultMap="BaseResultMap">
+        select p.* from rip_permission p
+        join rip_role_permission rp on p.id = rp.pid
+        where rp.rid = #{id}
+    </select>
+
+</mapper>
