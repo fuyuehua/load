@@ -4,24 +4,27 @@ package com.rip.load.controller;
 import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
+import com.baomidou.mybatisplus.service.IService;
 import com.rip.load.pojo.User;
 import com.rip.load.pojo.nativePojo.Result;
 import com.rip.load.pojo.nativePojo.UserThreadLocal;
 import com.rip.load.service.UserService;
 import com.rip.load.utils.MD5Util;
+import com.rip.load.utils.MessageUtil;
 import com.rip.load.utils.RedisUtil;
 import com.rip.load.utils.ResultUtil;
+import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 /**
  * <p>
@@ -91,6 +94,140 @@ public class UserController {
 //        map.put("role", Integer.toString(user.getRole()));
         return new ResultUtil<Object>().setData(map);
     }
+/**李瑞池 start**/
+    @ApiOperation(value = "禁用/启用用户")
+    @GetMapping("/prohibitAndnable")
+    public Result<Object>prohibiteAndnable(
+            @ApiParam("用户ID")
+            @RequestParam Integer id){
+        User user=userService.selectById(id);
+        if(id != user.getId()){
+            return new ResultUtil<Object>().setErrorMsg("该用户不存在");
+        }
+        if(id == user.getId()){
+            if (user.getOnoff() == 1){
+                 user.setOnoff(0);
+                return new ResultUtil<Object>().set();
+            }else {
+                user.setOnoff(1);
+            }
+        }
+       return new ResultUtil<Object>().set();
+    }
+
+
+
+    @ApiOperation(value = "已知密码重置")
+    @GetMapping("/knowpasswordReset")
+    public Result<Object> knowpasswordReset(@ApiParam(value = "用户名") @RequestParam String username,
+                                       @ApiParam(value = "密码") @RequestParam  String password,
+                                       @ApiParam(value = "新密码")@RequestParam String newPassword){
+        if(StringUtils.isEmpty(username) || StringUtils.isEmpty(password)){
+            return new ResultUtil<Object>().setErrorMsg("参数不足");
+        }
+        User user = userService.selectOne(new EntityWrapper<User>().eq("username", username));
+        if(user == null){
+            return new ResultUtil<Object>().setErrorMsg("用户不存在");
+        }
+        //知道原密码的前提下修改密码
+        boolean b = MD5Util.verifyPassword(password, user.getPassword(), user.getSalt());
+        if(!b){
+            return new ResultUtil<Object>().setErrorMsg("密码错误");
+        }else{
+            Map<String, String> map = MD5Util.getSecert(newPassword);
+            user.setPassword(map.get("secert"));
+            user.setSalt(map.get("salt"));
+        }
+        boolean b1 = userService.updateById(user);
+        if(b1){
+            return new ResultUtil<Object>().set();
+        }else{
+            return new ResultUtil<Object>().setErrorMsg("修改失败");
+        }
+    }
+
+
+
+    @ApiOperation(value="发送手机验证码,以最后一个验证码为准,时效5分钟")
+    @GetMapping("/sendValidate")
+    public Result<Object>sendValidate(@ApiParam(value="手机号") @RequestParam String phone){
+        if(StringUtils.isEmpty(phone)){
+            return new ResultUtil<Object>().setErrorMsg("传入号码为空");
+        }
+        User user = userService.selectOne(new EntityWrapper<User>().eq("phone", phone));
+        if(user == null){
+            return new ResultUtil<Object>().setErrorMsg("该用户不存在");
+        }
+        //假装发验证码
+        int i = (int)(Math.random()*900000 + 100000);
+        List<String> list = new ArrayList<>();
+        list.add(Integer.toString(i));
+        String s = MessageUtil.messageHttp(list, phone, null, null);
+        redisUtil.set(phone, Integer.toString(i));
+        redisUtil.expire(phone, 300);
+        return new ResultUtil<Object>().setData(s);
+    }
+
+    @ApiOperation(value="验证手机验证码")
+    @GetMapping("/validateMessage")
+    public Result<Object>validateMessage(@ApiParam(value="手机号") @RequestParam String phone,
+                                         @ApiParam(value="验证码") @RequestParam String str){
+        if(StringUtils.isEmpty(phone)|| StringUtils.isEmpty(str)){
+            return new ResultUtil<Object>().setErrorMsg("传入参数为空");
+        }
+        User user = userService.selectOne(new EntityWrapper<User>().eq("phone", phone));
+        if(user == null){
+            return new ResultUtil<Object>().setErrorMsg("该用户不存在");
+        }
+        boolean b = redisUtil.hasKey(phone);
+        if(!b){
+            return new ResultUtil<Object>().setErrorMsg("验证码过时或未发送");
+        }
+        String o = (String)redisUtil.get(phone);
+        if(o.equals(str)){
+            int i = (int)(Math.random()*900000 + 100000);
+            redisUtil.set(phone+"Secret", Integer.toString(i));
+            redisUtil.expire(phone+"Secret", 300);
+            return new ResultUtil<Object>().setData(Integer.toString(i));
+
+        }else {
+            return new ResultUtil<Object>().setErrorMsg("验证失败");
+        }
+    }
+
+        @ApiOperation(value="重置密码")
+        @GetMapping("/resetPassword")
+        public Result<Object>resetPassword(@ApiParam(value="手机号") @RequestParam String phone,
+                                           @ApiParam(value="新密码") @RequestParam String password,
+                                           @ApiParam(value="验证码") @RequestParam String str){
+            if(StringUtils.isEmpty(password)|| StringUtils.isEmpty(str)||StringUtils.isEmpty(phone)){
+                return new ResultUtil<Object>().setErrorMsg("传入参数为空");
+            }
+            User user = userService.selectOne(new EntityWrapper<User>().eq("phone", phone));
+            if(user == null){
+                return new ResultUtil<Object>().setErrorMsg("该用户不存在");
+            }
+            boolean b = redisUtil.hasKey(phone+"Secret");
+            if(!b){
+                return new ResultUtil<Object>().setErrorMsg("验证码过时");
+            }
+
+            String o = (String)redisUtil.get(phone);
+            if(o.equals(str)){
+                Map<String, String> map = MD5Util.getSecert(password);
+                user.setPassword(map.get("secert"));
+                user.setSalt(map.get("salt"));
+            }
+
+            boolean b1 = userService.updateById(user);
+            if(b1){
+                return new ResultUtil<Object>().set();
+            }else{
+                return new ResultUtil<Object>().setErrorMsg("修改失败");
+            }
+    }
+    /**李瑞池 end**/
+
 
     @ApiOperation(value = "修改一个用户信息")
     @PostMapping("/update")
@@ -102,9 +239,9 @@ public class UserController {
         User user1 = new User();
         user1.setId(user.getId());
         user1.setNickname(user.getNickname());
-        Map<String, String> map = MD5Util.getSecert(user.getPassword());
-        user1.setPassword(map.get("secert"));
-        user1.setSalt(map.get("salt"));
+//        Map<String, String> map = MD5Util.getSecert(user.getPassword());
+//        user1.setPassword(map.get("secert"));
+//        user1.setSalt(map.get("salt"));
 
         boolean b = userService.updateById(user1);
         if(b){
@@ -123,9 +260,9 @@ public class UserController {
 
         User user1 = UserThreadLocal.get();
         user1.setNickname(user.getNickname());
-        Map<String, String> map = MD5Util.getSecert(user.getPassword());
-        user1.setPassword(map.get("secert"));
-        user1.setSalt(map.get("salt"));
+//        Map<String, String> map = MD5Util.getSecert(user.getPassword());
+//        user1.setPassword(map.get("secert"));
+//        user1.setSalt(map.get("salt"));
 
         boolean b = userService.updateById(user1);
         if(b){

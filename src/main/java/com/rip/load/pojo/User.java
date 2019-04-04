@@ -88,7 +88,7 @@ public class User extends Model<User> {
         return nickname;
     }
 
-    public void setNickname(String nikename) {
+    public void setNickname(String nickname) {
         this.nickname = nickname;
     }
     public String getPhone() {

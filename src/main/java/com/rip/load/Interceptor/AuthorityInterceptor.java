@@ -29,7 +29,7 @@ public class AuthorityInterceptor implements HandlerInterceptor {
 
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        String requestURI = request.getRequestURI();
+        /*String requestURI = request.getRequestURI();
         String authorization = request.getHeader("authorization");
         if(authorization != null) {
             boolean b = redisUtil.hasKey(authorization);
@@ -58,8 +58,8 @@ public class AuthorityInterceptor implements HandlerInterceptor {
                     }
                 }
             }
-        }
-        return false;
+        }*/
+        return true;
     }
 
     @Override
