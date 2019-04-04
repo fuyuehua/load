@@ -26,6 +26,12 @@ public class Order extends Model<Order> {
     private Integer id;
 
     /**
+     * 用户ID
+     */
+    private Integer uid;
+
+
+    /**
      * 姓名
      */
     private String realname;
@@ -65,6 +71,12 @@ public class Order extends Model<Order> {
     private Date applicationTime;
 
     /**
+     * 到款时间
+     */
+    @TableField("arrival_time")
+    private Date arrivalTime;
+
+    /**
      * 到期时间
      */
     @TableField("due_time")
@@ -99,6 +111,15 @@ public class Order extends Model<Order> {
     public void setId(Integer id) {
         this.id = id;
     }
+
+    public Integer getUid() {
+        return uid;
+    }
+
+    public void setUid(Integer uid) {
+        this.uid = uid;
+    }
+
     public String getRealname() {
         return realname;
     }
@@ -148,6 +169,15 @@ public class Order extends Model<Order> {
     public void setApplicationTime(Date applicationTime) {
         this.applicationTime = applicationTime;
     }
+
+    public Date getArrivalTime() {
+        return arrivalTime;
+    }
+
+    public void setArrivalTime(Date arrivalTime) {
+        this.arrivalTime = arrivalTime;
+    }
+
     public Date getDueTime() {
         return dueTime;
     }

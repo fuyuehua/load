@@ -5,6 +5,7 @@
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="com.rip.load.pojo.Order">
         <id column="id" property="id" />
+        <result column="uid" property="uid" />
         <result column="realname" property="realname" />
         <result column="phone" property="phone" />
         <result column="borrow_money" property="borrowMoney" />
@@ -12,6 +13,7 @@
         <result column="time_limit" property="timeLimit" />
         <result column="status" property="status" />
         <result column="application_time" property="applicationTime" />
+        <result column="arrival_time" property="arrivalTime" />
         <result column="due_time" property="dueTime" />
         <result column="remark" property="remark" />
         <result column="expense_detailId" property="expenseDetailid" />
