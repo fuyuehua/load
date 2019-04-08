@@ -94,7 +94,10 @@ public class UserController {
 //        map.put("role", Integer.toString(user.getRole()));
         return new ResultUtil<Object>().setData(map);
     }
-/**李瑞池 start**/
+/**
+ *
+ *
+ * 李瑞池 start**/
     @ApiOperation(value = "禁用/启用用户")
     @GetMapping("/prohibitAndnable")
     public Result<Object>prohibiteAndnable(
@@ -107,8 +110,7 @@ public class UserController {
         if(id == user.getId()){
             if (user.getOnoff() == 1){
                  user.setOnoff(0);
-                return new ResultUtil<Object>().set();
-            }else {
+            }else{
                 user.setOnoff(1);
             }
         }
@@ -212,7 +214,7 @@ public class UserController {
                 return new ResultUtil<Object>().setErrorMsg("验证码过时");
             }
 
-            String o = (String)redisUtil.get(phone);
+            String o = (String)redisUtil.get(phone+"Secret");
             if(o.equals(str)){
                 Map<String, String> map = MD5Util.getSecert(password);
                 user.setPassword(map.get("secert"));
@@ -226,7 +228,9 @@ public class UserController {
                 return new ResultUtil<Object>().setErrorMsg("修改失败");
             }
     }
-    /**李瑞池 end**/
+    /**
+     *
+     * 李瑞池 end**/
 
 
     @ApiOperation(value = "修改一个用户信息")
