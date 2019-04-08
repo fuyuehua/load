@@ -49,9 +49,19 @@ public class User extends Model<User> {
     private String salt;
 
     /**
-     * 客户资料
+     * 父级ID
+     */
+    private Integer fatherId;
+
+    /**
+     * 客户资料ID
      */
     private Integer customerId;
+
+    /**
+     * 手续费抽成额度
+     */
+    private Integer poundage;
 
     /**
      * 注册时间
@@ -127,6 +137,22 @@ public class User extends Model<User> {
         this.onoff = onoff;
     }
 
+    public Integer getFatherId() {
+        return fatherId;
+    }
+
+    public void setFatherId(Integer fatherId) {
+        this.fatherId = fatherId;
+    }
+
+    public Integer getPoundage() {
+        return poundage;
+    }
+
+    public void setPoundage(Integer poundage) {
+        this.poundage = poundage;
+    }
+
     @Override
     protected Serializable pkVal() {
         return this.id;
@@ -135,15 +161,17 @@ public class User extends Model<User> {
     @Override
     public String toString() {
         return "User{" +
-        "id=" + id +
-        ", username=" + username +
-        ", password=" + password +
-        ", nickname=" + nickname +
-        ", phone=" + phone +
-        ", salt=" + salt +
-        ", customerId=" + customerId +
-        ", createtime=" + createtime +
-        ", onoff=" + onoff +
-        "}";
+                "id=" + id +
+                ", username='" + username + '\'' +
+                ", password='" + password + '\'' +
+                ", nickname='" + nickname + '\'' +
+                ", phone='" + phone + '\'' +
+                ", salt='" + salt + '\'' +
+                ", fatherId=" + fatherId +
+                ", customerId=" + customerId +
+                ", poundage=" + poundage +
+                ", createtime=" + createtime +
+                ", onoff=" + onoff +
+                '}';
     }
 }

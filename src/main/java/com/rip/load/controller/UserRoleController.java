@@ -25,7 +25,7 @@ import org.springframework.stereotype.Controller;
  * @since 2019-03-29
  */
 @Api(tags = {"用户与角色绑定控制器"})
-@Controller
+@RestController
 @RequestMapping("api/userRole")
 public class UserRoleController {
 
