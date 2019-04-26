@@ -6,13 +6,12 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.IService;
 import com.rip.load.pojo.User;
+import com.rip.load.pojo.UserRole;
 import com.rip.load.pojo.nativePojo.Result;
 import com.rip.load.pojo.nativePojo.UserThreadLocal;
+import com.rip.load.service.UserRoleService;
 import com.rip.load.service.UserService;
-import com.rip.load.utils.MD5Util;
-import com.rip.load.utils.MessageUtil;
-import com.rip.load.utils.RedisUtil;
-import com.rip.load.utils.ResultUtil;
+import com.rip.load.utils.*;
 import com.sun.scenario.effect.impl.sw.sse.SSEBlend_SRC_OUTPeer;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -24,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
 
+import javax.management.ObjectName;
+import javax.servlet.ServletRequest;
 import java.util.*;
 
 /**
@@ -43,22 +44,33 @@ public class UserController {
     private UserService userService;
     @Autowired
     private RedisUtil redisUtil;
+    @Autowired
+    private UserRoleService userRoleService;
 
-    @ApiOperation(value = "新建一个用户")
+    @ApiOperation(value = "新建一个用户（管理员）")
     @PostMapping("/add")
     public Result<Object> add(@ApiParam(value = "用户实体类") @RequestBody User user){
         if (StringUtils.isEmpty(user.getUsername())|| StringUtils.isEmpty(user.getPassword())
-                || StringUtils.isEmpty(user.getNickname())){
+                || StringUtils.isEmpty(user.getNickname()) || StringUtils.isEmpty(user.getPhone())){
             return new ResultUtil<Object>().setErrorMsg("参数不足");
         }
+
+        //账户名去重
+        User username = userService.selectOne(new EntityWrapper<User>().eq("username", user.getUsername()));
+        if(username != null){
+            return new ResultUtil<Object>().setErrorMsg("用户名重复");
+        }
+
         //密码处理
         Map<String, String> map = MD5Util.getSecert(user.getPassword());
-
         User readyUser = new User();
         readyUser.setUsername(user.getUsername());
         readyUser.setPassword(map.get("secert"));
         readyUser.setNickname(user.getNickname());
         readyUser.setSalt(map.get("salt"));
+        readyUser.setPhone(user.getPhone());
+        readyUser.setOnoff(1);
+        readyUser.setCreatetime(new Date());
 
         boolean b = userService.insert(readyUser);
         if(b){
@@ -91,8 +103,15 @@ public class UserController {
         Map<String, String> map = new HashMap<>();
         map.put("authorization", token);
         map.put("nickname", user.getNickname());
-//        map.put("role", Integer.toString(user.getRole()));
         return new ResultUtil<Object>().setData(map);
+    }
+
+    @ApiOperation(value = "登出")
+    @GetMapping("/loginOut")
+    public Result<Object> loginOut(@RequestHeader(value="authorization") String authorization){
+        UserThreadLocal.remove();
+        redisUtil.del(authorization);
+        return new ResultUtil<Object>().set();
     }
 
     @ApiOperation(value = "修改一个用户信息")
@@ -105,10 +124,7 @@ public class UserController {
         User user1 = new User();
         user1.setId(user.getId());
         user1.setNickname(user.getNickname());
-//        Map<String, String> map = MD5Util.getSecert(user.getPassword());
-//        user1.setPassword(map.get("secert"));
-//        user1.setSalt(map.get("salt"));
-
+        user1.setPhone(user.getPhone());
         boolean b = userService.updateById(user1);
         if(b){
             return new ResultUtil<Object>().set();
@@ -126,10 +142,7 @@ public class UserController {
 
         User user1 = UserThreadLocal.get();
         user1.setNickname(user.getNickname());
-//        Map<String, String> map = MD5Util.getSecert(user.getPassword());
-//        user1.setPassword(map.get("secert"));
-//        user1.setSalt(map.get("salt"));
-
+        user1.setPhone(user.getPhone());
         boolean b = userService.updateById(user1);
         if(b){
             return new ResultUtil<Object>().set();
@@ -157,6 +170,14 @@ public class UserController {
         return new ResultUtil<Map<String, Object>>().setData(rolePermission);
     }
 
+    @ApiOperation("用户得到自身信息")
+    @GetMapping("/getSelf")
+    public Result<User> getSelf(
+    ){
+        User user = UserThreadLocal.get();
+        return new ResultUtil<User>().setData(user);
+    }
+
 
     @ApiOperation("得到用户列表")
     @GetMapping("/getAllInPage")
@@ -164,9 +185,12 @@ public class UserController {
             @ApiParam(value = "想要请求的页码")
             @RequestParam int currentPage,
             @ApiParam(value = "一页显示多少数据")
-            @RequestParam int pageSize){
+            @RequestParam int pageSize,
+            @ApiParam(value = "模糊公司名称")
+            @RequestParam String nickname){
         Page<User> page = new Page<>(currentPage, pageSize);
-        Page<User> userPage = userService.selectPage(page);
+        Page<User> userPage = userService.selectPage(page, new EntityWrapper<User>()
+                .like("nickname", nickname));
         return new ResultUtil<Page<User>>().setData(userPage);
     }
 
@@ -176,18 +200,31 @@ public class UserController {
     public Result<Object>prohibiteAndnable(
             @ApiParam("用户ID")
             @RequestParam Integer id){
+        if(id == null || id == 0){
+            return new ResultUtil<Object>().setErrorMsg("参数不足");
+        }
         User user=userService.selectById(id);
-        if(id != user.getId()){
+        if(UserThreadLocal.get().getId().equals(id)){
+            return new ResultUtil<Object>().setErrorMsg("不能禁用自己");
+        }
+        if(user == null){
             return new ResultUtil<Object>().setErrorMsg("该用户不存在");
         }
-        if(id == user.getId()){
-            if (user.getOnoff() == 1){
-                user.setOnoff(0);
-            }else{
-                user.setOnoff(1);
-            }
+        if(user.getUsername().equals("admin")){
+            return new ResultUtil<Object>().setErrorMsg("无法禁用管理员");
         }
-        return new ResultUtil<Object>().set();
+
+        if (user.getOnoff().equals(1)){
+            user.setOnoff(0);
+        }else{
+            user.setOnoff(1);
+        }
+        boolean b = userService.updateById(user);
+        if(b){
+            return new ResultUtil<Object>().set();
+        }else{
+            return new ResultUtil<Object>().setErrorMsg("修改失败");
+        }
     }
 
 
@@ -225,41 +262,45 @@ public class UserController {
 
     @ApiOperation(value="发送手机验证码,以最后一个验证码为准,时效5分钟")
     @GetMapping("/sendValidate")
-    public Result<Object>sendValidate(@ApiParam(value="手机号") @RequestParam String phone){
-        if(StringUtils.isEmpty(phone)){
-            return new ResultUtil<Object>().setErrorMsg("传入号码为空");
+    public Result<Object>sendValidate(@ApiParam(value="手机号") @RequestParam String phone,
+                                      @ApiParam(value="用户名") @RequestParam String username){
+        if(StringUtils.isEmpty(phone) || StringUtils.isEmpty(username)){
+            return new ResultUtil<Object>().setErrorMsg("传入参数为空");
         }
-        User user = userService.selectOne(new EntityWrapper<User>().eq("phone", phone));
+        User user = userService.selectOne(new EntityWrapper<User>().eq("username", username));
         if(user == null){
             return new ResultUtil<Object>().setErrorMsg("该用户不存在");
         }
-        //假装发验证码
+        if(!phone.equals(user.getPhone())){
+            return new ResultUtil<Object>().setErrorMsg("手机号与用户不匹配");
+        }
+        //发验证码
         int i = (int)(Math.random()*900000 + 100000);
         List<String> list = new ArrayList<>();
         list.add(Integer.toString(i));
-        String s = MessageUtil.messageHttp(list, phone, null, null);
-        redisUtil.set(phone, Integer.toString(i));
-        redisUtil.expire(phone, 300);
+        String s = MessageUtil.messageHttp(list, phone, "500067", "900394");
+        redisUtil.set(username, Integer.toString(i));
+        redisUtil.expire(username, 300);
         return new ResultUtil<Object>().setData(s);
     }
 
     @ApiOperation(value="验证手机验证码")
     @GetMapping("/validateMessage")
-    public Result<Object>validateMessage(@ApiParam(value="手机号") @RequestParam String phone,
+    public Result<Object>validateMessage(@ApiParam(value="用户名") @RequestParam String username,
                                          @ApiParam(value="验证码") @RequestParam String str,
                                          @ApiParam(value="新密码") @RequestParam String password){
-        if(StringUtils.isEmpty(phone)|| StringUtils.isEmpty(str) || StringUtils.isEmpty(password)){
+        if(StringUtils.isEmpty(username)|| StringUtils.isEmpty(str) || StringUtils.isEmpty(password)){
             return new ResultUtil<Object>().setErrorMsg("传入参数为空");
         }
-        User user = userService.selectOne(new EntityWrapper<User>().eq("phone", phone));
+        User user = userService.selectOne(new EntityWrapper<User>().eq("username", username));
         if(user == null){
             return new ResultUtil<Object>().setErrorMsg("该用户不存在");
         }
-        boolean b = redisUtil.hasKey(phone);
+        boolean b = redisUtil.hasKey(username);
         if(!b){
-            return new ResultUtil<Object>().setErrorMsg("验证码过时或未发送");
+            return new ResultUtil<Object>().setErrorMsg("验证码过时");
         }
-        String o = (String)redisUtil.get(phone);
+        String o = (String)redisUtil.get(username);
         if(o.equals(str)){
             Map<String, String> map = MD5Util.getSecert(password);
             user.setPassword(map.get("secert"));
@@ -274,38 +315,137 @@ public class UserController {
             return new ResultUtil<Object>().setErrorMsg("验证失败");
         }
     }
+    /** 李瑞池 end**/
+    @ApiOperation(value = "客户通过手机号码注册,1.发送手机验证码")
+    @GetMapping("/registerByPhone1")
+    public Result<Object> registerByPhone1(
+            @ApiParam(value = "手机号码")
+            @RequestParam  String phone){
+        if(StringUtils.isEmpty(phone)){
+            return new ResultUtil<Object>().setErrorMsg("未传入手机号");
+        }
 
-    /** 主要是为了把验证手机验证码和重置密码分两个页面 **/
-//    @ApiOperation(value="重置密码")
-//    @GetMapping("/resetPassword")
-    /*public Result<Object>resetPassword(@ApiParam(value="手机号") @RequestParam String phone,
-                                       @ApiParam(value="验证码") @RequestParam String str,
-                                       @ApiParam(value="新密码") @RequestParam String password
-                                      ){
-        if(StringUtils.isEmpty(password)|| StringUtils.isEmpty(str)||StringUtils.isEmpty(phone)){
-            return new ResultUtil<Object>().setErrorMsg("传入参数为空");
+        //账户名去重
+        User username = userService.selectOne(new EntityWrapper<User>().eq("username", phone));
+        if(username != null){
+            return new ResultUtil<Object>().setErrorMsg("此用户已注册");
         }
-        User user = userService.selectOne(new EntityWrapper<User>().eq("phone", phone));
-        if(user == null){
-            return new ResultUtil<Object>().setErrorMsg("该用户不存在");
+
+        int i = (int)(Math.random()*900000 + 100000);
+        List<String> list = new ArrayList<>();
+        list.add(Integer.toString(i));
+        String s = MessageUtil.messageHttp(list, phone, "500067", "900394");
+        redisUtil.set(phone, Integer.toString(i));
+        redisUtil.expire(phone, 300);
+
+        return new ResultUtil<Object>().set();
+    }
+
+    @ApiOperation(value = "客户通过手机号码注册，2.校验验证码并注册")
+    @GetMapping("/registerByPhone2")
+    public Result<Object> registerByPhone2(
+            @ApiParam(value = "手机号码")
+            @RequestParam  String phone,
+            @ApiParam(value = "验证码")
+            @RequestParam String str){
+        if(StringUtils.isEmpty(phone)){
+            return new ResultUtil<Object>().setErrorMsg("未传入手机号");
         }
-        boolean b = redisUtil.hasKey(phone+"Secret");
+        boolean b = redisUtil.hasKey(phone);
         if(!b){
-            return new ResultUtil<Object>().setErrorMsg("验证码过时");
+            return new ResultUtil<Object>().setErrorMsg("此手机号验证码失效");
         }
-        String o = (String)redisUtil.get(phone+"Secret");
-        if(o.equals(str)){
-            Map<String, String> map = MD5Util.getSecert(password);
-            user.setPassword(map.get("secert"));
-            user.setSalt(map.get("salt"));
+        String secret = (String)redisUtil.get(phone);
+        if(!secret.equals(str)){
+            return new ResultUtil<Object>().setErrorMsg("验证码错误");
         }
-        boolean b1 = userService.updateById(user);
-        if(b1){
+        //密码处理(目前设验证码为其密码)
+        Map<String, String> map = MD5Util.getSecert(str);
+        User readyUser = new User();
+        readyUser.setUsername(phone);
+        readyUser.setPassword(map.get("secert"));
+        readyUser.setNickname("待修改个人信息客户");
+        readyUser.setSalt(map.get("salt"));
+        readyUser.setPhone(phone);
+        readyUser.setOnoff(1);
+        readyUser.setCreatetime(new Date());
+
+        boolean b1 = userService.insert(readyUser);
+        if(!b1){
+            return new ResultUtil<Object>().setErrorMsg("注册失败");
+        }
+
+        //给客户绑定客户角色，让其有权限
+        User user = userService.selectOne(new EntityWrapper<User>().eq("username", phone));
+        if(user == null){
+            return new ResultUtil<Object>().setErrorMsg("未知错误，请重新注册或联系客服");
+        }
+        UserRole userRole = new UserRole();
+        userRole.setUid(user.getId());
+        //固定角色：  1.管理员    2.角色
+        userRole.setRid(2);
+        boolean insert = userRoleService.insert(userRole);
+        if(insert){
             return new ResultUtil<Object>().set();
         }else{
-            return new ResultUtil<Object>().setErrorMsg("修改失败");
+            return new ResultUtil<Object>().setErrorMsg("注册失败");
         }
-    }*/
-    /** 李瑞池 end**/
+    }
+
+    @ApiOperation(value = "客户通过手机号码登录，发送验证码")
+    @GetMapping("/loginByPhone1")
+    public Result<Object> loginByPhone1(
+            @ApiParam(value = "手机号码")
+            @RequestParam  String phone){
+        if(StringUtils.isEmpty(phone)){
+            return new ResultUtil<Object>().setErrorMsg("未传入手机号");
+        }
+        //账户名去重
+        User username = userService.selectOne(new EntityWrapper<User>().eq("username", phone));
+        if(username == null){
+            return new ResultUtil<Object>().setErrorMsg("此用户未注册");
+        }
+
+        int i = (int)(Math.random()*900000 + 100000);
+        List<String> list = new ArrayList<>();
+        list.add(Integer.toString(i));
+        String s = MessageUtil.messageHttp(list, phone, "500067", "900394");
+        redisUtil.set(phone, Integer.toString(i));
+        redisUtil.expire(phone, 300);
+
+        return new ResultUtil<Object>().set();
+    }
+
+    @ApiOperation(value = "客户通过手机号登录，校验验证码")
+    @GetMapping("/loginByPhone2")
+    public Result<Object> loginByPhone2(
+            @ApiParam(value = "手机号码")
+            @RequestParam  String phone,
+            @ApiParam(value = "验证码")
+            @RequestParam String str) {
+        if (StringUtils.isEmpty(phone)) {
+            return new ResultUtil<Object>().setErrorMsg("未传入手机号");
+        }
+        boolean b = redisUtil.hasKey(phone);
+        if (!b) {
+            return new ResultUtil<Object>().setErrorMsg("此手机号验证码失效");
+        }
+        String secret = (String) redisUtil.get(phone);
+        if (!secret.equals(str)) {
+            return new ResultUtil<Object>().setErrorMsg("验证码错误");
+        }
+        User user = userService.selectOne(new EntityWrapper<User>().eq("username", phone).eq("phone", phone));
+
+        String json = JSON.toJSONString(user);
+        String token = MD5Util.getToken(json);
+        redisUtil.set(token, json);
+        redisUtil.expire(token, 28800);
+        Map<String, String> map = new HashMap<>();
+        map.put("authorization", token);
+        map.put("nickname", user.getNickname());
+        return new ResultUtil<Object>().setData(map);
+    }
+
+
 }
 

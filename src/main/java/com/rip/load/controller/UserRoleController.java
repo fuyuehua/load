@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
+
 /**
  * <p>
  *  前端控制器
@@ -38,16 +40,22 @@ public class UserRoleController {
     @PostMapping("/add")
     public Result<Object> add(
             @ApiParam(value = "用户与角色实体类")
-            @RequestBody UserRole userRole){
-
-        if(userRole.getUid() == null || userRole.getUid() == 0 || userRole.getRid() == null || userRole.getRid() == 0)
-            return new ResultUtil<Object>().setErrorMsg("参数不足，除了ID都要传");
-        userRole.setId(null);
-        UserRole userRoleInDB = userRoleService.selectOne(new EntityWrapper<UserRole>().eq("uid", userRole.getUid()).eq("rid", userRole.getRid()));
-        if(userRoleInDB != null){
-            return new ResultUtil<Object>().setErrorMsg("数据库已有此绑定");
+            @RequestBody List<UserRole> list){
+        List<UserRole> listInDB = userRoleService.selectList(new EntityWrapper<UserRole>().eq("rid", list.get(0).getRid()));
+        for(UserRole userRole : list) {
+            if (userRole.getUid() == null || userRole.getUid() == 0 || userRole.getRid() == null || userRole.getRid() == 0) {
+                return new ResultUtil<Object>().setErrorMsg("参数不足，除了ID都要传");
+            }
+            userRole.setId(null);
+            for(UserRole urInDB : listInDB){
+                if(userRole.getUid().equals(urInDB.getUid())){
+                    return new ResultUtil<Object>().setErrorMsg("数据库中已经存在此绑定");
+                }
+            }
         }
-        boolean b = userRoleService.insert(userRole);
+
+
+        boolean b = userRoleService.insertBatch(list);
         if(b){
             return new ResultUtil<Object>().set();
         }else{
@@ -58,10 +66,15 @@ public class UserRoleController {
     @ApiOperation("删除用户与角色的绑定")
     @GetMapping("/delete")
     public Result<Object> delete(
-            @ApiParam(value = "用户与角色的绑定ID")
-            @RequestParam int id
+            @ApiParam(value = "用户ID")
+            @RequestParam int uid,
+            @ApiParam(value = "角色ID")
+            @RequestParam int rid
     ){
-        boolean b = userRoleService.deleteById(id);
+        if(uid == 0 || rid == 0){
+            return new ResultUtil<Object>().setErrorMsg("不能传O");
+        }
+        boolean b = userRoleService.delete(new EntityWrapper<UserRole>().eq("uid", uid).eq("rid", rid));
         if(b){
             return new ResultUtil<Object>().set();
         }else{

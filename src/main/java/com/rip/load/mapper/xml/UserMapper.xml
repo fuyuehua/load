@@ -10,7 +10,6 @@
         <result column="nickname" property="nickname" />
         <result column="phone" property="phone" />
         <result column="salt" property="salt" />
-        <result column="customerId" property="customerId" />
         <result column="createtime" property="createtime" />
         <result column="onoff" property="onoff" />
     </resultMap>

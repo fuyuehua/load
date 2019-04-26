@@ -49,21 +49,6 @@ public class User extends Model<User> {
     private String salt;
 
     /**
-     * 父级ID
-     */
-    private Integer fatherId;
-
-    /**
-     * 客户资料ID
-     */
-    private Integer customerId;
-
-    /**
-     * 手续费抽成额度
-     */
-    private Integer poundage;
-
-    /**
      * 注册时间
      */
     private Date createtime;
@@ -115,13 +100,6 @@ public class User extends Model<User> {
     public void setSalt(String salt) {
         this.salt = salt;
     }
-    public Integer getCustomerId() {
-        return customerId;
-    }
-
-    public void setCustomerId(Integer customerId) {
-        this.customerId = customerId;
-    }
     public Date getCreatetime() {
         return createtime;
     }
@@ -135,22 +113,6 @@ public class User extends Model<User> {
 
     public void setOnoff(Integer onoff) {
         this.onoff = onoff;
-    }
-
-    public Integer getFatherId() {
-        return fatherId;
-    }
-
-    public void setFatherId(Integer fatherId) {
-        this.fatherId = fatherId;
-    }
-
-    public Integer getPoundage() {
-        return poundage;
-    }
-
-    public void setPoundage(Integer poundage) {
-        this.poundage = poundage;
     }
 
     @Override
@@ -167,9 +129,6 @@ public class User extends Model<User> {
                 ", nickname='" + nickname + '\'' +
                 ", phone='" + phone + '\'' +
                 ", salt='" + salt + '\'' +
-                ", fatherId=" + fatherId +
-                ", customerId=" + customerId +
-                ", poundage=" + poundage +
                 ", createtime=" + createtime +
                 ", onoff=" + onoff +
                 '}';

@@ -59,7 +59,7 @@ public class MySwaggerConfig{
     }
     private ApiInfo apiInfo() {
         return new ApiInfoBuilder()
-                .title("前后端交流接口文档（！！！！委贷系统！！！！！）")
+                .title("前后端交流接口文档（！！！！委贷系统！！！！！1）")
                 .description("委贷系统接口文档，旁边的authorization记得填，有实体类具体意义不明白的可以看最下面的所有实体类介绍")
                 .version("1.1.0")
                 .termsOfServiceUrl("")

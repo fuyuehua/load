@@ -5,11 +5,13 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.rip.load.pojo.Role;
 import com.rip.load.pojo.RolePermission;
+import com.rip.load.pojo.User;
 import com.rip.load.pojo.UserRole;
 import com.rip.load.pojo.nativePojo.Result;
 import com.rip.load.service.RolePermissionService;
 import com.rip.load.service.RoleService;
 import com.rip.load.service.UserRoleService;
+import com.rip.load.service.UserService;
 import com.rip.load.utils.ResultUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -41,6 +44,9 @@ public class RoleController {
     private UserRoleService userRoleService;
     @Autowired
     private RolePermissionService rolePermissionService;
+    @Autowired
+    private UserService userService;
+
 
     @ApiOperation(value = "新增一个角色")
     @PostMapping("/add")
@@ -124,5 +130,81 @@ public class RoleController {
     ) {
         List<Role> role = roleService.getUserRole(id);
         return new ResultUtil<List<Role>>().setData(role);
+    }
+
+    @ApiOperation("通过角色拿到绑定它的用户")
+    @GetMapping("/getAllInPageByrid")
+    public Result<Page<User>> getAllInPageByrid(
+            @ApiParam(value = "想要请求的页码")
+            @RequestParam int currentPage,
+            @ApiParam(value = "一页显示多少数据")
+            @RequestParam int pageSize,
+            @ApiParam(value = "角色ID")
+            @RequestParam int rid){
+        if(rid == 0){
+            return new ResultUtil<Page<User>>().setErrorMsg("该用户不存在");
+        }
+        List<UserRole> list = userRoleService.selectList(new EntityWrapper<UserRole>().eq("rid", rid));
+        List<Integer> list1 = new ArrayList<>();
+        for(UserRole ur : list){
+            list1.add(ur.getUid());
+        }
+        Page<User> page = new Page<>(currentPage, pageSize);
+        if(list1.size() == 0){
+            return new ResultUtil<Page<User>>().setData(page);
+        }
+        Page<User> userPage = userService.selectPage(page, new EntityWrapper<User>().in("id",list1).eq("onoff", 1));
+        return new ResultUtil<Page<User>>().setData(userPage);
+    }
+
+    @ApiOperation("通过角色拿到未绑定它的用户")
+    @GetMapping("/getNOInPageByrid")
+    public Result<Page<User>> getNOInPageByrid(
+            @ApiParam(value = "想要请求的页码")
+            @RequestParam int currentPage,
+            @ApiParam(value = "一页显示多少数据")
+            @RequestParam int pageSize,
+            @ApiParam(value = "角色ID")
+            @RequestParam int rid){
+        if(rid == 0){
+            return new ResultUtil<Page<User>>().setErrorMsg("该用户不存在");
+        }
+        List<UserRole> list = userRoleService.selectList(new EntityWrapper<UserRole>().eq("rid", rid));
+        List<Integer> list1 = new ArrayList<>();
+        for(UserRole ur : list){
+            list1.add(ur.getUid());
+        }
+        Page<User> page = new Page<>(currentPage, pageSize);
+        Page<User> userPage = userService.selectPage(page, new EntityWrapper<User>().notIn("id",list1).eq("onoff", 1));
+        return new ResultUtil<Page<User>>().setData(userPage);
+    }
+
+    @ApiOperation("通过角色拿到未绑定它的用户然后进行模糊查询")
+    @GetMapping("/getNOByridAndFuzzyQuery")
+    public Result<Page<User>> getNOByridAndFuzzyQuery(
+            @ApiParam(value = "想要请求的页码")
+            @RequestParam int currentPage,
+            @ApiParam(value = "一页显示多少数据")
+            @RequestParam int pageSize,
+            @ApiParam(value = "模糊公司名称")
+            @RequestParam String nickname,
+            @ApiParam(value = "模糊手机号")
+            @RequestParam String phone,
+            @ApiParam(value = "角色ID")
+            @RequestParam int rid){
+        if(rid == 0){
+            return new ResultUtil<Page<User>>().setErrorMsg("该角色不存在");
+        }
+        List<UserRole> list = userRoleService.selectList(new EntityWrapper<UserRole>().eq("rid", rid));
+        List<Integer> list1 = new ArrayList<>();
+        for(UserRole ur : list){
+            list1.add(ur.getUid());
+        }
+        Page<User> page = new Page<>(currentPage, pageSize);
+        Page<User> userPage = userService.selectPage(page, new EntityWrapper<User>().notIn("id",list1)
+                .eq("onoff", 1)
+                .like("nickname", nickname)
+                .like("phone", phone));
+        return new ResultUtil<Page<User>>().setData(userPage);
     }
 }

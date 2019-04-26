@@ -42,8 +42,8 @@ public class PermissionServiceImpl extends ServiceImpl<PermissionMapper, Permiss
                 // prefix = /rip/
                 String prefix = split[0];
                 // url = /rip/kkk
-                String[] split1 = url.split(split[0]);
-                if(split1[0].equals("")){
+                String[] split1 = url.split(prefix);
+                if(split1 == null ||split1.length == 0 ||split1[0].equals("")){
                     return true;
                 }
             }

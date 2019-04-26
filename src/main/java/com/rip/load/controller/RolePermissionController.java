@@ -16,6 +16,9 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * <p>
  *  前端控制器
@@ -38,16 +41,20 @@ public class RolePermissionController {
     @PostMapping("/add")
     public Result<Object> add(
             @ApiParam(value = "角色与权限实体类")
-            @RequestBody RolePermission rolePermission){
-
-        if(rolePermission.getPid() == null || rolePermission.getPid() == 0 || rolePermission.getRid() == null || rolePermission.getRid() == 0)
-            return new ResultUtil<Object>().setErrorMsg("参数不足，除了ID都要传");
-        rolePermission.setId(null);
-        RolePermission rolePermissionInDB = rolePermissionService.selectOne(new EntityWrapper<RolePermission>().eq("pid", rolePermission.getPid()).eq("rid", rolePermission.getRid()));
-        if(rolePermissionInDB != null){
-            return new ResultUtil<Object>().setErrorMsg("数据库已有此绑定");
+            @RequestBody List<RolePermission> list){
+        List<RolePermission> listInDB = rolePermissionService.selectList(new EntityWrapper<RolePermission>().eq("rid", list.get(0).getRid()));
+        for(RolePermission rolePermission : list) {
+            if (rolePermission.getPid() == null || rolePermission.getPid() == 0 || rolePermission.getRid() == null || rolePermission.getRid() == 0) {
+                return new ResultUtil<Object>().setErrorMsg("参数不足，除了ID都要传");
+            }
+            rolePermission.setId(null);
+            for(RolePermission rpInDB : listInDB){
+                if(rpInDB.getPid().equals(rolePermission.getPid())){
+                    return new ResultUtil<Object>().setErrorMsg("数据库中已经存在此绑定");
+                }
+            }
         }
-        boolean b = rolePermissionService.insert(rolePermission);
+        boolean b = rolePermissionService.insertBatch(list);
         if(b){
             return new ResultUtil<Object>().set();
         }else{
@@ -56,12 +63,24 @@ public class RolePermissionController {
     }
 
     @ApiOperation("删除角色与权限的绑定")
-    @GetMapping("/delete")
+    @PostMapping("/delete")
     public Result<Object> delete(
-            @ApiParam(value = "角色与权限的绑定ID")
-            @RequestParam int id
+            @ApiParam(value = "角色与权限绑定的数组")
+            @RequestBody List<RolePermission> list
     ){
-        boolean b = rolePermissionService.deleteById(id);
+        List<RolePermission> listInDB = rolePermissionService.selectList(new EntityWrapper<RolePermission>().eq("rid", list.get(0).getRid()));
+        List<Integer> resultList = new ArrayList<>();
+        for (RolePermission rp : list) {
+            if(rp.getPid() == null || rp.getPid() == 0 ||rp.getRid() == null|| rp.getRid() == 0){
+                return new ResultUtil<Object>().setErrorMsg("不能空或0");
+            }
+            for(RolePermission rpInDB : listInDB){
+                if(rpInDB.getPid().equals(rp.getPid()) && rpInDB.getRid().equals(rp.getRid())){
+                    resultList.add(rpInDB.getId());
+                }
+            }
+        }
+        boolean b = rolePermissionService.deleteBatchIds(resultList);
         if(b){
             return new ResultUtil<Object>().set();
         }else{
