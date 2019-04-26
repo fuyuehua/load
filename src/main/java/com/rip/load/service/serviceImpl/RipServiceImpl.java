@@ -1,19 +1,17 @@
 package com.rip.load.service.serviceImpl;
 
 import com.alibaba.fastjson.JSON;
-import com.alibaba.fastjson.JSONObject;
 import com.rip.load.pojo.OperatorReport;
 import com.rip.load.pojo.User;
 import com.rip.load.pojo.UserCustomer;
 import com.rip.load.pojo.UserDistributor;
 import com.rip.load.pojo.nativePojo.UserThreadLocal;
-import com.rip.load.pojo.personalComplaintInquiryC.PersonalComplaintInquiryC;
+import com.rip.load.otherPojo.personalComplaintInquiryC.PersonalComplaintInquiryC;
 import com.rip.load.service.OperatorReportService;
 import com.rip.load.service.RipService;
 import com.rip.load.service.UserCustomerService;
 import com.rip.load.service.UserDistributorService;
 import com.rip.load.utils.HttpUtil;
-import com.rip.load.utils.ImprovedTimer;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
