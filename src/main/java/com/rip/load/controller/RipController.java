@@ -51,64 +51,17 @@ public class RipController {
             return new ResultUtil<Object>().setErrorMsg("params are null");
         }
 
-        //获取渠道商秘钥
-        User user = UserThreadLocal.get();
-        UserCustomer userCustomer = userCustomerService.selectById(user.getId());
-        if(userCustomer == null || userCustomer.getFatherId() == null){
-            return new ResultUtil<Object>().setErrorMsg("客户未完善信息");
-        }
-        UserDistributor userDistributor = userDistributorService.selectById(userCustomer.getFatherId());
-        if(userDistributor == null){
-            return new ResultUtil<Object>().setErrorMsg("客户没有上级");
-        }
-        if(StringUtils.isEmpty(userDistributor.getUsername()) || StringUtils.isEmpty(userDistributor.getAccessToken())){
-            return new ResultUtil<Object>().setErrorMsg("缺少征信秘钥");
-        }
-        String username = userDistributor.getUsername();
-        String accessToken = userDistributor.getAccessToken();
 
         Map<String, Object> map = new HashMap();
-        map.put("username", username);
-        map.put("accessToken", accessToken);
-        map.put("name", userCustomer.getCellphone());
         map.put("password", password);
-        map.put("identityCardNo", userCustomer.getIdcard());
-        map.put("identityName", userCustomer.getRealname());
-
-//        if(!StringUtils.isEmpty(contentType))
-//            map.put("contentType", contentType);
-//        if(!StringUtils.isEmpty(otherInfo))
-//            map.put("otherInfo", otherInfo);
-        if(!StringUtils.isEmpty(userCustomer.getaRealname()))
-            map.put("contactName1st", userCustomer.getaRealname());
-        if(!StringUtils.isEmpty(userCustomer.getaPhone()))
-            map.put("contactMobile1st", userCustomer.getaPhone());
-//        if(!StringUtils.isEmpty(contactIdentityNo1st))
-//            map.put("contactIdentityNo1st", contactIdentityNo1st);
-        if(!StringUtils.isEmpty(userCustomer.getaRelation()))
-            map.put("contactRelationship1st", userCustomer.getaRelation());
-        if(!StringUtils.isEmpty(userCustomer.getbRealname()))
-            map.put("contactName2nd", userCustomer.getbRealname());
-        if(!StringUtils.isEmpty(userCustomer.getbPhone()))
-            map.put("contactMobile2nd", userCustomer.getbPhone());
-//        if(!StringUtils.isEmpty(contactIdentityNo2nd))
-//            map.put("contactIdentityNo2nd", contactIdentityNo2nd);
-        if(!StringUtils.isEmpty(userCustomer.getbRelation()))
-            map.put("contactRelationship2nd", userCustomer.getbRelation());
-//        if(!StringUtils.isEmpty(contactName3rd))
-//            map.put("contactName3rd", contactName3rd);
-//        if(!StringUtils.isEmpty(contactMobile3rd))
-//            map.put("contactMobile3rd", contactMobile3rd);
-//        if(!StringUtils.isEmpty(contactIdentityNo3rd))
-//            map.put("contactIdentityNo3rd", contactIdentityNo3rd);
-//        if(!StringUtils.isEmpty(contactRelationship3rd))
-//            map.put("contactRelationship3rd", contactRelationship3rd);
-//        if(!StringUtils.isEmpty(score))
-//            map.put("score", score);
 
         String suffixUrl = "/operatorCreditReports/result";
-        String json = ripService.ripSetTokenService(map, suffixUrl);
-        return new ResultUtil<Object>().setData(json);
+        Map<String, String> map1 = ripService.operatorCreditReportsService(0, map, suffixUrl);
+        String result = map1.get("result");
+        if(result.equals("1"))
+            return new ResultUtil<Object>().setData(map1.get("data"));
+        else
+            return new ResultUtil<Object>().setData(result);
     }
     /**
      * 轮询运营商报告采集状态（立木轮询）
@@ -126,8 +79,12 @@ public class RipController {
         map.put("token", token);
 
         String suffixUrl = "/operatorCreditReports/status";
-        String json = ripService.ripSetTokenService(map, suffixUrl);
-        return new ResultUtil<Object>().setData(json);
+        Map<String, String> map1 = ripService.operatorCreditReportsService(0, map, suffixUrl);
+        String result = map1.get("result");
+        if(result.equals("1"))
+            return new ResultUtil<Object>().setData(map1.get("data"));
+        else
+            return new ResultUtil<Object>().setData(result);
     }
 
     /**
@@ -148,8 +105,12 @@ public class RipController {
         map.put("input", input);
 
         String suffixUrl = "/operatorCreditReports/input";
-        String json = ripService.ripSetTokenService(map, suffixUrl);
-        return new ResultUtil<Object>().setData(json);
+        Map<String, String> map1 = ripService.operatorCreditReportsService(0, map, suffixUrl);
+        String result = map1.get("result");
+        if(result.equals("1"))
+            return new ResultUtil<Object>().setData(map1.get("data"));
+        else
+            return new ResultUtil<Object>().setData(result);
     }
 
     /**
@@ -170,24 +131,12 @@ public class RipController {
         map.put("rip_id", rip_id);
 
         String suffixUrl = "/operatorCreditReports/report";
-        String json = ripService.ripSetTokenService(map, suffixUrl);
-        if(json == null){
-            return new ResultUtil<Object>().setErrorMsg("运营商报告获取失败");
-        }
-
-        User user = UserThreadLocal.get();
-
-        OperatorReport report = new OperatorReport();
-        report.setResultJson(json);
-        report.setTime(new Date());
-        report.setUserId(user.getId());
-        report.setType("10");
-        boolean insert = operatorReportService.insert(report);
-        if(insert){
-            return new ResultUtil<Object>().set();
-        }else{
-            return new ResultUtil<Object>().setErrorMsg("存储数据库失败");
-        }
+        Map<String, String> map1 = ripService.operatorCreditReportsService(0, map, suffixUrl);
+        String result = map1.get("result");
+        if(result.equals("1"))
+            return new ResultUtil<Object>().setData(map1.get("data"));
+        else
+            return new ResultUtil<Object>().setData(result);
     }
     /** 运营商信用报告高级版  end**/
 
@@ -272,6 +221,7 @@ public class RipController {
         }
         return new ResultUtil<Object>().set();
     }
+
     @ApiOperation(value = "个人涉诉报告高级版")
     @GetMapping("/personalComplaintInquiryC")
     public Result<Object> personalComplaintInquiryC() {
@@ -283,6 +233,114 @@ public class RipController {
         return new ResultUtil<Object>().set();
     }
 
+    @ApiOperation(value = "银行卡四要素")
+    @GetMapping("/fourElementsOfBankCard")
+    public Result<Object> fourElementsOfBankCard() {
+        //fourElementsOfBankCard/result
+        String s = ripService.fourElementsOfBankCardService(0);
+        if(!s.equals("1")){
+            return new ResultUtil<Object>().setErrorMsg(s);
+        }
+        return new ResultUtil<Object>().set();
+    }
 
+    /** 淘宝报告 **/
+    /**
+     * 淘宝查询
+     *
+     * @return
+     */
+    @ApiOperation(value = "淘宝查询")
+    @GetMapping("/taoBaoGet")
+    public Result<Object> taoBaoGet() {
+        Map<String, Object> map = new HashMap();
+        String suffixUrl = "/taoBao/get";
+        Map<String, String> map1 = ripService.taoBaoService(0, map, suffixUrl);
+        String result = map1.get("result");
+        if(result.equals("1"))
+            return new ResultUtil<Object>().setData(map1.get("data"));
+        else
+            return new ResultUtil<Object>().setData(result);
+    }
+
+    /**
+     * 轮询查看状态
+     *
+     * @param token
+     * @return
+     */
+    @ApiOperation(value = "轮询查看状态")
+    @GetMapping("/getStatus")
+    public Result<Object> getStatus(String token, String ripId, String biztype) {
+        if (StringUtils.isEmpty(token) || StringUtils.isEmpty(ripId) || StringUtils.isEmpty(biztype))
+            return new ResultUtil<Object>().setErrorMsg("参数不足");
+
+        Map<String, Object> map = new HashMap();
+        map.put("token", token);
+        map.put("rip_id", ripId);
+        map.put("biztype", biztype);
+
+        String suffixUrl = "/limu/validate/getStatus";
+        Map<String, String> map1 = ripService.taoBaoService(0, map, suffixUrl);
+        String result = map1.get("result");
+        if(result.equals("1"))
+            return new ResultUtil<Object>().setData(map1.get("data"));
+        else
+            return new ResultUtil<Object>().setData(result);
+    }
+
+    /**
+     * 输入
+     *
+     * @param token
+     * @param sign
+     * @return
+     */
+    @ApiOperation(value = "输入输入")
+    @GetMapping("/getInput")
+    public Result<Object> getInput(String token, String sign) {
+        if (StringUtils.isEmpty(token) || StringUtils.isEmpty(sign))
+            return new ResultUtil<Object>().setErrorMsg("参数不足");
+
+        Map<String, Object> map = new HashMap();
+        map.put("token", token);
+        map.put("sign", sign);
+
+        String suffixUrl = "/limu/validate/getInput";
+        Map<String, String> map1 = ripService.taoBaoService(0, map, suffixUrl);
+        String result = map1.get("result");
+        if(result.equals("1"))
+            return new ResultUtil<Object>().setData(map1.get("data"));
+        else
+            return new ResultUtil<Object>().setData(result);
+    }
+
+    /**
+     * 得到结果
+     *
+     * @param token
+     * @param ripId
+     * @param biztype
+     * @return
+     */
+    @ApiOperation(value = "得到结果")
+    @GetMapping("/getResult")
+    public Result<Object> getResult(String token, String ripId, String biztype) {
+        if (StringUtils.isEmpty(token) || StringUtils.isEmpty(ripId) || StringUtils.isEmpty(biztype))
+            return new ResultUtil<Object>().setErrorMsg("参数不足");
+
+        Map<String, Object> map = new HashMap();
+        map.put("token", token);
+        map.put("rip_id", ripId);
+        map.put("biztype", biztype);
+
+        String suffixUrl = "/limu/validate/getResult";
+        Map<String, String> map1 = ripService.taoBaoService(0, map, suffixUrl);
+        String result = map1.get("result");
+        if(result.equals("1"))
+            return new ResultUtil<Object>().setData(map1.get("data"));
+        else
+            return new ResultUtil<Object>().setData(result);
+    }
 
 }

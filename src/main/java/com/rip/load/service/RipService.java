@@ -6,7 +6,12 @@ public interface RipService {
 
     Map<String, Object> getOperatorCreditReports(Map<String, Object> map);
 
+
     String ripSetTokenService(Map<String, Object> map, String suffixUrl);
+
+    Map<String, String> operatorCreditReportsService(int id, Map<String, Object> map, String suffixUrl);
+
+    Map<String, String> taoBaoService(int id, Map<String, Object> map, String suffixUrl);
 
     /**
      * 不传ID就是ThreadLocal本身
@@ -28,4 +33,6 @@ public interface RipService {
     String personalRiskInformationService(int id);
 
     String personalComplaintInquiryCService(int id);
+
+    String fourElementsOfBankCardService(int id);
 }

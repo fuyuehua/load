@@ -52,6 +52,132 @@ public class RipServiceImpl implements RipService {
         }
         return resultJson;
     }
+
+    @Override
+    public Map<String, String> operatorCreditReportsService(int id, Map<String, Object> map, String suffixUrl) {
+        Map<String, String> resultMap = new HashMap<>();
+        if(id == 0){
+            User user = UserThreadLocal.get();
+            id = user.getId();
+        }
+        Map<String, Object> mapReturn = setToken(id);
+        String result = (String) mapReturn.get("result");
+        if(!result.equals("1")){
+            resultMap.put("result", result);
+            return resultMap;
+        }
+        UserCustomer userCustomer = (UserCustomer) mapReturn.get("customer");
+        Map<String, Object> mapToken = (Map)mapReturn.get("map");
+        map.put("username", mapToken.get("username"));
+        map.put("accessToken", mapToken.get("accessToken"));
+        if(suffixUrl.equals("/operatorCreditReports/result")){
+            map.put("name", userCustomer.getCellphone());
+            map.put("identityCardNo", userCustomer.getIdcard());
+            map.put("identityName", userCustomer.getRealname());
+            //        if(!StringUtils.isEmpty(contentType))
+//            map.put("contentType", contentType);
+//        if(!StringUtils.isEmpty(otherInfo))
+//            map.put("otherInfo", otherInfo);
+            if(!StringUtils.isEmpty(userCustomer.getaRealname()))
+                map.put("contactName1st", userCustomer.getaRealname());
+            if(!StringUtils.isEmpty(userCustomer.getaPhone()))
+                map.put("contactMobile1st", userCustomer.getaPhone());
+//        if(!StringUtils.isEmpty(contactIdentityNo1st))
+//            map.put("contactIdentityNo1st", contactIdentityNo1st);
+            if(!StringUtils.isEmpty(userCustomer.getaRelation()))
+                map.put("contactRelationship1st", userCustomer.getaRelation());
+            if(!StringUtils.isEmpty(userCustomer.getbRealname()))
+                map.put("contactName2nd", userCustomer.getbRealname());
+            if(!StringUtils.isEmpty(userCustomer.getbPhone()))
+                map.put("contactMobile2nd", userCustomer.getbPhone());
+//        if(!StringUtils.isEmpty(contactIdentityNo2nd))
+//            map.put("contactIdentityNo2nd", contactIdentityNo2nd);
+            if(!StringUtils.isEmpty(userCustomer.getbRelation()))
+                map.put("contactRelationship2nd", userCustomer.getbRelation());
+//        if(!StringUtils.isEmpty(contactName3rd))
+//            map.put("contactName3rd", contactName3rd);
+//        if(!StringUtils.isEmpty(contactMobile3rd))
+//            map.put("contactMobile3rd", contactMobile3rd);
+//        if(!StringUtils.isEmpty(contactIdentityNo3rd))
+//            map.put("contactIdentityNo3rd", contactIdentityNo3rd);
+//        if(!StringUtils.isEmpty(contactRelationship3rd))
+//            map.put("contactRelationship3rd", contactRelationship3rd);
+//        if(!StringUtils.isEmpty(score))
+//            map.put("score", score);
+        }
+
+        String json = ripSetTokenService(map, suffixUrl);
+        if(json == null){
+            resultMap.put("result", "接口调用失败");
+            return resultMap;
+        }
+        if(suffixUrl.equals("/operatorCreditReports/report)")){
+
+            OperatorReport report = new OperatorReport();
+            report.setResultJson(json);
+            report.setTime(new Date());
+            report.setUserId(id);
+            report.setType("10");
+            boolean insert = operatorReportService.insert(report);
+            if(insert){
+                resultMap.put("result", "1");
+                return resultMap;
+            }else{
+                resultMap.put("result", "储存错误");
+                return resultMap;
+            }
+        }
+        resultMap.put("result", "1");
+        resultMap.put("data", json);
+        return resultMap;
+    }
+
+    @Override
+    public Map<String, String> taoBaoService(int id, Map<String, Object> map, String suffixUrl) {
+        Map<String, String> resultMap = new HashMap<>();
+        if(id == 0){
+            User user = UserThreadLocal.get();
+            id = user.getId();
+        }
+        Map<String, Object> mapReturn = setToken(id);
+        String result = (String) mapReturn.get("result");
+        if(!result.equals("1")){
+            resultMap.put("result", result);
+            return resultMap;
+        }
+        UserCustomer userCustomer = (UserCustomer) mapReturn.get("customer");
+        Map<String, Object> mapToken = (Map)mapReturn.get("map");
+        map.put("username", mapToken.get("username"));
+        map.put("accessToken", mapToken.get("accessToken"));
+        if(suffixUrl.equals("/operatorCreditReports/result")){
+
+        }
+
+        String json = ripSetTokenService(map, suffixUrl);
+        if(json == null){
+            resultMap.put("result", "接口调用失败");
+            return resultMap;
+        }
+        if(suffixUrl.equals("/limu/validate/getResult")){
+
+            OperatorReport report = new OperatorReport();
+            report.setResultJson(json);
+            report.setTime(new Date());
+            report.setUserId(id);
+            report.setType("11");
+            boolean insert = operatorReportService.insert(report);
+            if(insert){
+                resultMap.put("result", "1");
+                return resultMap;
+            }else{
+                resultMap.put("result", "储存错误");
+                return resultMap;
+            }
+        }
+        resultMap.put("result", "1");
+        resultMap.put("data", json);
+        return resultMap;
+    }
     @Override
     public String idCardElementsService(int id) {
 
@@ -72,7 +198,7 @@ public class RipServiceImpl implements RipService {
         String suffixUrl = "/idCardElements/result";
         String json = ripSetTokenService(map, suffixUrl);
         if(json == null){
-            return "身份证二要素信息获取失败";
+            return "征信信息获取失败";
         }
 
         OperatorReport report = new OperatorReport();
@@ -361,6 +487,7 @@ public class RipServiceImpl implements RipService {
             return "储存错误";
         }
     }
+
     private Map<String, Object> setToken(int id){
         Map<String, Object> map = new HashMap(3);
         if(id == 0){
@@ -391,6 +518,45 @@ public class RipServiceImpl implements RipService {
         map.put("result", "1");
         map.put("customer", userCustomer);
         return map;
+    }
+
+
+    @Override
+    public String fourElementsOfBankCardService(int id) {
+        if(id == 0){
+            User user = UserThreadLocal.get();
+            id = user.getId();
+        }
+        Map<String, Object> mapReturn = setToken(id);
+        String result = (String) mapReturn.get("result");
+        if(!result.equals("1")){
+            return result;
+        }
+        UserCustomer userCustomer = (UserCustomer) mapReturn.get("customer");
+        Map<String, Object> map = (Map)mapReturn.get("map");
+        map.put("custName", userCustomer.getRealname());
+        map.put("idNo", userCustomer.getIdcard());
+        map.put("phoneNo", userCustomer.getCellphone());
+        map.put("idType", 01);
+        map.put("bankCardno", userCustomer.getBankcard());
+
+        String suffixUrl = "/fourElementsOfBankCard/result";
+        String json = ripSetTokenService(map, suffixUrl);
+        if(json == null){
+            return "征信信息获取失败";
+        }
+
+        OperatorReport report = new OperatorReport();
+        report.setResultJson(json);
+        report.setTime(new Date());
+        report.setUserId(id);
+        report.setType("11");
+        boolean insert = operatorReportService.insert(report);
+        if(insert){
+            return "1";
+        }else{
+            return "储存错误";
+        }
     }
 
 }

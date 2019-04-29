@@ -6,9 +6,11 @@ import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.IService;
 import com.rip.load.pojo.User;
+import com.rip.load.pojo.UserCustomer;
 import com.rip.load.pojo.UserRole;
 import com.rip.load.pojo.nativePojo.Result;
 import com.rip.load.pojo.nativePojo.UserThreadLocal;
+import com.rip.load.service.UserCustomerService;
 import com.rip.load.service.UserRoleService;
 import com.rip.load.service.UserService;
 import com.rip.load.utils.*;
@@ -46,19 +48,21 @@ public class UserController {
     private RedisUtil redisUtil;
     @Autowired
     private UserRoleService userRoleService;
+    @Autowired
+    private UserCustomerService userCustomerService;
 
     @ApiOperation(value = "新建一个用户（管理员）")
     @PostMapping("/add")
-    public Result<Object> add(@ApiParam(value = "用户实体类") @RequestBody User user){
+    public Result<User> add(@ApiParam(value = "用户实体类") @RequestBody User user){
         if (StringUtils.isEmpty(user.getUsername())|| StringUtils.isEmpty(user.getPassword())
                 || StringUtils.isEmpty(user.getNickname()) || StringUtils.isEmpty(user.getPhone())){
-            return new ResultUtil<Object>().setErrorMsg("参数不足");
+            return new ResultUtil<User>().setErrorMsg("参数不足");
         }
 
         //账户名去重
         User username = userService.selectOne(new EntityWrapper<User>().eq("username", user.getUsername()));
         if(username != null){
-            return new ResultUtil<Object>().setErrorMsg("用户名重复");
+            return new ResultUtil<User>().setErrorMsg("用户名重复");
         }
 
         //密码处理
@@ -73,10 +77,11 @@ public class UserController {
         readyUser.setCreatetime(new Date());
 
         boolean b = userService.insert(readyUser);
+        User backUser = userService.selectOne(new EntityWrapper<User>().eq("username", user.getUsername()));
         if(b){
-            return new ResultUtil<Object>().set();
+            return new ResultUtil<User>().setData(backUser);
         }else{
-            return new ResultUtil<Object>().setErrorMsg("注册失败");
+            return new ResultUtil<User>().setErrorMsg("注册失败");
         }
     }
 
@@ -444,6 +449,63 @@ public class UserController {
         map.put("authorization", token);
         map.put("nickname", user.getNickname());
         return new ResultUtil<Object>().setData(map);
+    }
+
+    @ApiOperation(value = "新建一个借贷客户（入建员）")
+    @PostMapping("/addCustomer")
+    public Result<Object> addCustomer(@ApiParam(value = "借贷客户客户信息实体类")
+                                          @RequestBody UserCustomer user){
+        if(user.getUserId() == null || user.getUserId() == 0 ||
+                StringUtils.isEmpty(user.getRealname()) ||
+                StringUtils.isEmpty(user.getIdcard()) ||
+                StringUtils.isEmpty(user.getCellphone())||
+                StringUtils.isEmpty(user.getBankcard())){
+            return new ResultUtil<Object>().setErrorMsg("用户名不能为空");
+        }
+        //账户名去重
+        User username = userService.selectOne(new EntityWrapper<User>().eq("username", user.getCellphone()));
+        if(username != null){
+            return new ResultUtil<Object>().setErrorMsg("用户名重复");
+        }
+
+        int i = (int)(Math.random()*900000 + 100000);
+        //密码处理(目前设验证码为其密码)
+        Map<String, String> map = MD5Util.getSecert(Integer.toString(i));
+        User readyUser = new User();
+        readyUser.setUsername(user.getCellphone());
+        readyUser.setPassword(map.get("secert"));
+        readyUser.setNickname("随机密码客户");
+        readyUser.setSalt(map.get("salt"));
+        readyUser.setPhone(user.getCellphone());
+        readyUser.setOnoff(1);
+        readyUser.setCreatetime(new Date());
+
+        boolean b1 = userService.insert(readyUser);
+        if(!b1){
+            return new ResultUtil<Object>().setErrorMsg("注册失败");
+        }
+
+        //给客户绑定客户角色，让其有权限
+        User user1 = userService.selectOne(new EntityWrapper<User>().eq("username", user.getCellphone()));
+        if(user1 == null){
+            return new ResultUtil<Object>().setErrorMsg("未知错误，请重新注册或联系客服");
+        }
+        UserRole userRole = new UserRole();
+        userRole.setUid(user1.getId());
+        //固定角色：  1.管理员    2.角色
+        userRole.setRid(2);
+        boolean insert = userRoleService.insert(userRole);
+        if(!insert){
+            return new ResultUtil<Object>().setErrorMsg("赋予角色失败");
+        }
+
+        boolean b = userCustomerService.insert(user);
+        if (b) {
+            return new ResultUtil<Object>().set();
+        } else {
+            return new ResultUtil<Object>().setErrorMsg("数据库错误");
+        }
+
     }
 
 

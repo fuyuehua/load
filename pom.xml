@@ -42,8 +42,8 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-tomcat</artifactId>
             <!-- provided:启动不保留内置tomcat（打war包的时候使用），compile启动的时候保留内置tomcat-->
-            <scope>provided</scope>
-            <!--<scope>compile</scope>-->
+            <!--<scope>provided</scope>-->
+            <scope>compile</scope>
         </dependency>
         <!-- 支持热部署 -->
         <dependency>
