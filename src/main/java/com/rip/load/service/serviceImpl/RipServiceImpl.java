@@ -1,13 +1,16 @@
 package com.rip.load.service.serviceImpl;
 
 import com.alibaba.fastjson.JSON;
-import com.rip.load.pojo.OperatorReport;
+import com.rip.load.otherPojo.bankcardPhoto.BankcardPhoto;
+import com.rip.load.otherPojo.idcardPhoto.IdcardPhoto;
+import com.rip.load.otherPojo.idcardPhoto.Words_result;
+import com.rip.load.pojo.Item;
 import com.rip.load.pojo.User;
 import com.rip.load.pojo.UserCustomer;
 import com.rip.load.pojo.UserDistributor;
 import com.rip.load.pojo.nativePojo.UserThreadLocal;
 import com.rip.load.otherPojo.personalComplaintInquiryC.PersonalComplaintInquiryC;
-import com.rip.load.service.OperatorReportService;
+import com.rip.load.service.ItemService;
 import com.rip.load.service.RipService;
 import com.rip.load.service.UserCustomerService;
 import com.rip.load.service.UserDistributorService;
@@ -34,7 +37,7 @@ public class RipServiceImpl implements RipService {
     @Autowired
     private UserDistributorService userDistributorService;
     @Autowired
-    private OperatorReportService operatorReportService;
+    private ItemService itemService;
 
 
     @Override
@@ -113,12 +116,12 @@ public class RipServiceImpl implements RipService {
         }
         if(suffixUrl.equals("/operatorCreditReports/report)")){
 
-            OperatorReport report = new OperatorReport();
-            report.setResultJson(json);
-            report.setTime(new Date());
-            report.setUserId(id);
-            report.setType("10");
-            boolean insert = operatorReportService.insert(report);
+            Item item = new Item();
+            item.setResultJson(json);
+            item.setTime(new Date());
+            item.setUserId(id);
+            item.setType("10");
+            boolean insert = itemService.insert(item);
             if(insert){
                 resultMap.put("result", "1");
                 return resultMap;
@@ -160,12 +163,12 @@ public class RipServiceImpl implements RipService {
         }
         if(suffixUrl.equals("/limu/validate/getResult")){
 
-            OperatorReport report = new OperatorReport();
-            report.setResultJson(json);
-            report.setTime(new Date());
-            report.setUserId(id);
-            report.setType("11");
-            boolean insert = operatorReportService.insert(report);
+            Item item = new Item();
+            item.setResultJson(json);
+            item.setTime(new Date());
+            item.setUserId(id);
+            item.setType("11");
+            boolean insert = itemService.insert(item);
             if(insert){
                 resultMap.put("result", "1");
                 return resultMap;
@@ -201,12 +204,12 @@ public class RipServiceImpl implements RipService {
             return "征信信息获取失败";
         }
 
-        OperatorReport report = new OperatorReport();
-        report.setResultJson(json);
-        report.setTime(new Date());
-        report.setUserId(id);
-        report.setType("1");
-        boolean insert = operatorReportService.insert(report);
+        Item item = new Item();
+        item.setResultJson(json);
+        item.setTime(new Date());
+        item.setUserId(id);
+        item.setType("1");
+        boolean insert = itemService.insert(item);
         if(insert){
             return "1";
         }else{
@@ -238,12 +241,48 @@ public class RipServiceImpl implements RipService {
             return "征信信息获取失败";
         }
 
-        OperatorReport report = new OperatorReport();
-        report.setResultJson(json);
-        report.setTime(new Date());
-        report.setUserId(id);
-        report.setType("2");
-        boolean insert = operatorReportService.insert(report);
+        Item item = new Item();
+        item.setResultJson(json);
+        item.setTime(new Date());
+        item.setUserId(id);
+        item.setType("2");
+        boolean insert = itemService.insert(item);
+        if(insert){
+            return "1";
+        }else{
+            return "储存错误";
+        }
+    }
+
+    @Override
+    public String operatorTwoElementsService(int id) {
+
+        if(id == 0){
+            User user = UserThreadLocal.get();
+            id = user.getId();
+        }
+        Map<String, Object> mapReturn = setToken(id);
+        String result = (String) mapReturn.get("result");
+        if(!result.equals("1")){
+            return result;
+        }
+        UserCustomer userCustomer = (UserCustomer) mapReturn.get("customer");
+        Map<String, Object> map = (Map)mapReturn.get("map");
+        map.put("name", userCustomer.getRealname());
+        map.put("mobile", userCustomer.getCellphone());
+
+        String suffixUrl = "/operatorTwoElements/result";
+        String json = ripSetTokenService(map, suffixUrl);
+        if(json == null){
+            return "征信信息获取失败";
+        }
+
+        Item item = new Item();
+        item.setResultJson(json);
+        item.setTime(new Date());
+        item.setUserId(id);
+        item.setType("14");
+        boolean insert = itemService.insert(item);
         if(insert){
             return "1";
         }else{
@@ -272,12 +311,12 @@ public class RipServiceImpl implements RipService {
             return "征信信息获取失败";
         }
 
-        OperatorReport report = new OperatorReport();
-        report.setResultJson(json);
-        report.setTime(new Date());
-        report.setUserId(id);
-        report.setType("3");
-        boolean insert = operatorReportService.insert(report);
+        Item item = new Item();
+        item.setResultJson(json);
+        item.setTime(new Date());
+        item.setUserId(id);
+        item.setType("3");
+        boolean insert = itemService.insert(item);
         if(insert){
             return "1";
         }else{
@@ -313,12 +352,12 @@ public class RipServiceImpl implements RipService {
             return "征信信息获取失败";
         }
 
-        OperatorReport report = new OperatorReport();
-        report.setResultJson(json);
-        report.setTime(new Date());
-        report.setUserId(id);
-        report.setType("4");
-        boolean insert = operatorReportService.insert(report);
+        Item item = new Item();
+        item.setResultJson(json);
+        item.setTime(new Date());
+        item.setUserId(id);
+        item.setType("4");
+        boolean insert = itemService.insert(item);
         if(insert){
             return "1";
         }else{
@@ -352,12 +391,12 @@ public class RipServiceImpl implements RipService {
             return "征信信息获取失败";
         }
 
-        OperatorReport report = new OperatorReport();
-        report.setResultJson(json);
-        report.setTime(new Date());
-        report.setUserId(id);
-        report.setType("5");
-        boolean insert = operatorReportService.insert(report);
+        Item item = new Item();
+        item.setResultJson(json);
+        item.setTime(new Date());
+        item.setUserId(id);
+        item.setType("5");
+        boolean insert = itemService.insert(item);
         if(insert){
             return "1";
         }else{
@@ -387,12 +426,12 @@ public class RipServiceImpl implements RipService {
             return "征信信息获取失败";
         }
 
-        OperatorReport report = new OperatorReport();
-        report.setResultJson(json);
-        report.setTime(new Date());
-        report.setUserId(id);
-        report.setType("6");
-        boolean insert = operatorReportService.insert(report);
+        Item item = new Item();
+        item.setResultJson(json);
+        item.setTime(new Date());
+        item.setUserId(id);
+        item.setType("6");
+        boolean insert = itemService.insert(item);
         if(insert){
             return "1";
         }else{
@@ -424,12 +463,12 @@ public class RipServiceImpl implements RipService {
             return "征信信息获取失败";
         }
 
-        OperatorReport report = new OperatorReport();
-        report.setResultJson(json);
-        report.setTime(new Date());
-        report.setUserId(id);
-        report.setType("8");
-        boolean insert = operatorReportService.insert(report);
+        Item item = new Item();
+        item.setResultJson(json);
+        item.setTime(new Date());
+        item.setUserId(id);
+        item.setType("8");
+        boolean insert = itemService.insert(item);
         if(insert){
             return "1";
         }else{
@@ -475,12 +514,149 @@ public class RipServiceImpl implements RipService {
             sb.append(jsonTemp).append("fengexian");
         }
 
-        OperatorReport report = new OperatorReport();
-        report.setResultJson(sb.toString());
-        report.setTime(new Date());
-        report.setUserId(id);
-        report.setType("9");
-        boolean insert = operatorReportService.insert(report);
+        Item item = new Item();
+        item.setResultJson(json);
+        item.setTime(new Date());
+        item.setUserId(id);
+        item.setType("9");
+        boolean insert = itemService.insert(item);
+        if(insert){
+            return "1";
+        }else{
+            return "储存错误";
+        }
+    }
+
+    @Override
+    public Map<String, String> idcardPhotoService(int id, Map<String, Object> map, String suffixUrl) {
+        Map<String, String> resultMap = new HashMap<>();
+        if(id == 0){
+            User user = UserThreadLocal.get();
+            id = user.getId();
+        }
+        Map<String, Object> mapReturn = setToken(id);
+        String result = (String) mapReturn.get("result");
+        if(!result.equals("1")){
+            resultMap.put("result", result);
+            return resultMap;
+        }
+        UserCustomer userCustomer = (UserCustomer) mapReturn.get("customer");
+        Map<String, Object> mapToken = (Map)mapReturn.get("map");
+        map.put("username", mapToken.get("username"));
+        map.put("accessToken", mapToken.get("accessToken"));
+        String json = ripSetTokenService(map, suffixUrl);
+        if(json == null){
+            resultMap.put("result", "接口调用失败");
+            return resultMap;
+        }
+
+        Item item = new Item();
+        item.setResultJson(json);
+        item.setTime(new Date());
+        item.setUserId(id);
+        item.setType("12");
+        boolean insert = itemService.insert(item);
+
+        IdcardPhoto idcardPhoto = JSON.parseObject(json, IdcardPhoto.class);
+        Words_result words_result = idcardPhoto.getWords_result();
+        userCustomer.setIdcardAddress(words_result.get住址().getWords());
+        userCustomer.setIdcardBirthday(words_result.get出生().getWords());
+        userCustomer.setIdcardExpiration(words_result.get失效日期().getWords());
+        userCustomer.setIdcardIdcard(words_result.get公民身份号码().getWords());
+        userCustomer.setIdcardLocation(words_result.get签发机关().getWords());
+        userCustomer.setIdcardSex(words_result.get性别().getWords());
+        userCustomer.setIdcardName(words_result.get姓名().getWords());
+        userCustomer.setIdcardSign(words_result.get签发日期().getWords());
+        userCustomer.setIdcardNation(words_result.get民族().getWords());
+
+        boolean b = userCustomerService.updateById(userCustomer);
+
+        if(insert && b){
+            resultMap.put("result", "1");
+            return resultMap;
+        }else{
+            resultMap.put("result", "储存错误");
+            return resultMap;
+        }
+    }
+
+    @Override
+    public Map<String, String> bankcardPhotoService(int id, Map<String, Object> map, String suffixUrl) {
+        Map<String, String> resultMap = new HashMap<>();
+        if(id == 0){
+            User user = UserThreadLocal.get();
+            id = user.getId();
+        }
+        Map<String, Object> mapReturn = setToken(id);
+        String result = (String) mapReturn.get("result");
+        if(!result.equals("1")){
+            resultMap.put("result", result);
+            return resultMap;
+        }
+        UserCustomer userCustomer = (UserCustomer) mapReturn.get("customer");
+        Map<String, Object> mapToken = (Map)mapReturn.get("map");
+        map.put("username", mapToken.get("username"));
+        map.put("accessToken", mapToken.get("accessToken"));
+        String json = ripSetTokenService(map, suffixUrl);
+        if(json == null){
+            resultMap.put("result", "接口调用失败");
+            return resultMap;
+        }
+
+        Item item = new Item();
+        item.setResultJson(json);
+        item.setTime(new Date());
+        item.setUserId(id);
+        item.setType("13");
+        boolean insert = itemService.insert(item);
+
+        BankcardPhoto bankcardPhoto = JSON.parseObject(json, BankcardPhoto.class);
+        userCustomer.setBankcardCardnumber(bankcardPhoto.getResult().getCardnumber());
+        userCustomer.setBankcardCardtype(bankcardPhoto.getResult().getCardtype());
+        userCustomer.setBankcardCardname(bankcardPhoto.getResult().getCardname());
+
+        boolean b = userCustomerService.updateById(userCustomer);
+
+        if(insert && b){
+            resultMap.put("result", "1");
+            return resultMap;
+        }else{
+            resultMap.put("result", "储存错误");
+            return resultMap;
+        }
+    }
+
+    @Override
+    public String fourElementsOfBankCardService(int id) {
+        if(id == 0){
+            User user = UserThreadLocal.get();
+            id = user.getId();
+        }
+        Map<String, Object> mapReturn = setToken(id);
+        String result = (String) mapReturn.get("result");
+        if(!result.equals("1")){
+            return result;
+        }
+        UserCustomer userCustomer = (UserCustomer) mapReturn.get("customer");
+        Map<String, Object> map = (Map)mapReturn.get("map");
+        map.put("custName", userCustomer.getRealname());
+        map.put("idNo", userCustomer.getIdcard());
+        map.put("phoneNo", userCustomer.getCellphone());
+        map.put("idType", 01);
+        map.put("bankCardno", userCustomer.getBankcard());
+
+        String suffixUrl = "/fourElementsOfBankCard/result";
+        String json = ripSetTokenService(map, suffixUrl);
+        if(json == null){
+            return "征信信息获取失败";
+        }
+
+        Item item = new Item();
+        item.setResultJson(json);
+        item.setTime(new Date());
+        item.setUserId(id);
+        item.setType("11");
+        boolean insert = itemService.insert(item);
         if(insert){
             return "1";
         }else{
@@ -521,42 +697,6 @@ public class RipServiceImpl implements RipService {
     }
 
 
-    @Override
-    public String fourElementsOfBankCardService(int id) {
-        if(id == 0){
-            User user = UserThreadLocal.get();
-            id = user.getId();
-        }
-        Map<String, Object> mapReturn = setToken(id);
-        String result = (String) mapReturn.get("result");
-        if(!result.equals("1")){
-            return result;
-        }
-        UserCustomer userCustomer = (UserCustomer) mapReturn.get("customer");
-        Map<String, Object> map = (Map)mapReturn.get("map");
-        map.put("custName", userCustomer.getRealname());
-        map.put("idNo", userCustomer.getIdcard());
-        map.put("phoneNo", userCustomer.getCellphone());
-        map.put("idType", 01);
-        map.put("bankCardno", userCustomer.getBankcard());
 
-        String suffixUrl = "/fourElementsOfBankCard/result";
-        String json = ripSetTokenService(map, suffixUrl);
-        if(json == null){
-            return "征信信息获取失败";
-        }
-
-        OperatorReport report = new OperatorReport();
-        report.setResultJson(json);
-        report.setTime(new Date());
-        report.setUserId(id);
-        report.setType("11");
-        boolean insert = operatorReportService.insert(report);
-        if(insert){
-            return "1";
-        }else{
-            return "储存错误";
-        }
-    }
 
 }

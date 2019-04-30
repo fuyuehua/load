@@ -63,7 +63,7 @@ public class MybatisPlusGenerator {
         // strategy.setCapitalMode(true);// 全局大写命名 ORACLE 注意
         strategy.setTablePrefix(new String[] { "rip_" });// 此处可以修改为您的表前缀(生成的实体会省略这个前缀)
         strategy.setNaming(NamingStrategy.underline_to_camel);// 表名生成策略
-        strategy.setInclude(new String[] { "rip_operator_report"}); // 需要生成的表
+        strategy.setInclude(new String[] { "rip_report", "rip_report_item", }); // 需要生成的表
 //         strategy.setExclude(new String[]{"user_bank_alipay_type"}); // 排除生成的表
         // 自定义实体父类
         // strategy.setSuperEntityClass("com.baomidou.demo.TestEntity");

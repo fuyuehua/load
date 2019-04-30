@@ -34,5 +34,11 @@ public interface RipService {
 
     String personalComplaintInquiryCService(int id);
 
+    Map<String, String> idcardPhotoService(int id, Map<String, Object> map, String suffixUrl);
+
     String fourElementsOfBankCardService(int id);
+
+    Map<String, String> bankcardPhotoService(int id, Map<String, Object> map, String suffixUrl);
+
+    String operatorTwoElementsService(int id);
 }
