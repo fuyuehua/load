@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rip.load.mapper.RiskRuleMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rip.load.pojo.RiskRule">
+        <id column="id" property="id" />
+        <result column="risk_id" property="riskId" />
+        <result column="name" property="name" />
+        <result column="info" property="info" />
+        <result column="paramA" property="paramA" />
+        <result column="paramB" property="paramB" />
+        <result column="paramC" property="paramC" />
+        <result column="paramD" property="paramD" />
+        <result column="paramE" property="paramE" />
+        <result column="flag" property="flag" />
+        <result column="method" property="method" />
+    </resultMap>
+
+</mapper>

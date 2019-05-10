@@ -18,23 +18,29 @@ public class Test {
                 .divide(new BigDecimal(Math.pow(1 + monthRate, totalmonth) - 1), 2, BigDecimal.ROUND_DOWN);
         return monthIncome.doubleValue();
     }
+    private int j;
+    public int get(){
+        return j;
+    }
+
+    public Test(int j ){
+        this.j = j;
+    }
+
+    public static void swap(Test t1, Test t2){
+        Test test = t1;
+        t1 = t2;
+        t2 = test;
+    }
 
     public static void main(String[] args) {
+        Test test1 = new Test(1);
+        Test test2 = new Test(2);
 
-        double perMonthPrincipalInterest = Test.getPerMonthPrincipalInterest(100, 0.01, 6);
-        System.out.println("1:   " + perMonthPrincipalInterest);
+        swap(test1, test2);
 
-
-        double A = 100;
-        double p = 0.01;
-        double k = 6.00;
-
-            System.out.println(
-                    (A*p*Math.pow((1+p), k))/
-                            (Math.pow((1+p), k) - 1)
-            );
-
-        System.out.println(new BigDecimal(106).divide(new BigDecimal(6), 2, BigDecimal.ROUND_DOWN));
+        System.out.println(test1.get());
+        System.out.println(test2.get());
     }
 
 }

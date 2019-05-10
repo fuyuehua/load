@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rip.load.mapper.ConfigMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rip.load.pojo.Config">
+        <id column="id" property="id" />
+        <result column="uid" property="uid" />
+        <result column="invented_money" property="inventedMoney" />
+        <result column="load_limit" property="loadLimit" />
+        <result column="day_limit" property="dayLimit" />
+        <result column="month_limit" property="monthLimit" />
+        <result column="day_interest" property="dayInterest" />
+        <result column="month_interest" property="monthInterest" />
+        <result column="renewal_money" property="renewalMoney" />
+        <result column="overdue_money" property="overdueMoney" />
+        <result column="register_limit" property="registerLimit" />
+        <result column="register_limit_onoff" property="registerLimitOnoff" />
+        <result column="prophase_money" property="prophaseMoney" />
+        <result column="prophase_money_onoff" property="prophaseMoneyOnoff" />
+        <result column="prophase_money_type" property="prophaseMoneyType" />
+        <result column="reject_wait" property="rejectWait" />
+    </resultMap>
+
+</mapper>

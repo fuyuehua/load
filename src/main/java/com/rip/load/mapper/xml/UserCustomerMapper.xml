@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rip.load.mapper.UserCustomerMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rip.load.pojo.UserCustomer">
+        <id column="userId" property="userId" />
+        <result column="realname" property="realname" />
+        <result column="cellphone" property="cellphone" />
+        <result column="plate_number" property="plateNumber" />
+        <result column="work_unit" property="workUnit" />
+        <result column="emergency_manA" property="emergencyMana" />
+        <result column="A_realname" property="aRealname" />
+        <result column="A_phone" property="aPhone" />
+        <result column="A_relation" property="aRelation" />
+        <result column="emergency_manB" property="emergencyManb" />
+        <result column="B_realname" property="bRealname" />
+        <result column="B_phone" property="bPhone" />
+        <result column="B_relation" property="bRelation" />
+    </resultMap>
+
+</mapper>

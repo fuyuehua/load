@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rip.load.mapper.UserCustomerBankcardMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rip.load.pojo.UserCustomerBankcard">
+        <id column="id" property="id" />
+        <result column="userId" property="userId" />
+        <result column="bankcard" property="bankcard" />
+        <result column="main_card_flag" property="mainCardFlag" />
+        <result column="bankcard_info" property="bankcardInfo" />
+        <result column="bankcard_photo" property="bankcardPhoto" />
+        <result column="bankcard_cardnumber" property="bankcardCardnumber" />
+        <result column="bankcard_cardtype" property="bankcardCardtype" />
+        <result column="bankcard_cardname" property="bankcardCardname" />
+        <result column="status" property="status" />
+    </resultMap>
+
+</mapper>
