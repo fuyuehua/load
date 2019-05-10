@@ -18,7 +18,7 @@ public class Test {
                 .divide(new BigDecimal(Math.pow(1 + monthRate, totalmonth) - 1), 2, BigDecimal.ROUND_DOWN);
         return monthIncome.doubleValue();
     }
-    private int j;
+    private static int j;
     public int get(){
         return j;
     }
@@ -27,17 +27,14 @@ public class Test {
         this.j = j;
     }
 
-    public static void swap(Test t1, Test t2){
-        Test test = t1;
-        t1 = t2;
-        t2 = test;
+    static {
+        j = 3;
     }
 
     public static void main(String[] args) {
         Test test1 = new Test(1);
         Test test2 = new Test(2);
 
-        swap(test1, test2);
 
         System.out.println(test1.get());
         System.out.println(test2.get());
