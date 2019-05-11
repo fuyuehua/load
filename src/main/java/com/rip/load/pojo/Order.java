@@ -42,6 +42,12 @@ public class Order extends Model<Order> {
     private String phone;
 
     /**
+     * 借款产品ID
+     */
+    @TableField("product_id")
+    private BigDecimal productId;
+
+    /**
      * 借款金额
      */
     @TableField("borrow_money")
@@ -212,6 +218,14 @@ public class Order extends Model<Order> {
 
     public void setRejectReason(String rejectReason) {
         this.rejectReason = rejectReason;
+    }
+
+    public BigDecimal getProductId() {
+        return productId;
+    }
+
+    public void setProductId(BigDecimal productId) {
+        this.productId = productId;
     }
 
     @Override

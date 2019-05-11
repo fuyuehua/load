@@ -65,6 +65,25 @@ public class Product extends Model<Product> {
     @NotBlank(message = "产品图片不能为空")
     private String img;
 
+    private Config config;
+    private Risk risk;
+
+    public Config getConfig() {
+        return config;
+    }
+
+    public void setConfig(Config config) {
+        this.config = config;
+    }
+
+    public Risk getRisk() {
+        return risk;
+    }
+
+    public void setRisk(Risk risk) {
+        this.risk = risk;
+    }
+
     public Integer getId() {
         return id;
     }

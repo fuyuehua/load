@@ -48,8 +48,12 @@ public class RiskRuleController {
             return new ResultUtil<Object>().setErrorMsg("未创建风控规则表");
         }
 
-        return null;
-
+        boolean b = riskRuleService.insertBatch(list);
+        if(b){
+            return new ResultUtil<Object>().set();
+        }else{
+            return new ResultUtil<Object>().setErrorMsg("存储失败");
+        }
     }
 
 

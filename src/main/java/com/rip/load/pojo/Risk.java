@@ -5,6 +5,8 @@ import com.baomidou.mybatisplus.enums.IdType;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
+
+import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
 
 /**
@@ -26,6 +28,7 @@ public class Risk extends Model<Risk> {
     /**
      * 风控规则名字
      */
+    @NotBlank
     private String name;
 
     /**

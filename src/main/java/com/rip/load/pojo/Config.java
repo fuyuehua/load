@@ -29,7 +29,7 @@ public class Config extends Model<Config> {
     @TableField("user_id")
     private Integer userId;
 
-    @NotBlank(message = "didi")
+    @NotBlank(message = "fuck")
     private String name;
 
     /**

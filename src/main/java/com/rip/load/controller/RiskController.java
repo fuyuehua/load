@@ -1,11 +1,13 @@
 package com.rip.load.controller;
 
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.rip.load.pojo.Risk;
 import com.rip.load.pojo.User;
 import com.rip.load.pojo.nativePojo.Result;
 import com.rip.load.pojo.nativePojo.UserThreadLocal;
 import com.rip.load.service.RiskService;
+import com.rip.load.utils.ResultUtil;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,14 +35,24 @@ public class RiskController {
     @Autowired
     private RiskService riskService;
 
-    @ApiOperation(value = "增加一个新的")
+    @ApiOperation(value = "增加一个新的风控规则表")
     @PostMapping("/add")
-    public Result<Object> add(@ApiParam(value = "风控规则实体类")
+    public Result<Risk> add(@ApiParam(value = "风控规则实体类")
                               @RequestBody Risk risk){
 
         User user = UserThreadLocal.get();
         risk.setUserId(user.getId());
-        return null;
 
+        Risk name = riskService.selectOne(new EntityWrapper<Risk>().eq("name", risk.getName()));
+        if(name != null){
+            return new ResultUtil<Risk>().setErrorMsg("已有此名称");
+        }
+        boolean b = riskService.insert(risk);
+        Risk risk1 = riskService.selectOne(new EntityWrapper<Risk>().eq("name", risk.getName()));
+        if(b){
+            return new ResultUtil<Risk>().setData(risk1);
+        }else{
+            return new ResultUtil<Risk>().setErrorMsg("储存错误");
+        }
     }
 }

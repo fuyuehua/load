@@ -161,7 +161,7 @@ public class RipController {
         return new ResultUtil<Object>().set();
     }
     @ApiOperation(value = "运营商二要素")
-    @GetMapping("/operatorThreeElements")
+    @GetMapping("/operatorTwoElements")
     public Result<Object> operatorTwoElements(int id) {
 
         String s = ripService.operatorTwoElementsService(id);
