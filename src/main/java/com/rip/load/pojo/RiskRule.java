@@ -122,6 +122,14 @@ public class RiskRule extends Model<RiskRule> {
         this.flag = flag;
     }
 
+    public Integer getRuleId() {
+        return ruleId;
+    }
+
+    public void setRuleId(Integer ruleId) {
+        this.ruleId = ruleId;
+    }
+
     @Override
     protected Serializable pkVal() {
         return this.id;

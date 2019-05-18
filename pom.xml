@@ -163,6 +163,13 @@
             <version>1.5.2.RELEASE</version>
         </dependency>
 
+        <!-- 文件工具 -->
+        <dependency>
+            <groupId>commons-io</groupId>
+            <artifactId>commons-io</artifactId>
+            <version>2.6</version>
+        </dependency>
+
     </dependencies>
 
     <build>

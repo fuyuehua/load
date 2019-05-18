@@ -2,7 +2,9 @@ package com.rip.load.pojo;
 
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
+import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableName;
+import com.baomidou.mybatisplus.enums.IdType;
 
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -21,6 +23,7 @@ public class Config extends Model<Config> {
 
     private static final long serialVersionUID = 1L;
 
+    @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     /**
@@ -29,7 +32,7 @@ public class Config extends Model<Config> {
     @TableField("user_id")
     private Integer userId;
 
-    @NotBlank(message = "fuck")
+    @NotBlank(message = "配置信息的名称不能为空")
     private String name;
 
     /**
@@ -122,6 +125,8 @@ public class Config extends Model<Config> {
      */
     @TableField("reject_wait")
     private String rejectWait;
+
+    private String remark;
 
     public Integer getId() {
         return id;
@@ -249,6 +254,14 @@ public class Config extends Model<Config> {
 
     public void setRejectWait(String rejectWait) {
         this.rejectWait = rejectWait;
+    }
+
+    public String getRemark() {
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
     }
 
     @Override

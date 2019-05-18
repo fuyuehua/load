@@ -8,6 +8,7 @@ import com.baomidou.mybatisplus.annotations.TableName;
 
 import javax.validation.constraints.NotBlank;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -37,6 +38,11 @@ public class Risk extends Model<Risk> {
     @TableField("user_id")
     private Integer userId;
 
+    private String remark;
+
+    @TableField(exist=false)
+    private List<RiskRule> riskRuleList;
+
     public Integer getId() {
         return id;
     }
@@ -58,6 +64,23 @@ public class Risk extends Model<Risk> {
 
     public void setUserId(Integer userId) {
         this.userId = userId;
+    }
+
+    public String getRemark() {
+
+        return remark;
+    }
+
+    public void setRemark(String remark) {
+        this.remark = remark;
+    }
+
+    public List<RiskRule> getRiskRuleList() {
+        return riskRuleList;
+    }
+
+    public void setRiskRuleList(List<RiskRule> riskRuleList) {
+        this.riskRuleList = riskRuleList;
     }
 
     @Override

@@ -1,10 +1,11 @@
 package com.rip.load.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.rip.load.pojo.nativePojo.Result;
+import com.rip.load.utils.HttpUtil;
 import com.rip.load.utils.ResultUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiParam;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.apache.commons.io.FileUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -31,8 +33,8 @@ public class FileController {
     //服务器中文件储存的地址
     private final static String FILE_PATH = "/usr/local/tomcatfangdifile";
 
-    @ApiOperation("上传文件获得URL")
-    @PostMapping("/getUrl")
+//    @ApiOperation("上传文件获得URL（先弃用）")
+//    @PostMapping("/getUrl")
     public Result<Object> getUrl(@RequestParam(required = false) MultipartFile file, HttpServletRequest request){
         Map<String, Object> map = new HashMap<>();
         File targetFile=null;
@@ -72,5 +74,54 @@ public class FileController {
             }
         }
         return new ResultUtil<Object>().setErrorMsg("文件上传失败");
+    }
+
+
+    @ApiOperation("上传文件获得URL（外接线上）")
+    @PostMapping("/getOnlineUrl")
+    public Result getOnlineUrl(MultipartFile file, HttpServletRequest request){
+
+        if(file.isEmpty()){
+            return new ResultUtil<Object>().setErrorMsg("传入的文件为空");
+        }
+
+        String name = "zxh";
+        String password = "233123";
+        String filepath = "img";
+
+        Map<String, Object> map = new HashMap<>();
+        map.put("name", name);
+        map.put("password", password);
+        map.put("filepath", filepath);
+
+        String url = "http://106.13.58.157:9898/api/file/getUrl";
+        //转换成file
+        //在指定目录，生成临时文件，然后再转换
+        //在根目录下创建一个tempfileDir的临时文件夹
+        String contextpath = request.getContextPath()+"/tempfileDir";
+        File f = new File(contextpath);
+        if(!f.exists()){
+            f.mkdirs();
+        }
+        String fileName = file.getOriginalFilename();
+        String finalfilepath = contextpath+"/"+fileName;
+        File finalfile = new File(finalfilepath);
+        String json = "";
+        try {
+            FileUtils.copyInputStreamToFile(file.getInputStream(), finalfile);
+            json = HttpUtil.httpPostForm(url, "file", finalfile, map);
+        } catch (Exception e) {
+            e.printStackTrace();
+            logger.error("文件转换错误");
+        }finally {
+            //如果不需要File文件可删除
+            if(finalfile.exists()){
+                finalfile.delete();
+            }
+        }
+        Result result = JSON.parseObject(json, Result.class);
+
+        return result;
+
     }
 }

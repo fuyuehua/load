@@ -7,6 +7,7 @@ import com.rip.load.pojo.nativePojo.UserThreadLocal;
 import com.rip.load.service.PermissionService;
 import com.rip.load.service.UserService;
 import com.rip.load.utils.RedisUtil;
+import com.rip.load.utils.ResultUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.web.servlet.HandlerInterceptor;
@@ -51,15 +52,17 @@ public class AuthorityInterceptor implements HandlerInterceptor {
                                 return false;
                             }
                         }else {
-                            //没调用接口
-//                            UserThreadLocal.set(user);
+                            response.setStatus(404);
                             return false;
                         }
                     }
                 }
             }
         }
-        return true;
+        response.setStatus(405);
+        response.setContentType("application/json; charset=UTF-8");
+        response.getWriter().print(JSON.toJSONString(new ResultUtil<Object>().setErrorMsg("没有登录秘钥，无法验明身份")));
+        return false;
     }
 
     @Override

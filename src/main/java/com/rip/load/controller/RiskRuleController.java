@@ -56,5 +56,22 @@ public class RiskRuleController {
         }
     }
 
+    @ApiOperation("批量修改个性风控规则")
+    @PostMapping("/updateBatch")
+    public Result<Object> updateBatch(@ApiParam("个性风控规则列表")
+                                   @RequestBody List<RiskRule> list){
+        Risk risk = riskService.selectOne(new EntityWrapper<Risk>().eq("id", list.get(0).getRiskId()));
+        if(risk == null){
+            return new ResultUtil<Object>().setErrorMsg("未创建风控规则表");
+        }
+
+        boolean b = riskRuleService.updateBatchById(list);
+        if(b){
+            return new ResultUtil<Object>().set();
+        }else{
+            return new ResultUtil<Object>().setErrorMsg("存储失败");
+        }
+    }
+
 
 }

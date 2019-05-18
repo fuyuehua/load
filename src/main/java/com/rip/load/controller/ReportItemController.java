@@ -4,6 +4,7 @@ package com.rip.load.controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * <p>
@@ -13,7 +14,7 @@ import org.springframework.stereotype.Controller;
  * @author zxh
  * @since 2019-04-30
  */
-@Controller
+@RestController
 @RequestMapping("/reportItem")
 public class ReportItemController {
 

@@ -2,6 +2,7 @@ package com.rip.load.controller;
 
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.baomidou.mybatisplus.plugins.Page;
 import com.rip.load.pojo.Config;
 import com.rip.load.pojo.Product;
 import com.rip.load.pojo.Risk;
@@ -15,12 +16,14 @@ import com.rip.load.utils.DateUtil;
 import com.rip.load.utils.ResultUtil;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.validation.ValidationAutoConfiguration;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
 
+import javax.validation.Valid;
 import java.util.List;
 
 /**
@@ -46,7 +49,7 @@ public class ProductController {
     @PostMapping("/add")
     public Result<Object> add(
             @ApiParam(value = "贷款产品实体类")
-            @RequestBody Product product) {
+            @Valid  @RequestBody Product product) {
 
         User user = UserThreadLocal.get();
         product.setUserId(user.getId());
@@ -61,24 +64,33 @@ public class ProductController {
 
     @ApiOperation(value = "查看渠道商的产品")
     @GetMapping("/listByDistributorId")
-    public Result<List<Product>>  listByDistributorId(@ApiParam(value = "渠道商ID")
-                                                @RequestParam
-                                                           int id){
-        List<Product> list = productService.selectList(new EntityWrapper<Product>().eq("user_id", id));
+    public Result<Page<Product>>  listByDistributorId(@ApiParam(value = "渠道商ID")
+                                                          @RequestParam int id,
+                                                      @ApiParam(value = "想要请求的页码")
+                                                      @RequestParam int currentPage,
+                                                      @ApiParam(value = "一页显示多少数据")
+                                                          @RequestParam int pageSize,
+                                                      @ApiParam(value = "产品名称模糊查询")
+                                                      @RequestParam String name){
+        Page<Product> page = new Page<>(currentPage, pageSize);
+        Page<Product> pages = productService.selectPage(page, new EntityWrapper<Product>().eq("user_id", id)
+                .like(!StringUtils.isEmpty(name),"name", name));
+        List<Product> list = pages.getRecords();
         for (Product product: list) {
             Config config = configService.selectById(product.getConfigId());
             product.setConfig(config);
             Risk risk = riskService.selectById(product.getRiskId());
             product.setRisk(risk);
         }
-        return new ResultUtil<List<Product>>().setData(list);
+        pages.setRecords(list);
+        return new ResultUtil<Page<Product>>().setData(pages);
     }
 
     @ApiOperation(value = "修改一个贷款产品的基本信息")
     @PostMapping("/update")
     public Result<Object> update(
             @ApiParam(value = "贷款产品实体类")
-            @RequestBody Product product) {
+            @Valid @RequestBody Product product) {
 
         product.setConfigId(null);
         product.setRiskId(null);
@@ -90,5 +102,6 @@ public class ProductController {
             return new ResultUtil<Object>().setErrorMsg("储存错误");
         }
     }
+
 
 }

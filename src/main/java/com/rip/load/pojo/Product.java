@@ -65,7 +65,9 @@ public class Product extends Model<Product> {
     @NotBlank(message = "产品图片不能为空")
     private String img;
 
+    @TableField(exist = false)
     private Config config;
+    @TableField(exist = false)
     private Risk risk;
 
     public Config getConfig() {
