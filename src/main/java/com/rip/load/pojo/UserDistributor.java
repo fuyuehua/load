@@ -4,6 +4,9 @@ import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -22,24 +25,28 @@ public class UserDistributor extends Model<UserDistributor> {
     /**
      * 用户ID
      */
+    @NotNull
     @TableId("user_id")
     private Integer userId;
 
     /**
      * 渠道商公司名称
      */
+    @NotBlank
     @TableField("corporate_name")
     private String corporateName;
 
     /**
      * 渠道商公司地址
      */
+    @NotBlank
     @TableField("corporate_location")
     private String corporateLocation;
 
     /**
      * 渠道商公司联系电话
      */
+    @NotBlank
     @TableField("corporate_phone")
     private String corporatePhone;
 
@@ -52,6 +59,7 @@ public class UserDistributor extends Model<UserDistributor> {
     /**
      * 手续费抽成额度
      */
+    @NotNull
     private Integer poundage;
 
     /**
@@ -64,6 +72,15 @@ public class UserDistributor extends Model<UserDistributor> {
      */
     @TableField("access_token")
     private String accessToken;
+
+    @TableField("province_id")
+    private Integer provinceId;
+
+    @TableField("city_id")
+    private Integer cityId;
+
+    @TableField(value = "area_id")
+    private Integer areaId;
 
     public Integer getUserId() {
         return userId;
@@ -123,6 +140,30 @@ public class UserDistributor extends Model<UserDistributor> {
 
     public void setAccessToken(String accessToken) {
         this.accessToken = accessToken;
+    }
+
+    public Integer getProvinceId() {
+        return provinceId;
+    }
+
+    public void setProvinceId(Integer provinceId) {
+        this.provinceId = provinceId;
+    }
+
+    public Integer getCityId() {
+        return cityId;
+    }
+
+    public void setCityId(Integer cityId) {
+        this.cityId = cityId;
+    }
+
+    public Integer getAreaId() {
+        return areaId;
+    }
+
+    public void setAreaId(Integer areaId) {
+        this.areaId = areaId;
     }
 
     @Override

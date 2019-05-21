@@ -3,6 +3,9 @@ package com.rip.load.pojo;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -21,6 +24,7 @@ public class UserCustomer extends Model<UserCustomer> {
     /**
      * 用户ID
      */
+    @NotNull
     private Integer userId;
 
     /**
@@ -228,7 +232,6 @@ public class UserCustomer extends Model<UserCustomer> {
      */
     @TableField("bankcard_cardname")
     private String bankcardCardname;
-
 
 
     public Integer getUserId() {

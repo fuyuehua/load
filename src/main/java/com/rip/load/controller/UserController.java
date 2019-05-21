@@ -352,7 +352,9 @@ public class UserController {
             @ApiParam(value = "手机号码")
             @RequestParam  String phone,
             @ApiParam(value = "验证码")
-            @RequestParam String str){
+            @RequestParam String str,
+            @ApiParam("传一个标识这个客户属于某个渠道商的渠道商ID")
+            @RequestParam Integer distributorId){
         if(StringUtils.isEmpty(phone)){
             return new ResultUtil<Object>().setErrorMsg("未传入手机号");
         }
@@ -364,7 +366,7 @@ public class UserController {
         if(!secret.equals(str)){
             return new ResultUtil<Object>().setErrorMsg("验证码错误");
         }
-        //密码处理(目前设验证码为其密码)
+        //密码处理(目前设验证码为其密码)，设置其手机号为账户
         Map<String, String> map = MD5Util.getSecert(str);
         User readyUser = new User();
         readyUser.setUsername(phone);
@@ -375,23 +377,27 @@ public class UserController {
         readyUser.setOnoff(1);
         readyUser.setCreatetime(new Date());
 
+
         boolean b1 = userService.insert(readyUser);
         if(!b1){
-            return new ResultUtil<Object>().setErrorMsg("注册失败");
+            return new ResultUtil<Object>().setErrorMsg("产生基础用户失败");
         }
 
         //给客户绑定客户角色，让其有权限
-        User user = userService.selectOne(new EntityWrapper<User>().eq("username", phone));
-        if(user == null){
-            return new ResultUtil<Object>().setErrorMsg("未知错误，请重新注册或联系客服");
-        }
         UserRole userRole = new UserRole();
-        userRole.setUid(user.getId());
-        //固定角色：  1.管理员    2.角色
+        userRole.setUid(readyUser.getId());
+        //固定角色：  1.管理员    2.客户角色
         userRole.setRid(2);
         boolean insert = userRoleService.insert(userRole);
-        if(insert){
-            return new ResultUtil<Object>().set();
+        if(!insert){
+            return new ResultUtil<Object>().setErrorMsg("赋予角色失败");
+        }
+        UserCustomer userCustomer = new UserCustomer();
+        userCustomer.setUserId(readyUser.getId());
+        userCustomer.setFatherId(distributorId);
+        boolean insert1 = userCustomerService.insert(userCustomer);
+        if(insert1){
+            return new ResultUtil<Object>().setData(readyUser);
         }else{
             return new ResultUtil<Object>().setErrorMsg("注册失败");
         }
@@ -451,8 +457,8 @@ public class UserController {
         return new ResultUtil<Object>().setData(map);
     }
 
-    @ApiOperation(value = "新建一个借贷客户（入建员）")
-    @PostMapping("/addCustomer")
+//    @ApiOperation(value = "新建一个借贷客户（入件员）")
+//    @PostMapping("/addCustomer")
     public Result<Object> addCustomer(@ApiParam(value = "借贷客户客户信息实体类")
                                           @RequestBody UserCustomer user){
         if(user.getUserId() == null || user.getUserId() == 0 ||
@@ -498,7 +504,6 @@ public class UserController {
         if(!insert){
             return new ResultUtil<Object>().setErrorMsg("赋予角色失败");
         }
-
         boolean b = userCustomerService.insert(user);
         if (b) {
             return new ResultUtil<Object>().set();

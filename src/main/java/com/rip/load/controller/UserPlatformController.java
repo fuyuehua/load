@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -65,6 +66,16 @@ public class UserPlatformController {
         Page<UserPlatform> page = new Page<>(currentPage, pageSize);
         Page<UserPlatform> userPage = userPlatformService.selectPage(page);
         return new ResultUtil<Page<UserPlatform>>().setData(userPage);
+    }
+
+    @ApiOperation("获取唯一平台")
+    @GetMapping("/getOne")
+    public Result<UserPlatform> getOne(){
+        List<UserPlatform> list = userPlatformService.selectList(null);
+        if(list == null || list.size() == 0){
+            return new ResultUtil<UserPlatform>().setErrorMsg("无内部平台");
+        }
+        return new ResultUtil<UserPlatform>().setData(list.get(0));
     }
 
     @ApiOperation("平台得到自身信息")

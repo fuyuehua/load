@@ -37,16 +37,12 @@ public class UserCustomerController {
     @Autowired
     private UserCustomerService userCustomerService;
 
-    @ApiOperation(value = "完善征信信息")
+    @ApiOperation(value = "完善客户信息")
     @PostMapping("/improveInfo")
     public Result<Object> improveInfo(@ApiParam(value = "借贷客户客户信息实体类")
                                           @RequestBody UserCustomer userCustomer){
-        if(userCustomer.getUserId() == null || userCustomer.getUserId() == 0 ||
-                StringUtils.isEmpty(userCustomer.getRealname()) ||
-                StringUtils.isEmpty(userCustomer.getIdcard()) ||
-            StringUtils.isEmpty(userCustomer.getCellphone())||
-                StringUtils.isEmpty(userCustomer.getBankcard())){
-            return new ResultUtil<Object>().setErrorMsg("用户名不能为空");
+        if(userCustomer.getUserId() == 0){
+            return new ResultUtil<Object>().setErrorMsg("用户ID不能为空");
         }
         User user = userService.selectById(userCustomer.getUserId());
         if(user == null){
@@ -59,7 +55,6 @@ public class UserCustomerController {
             return new ResultUtil<Object>().setErrorMsg("数据库错误");
         }
     }
-
 
 
 }

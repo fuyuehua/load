@@ -7,6 +7,9 @@ import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 
 /**
@@ -28,6 +31,7 @@ public class Order extends Model<Order> {
     /**
      * 用户ID
      */
+    @NotNull
     private Integer uid;
 
 
@@ -44,8 +48,9 @@ public class Order extends Model<Order> {
     /**
      * 借款产品ID
      */
+    @NotNull
     @TableField("product_id")
-    private BigDecimal productId;
+    private Integer productId;
 
     /**
      * 借款金额
@@ -220,11 +225,12 @@ public class Order extends Model<Order> {
         this.rejectReason = rejectReason;
     }
 
-    public BigDecimal getProductId() {
+
+    public Integer getProductId() {
         return productId;
     }
 
-    public void setProductId(BigDecimal productId) {
+    public void setProductId(Integer productId) {
         this.productId = productId;
     }
 

@@ -2,9 +2,8 @@ package com.rip.load.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
-import com.rip.load.pojo.User;
-import com.rip.load.pojo.UserCustomer;
-import com.rip.load.pojo.UserDistributor;
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.rip.load.pojo.*;
 import com.rip.load.pojo.nativePojo.Result;
 import com.rip.load.pojo.nativePojo.UserThreadLocal;
 import com.rip.load.service.*;
@@ -16,9 +15,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 
 @Api(tags = {"查询征信控制"})
@@ -144,7 +141,7 @@ public class RipController {
     @GetMapping("/idCardElements")
     public Result<Object> idCardElements(int id) {
 
-        String s = ripService.idCardElementsService(id);
+        String s = ripService.idCardElementsService(id, null);
         if(!s.equals("1")){
             return new ResultUtil<Object>().setErrorMsg(s);
         }
@@ -359,7 +356,7 @@ public class RipController {
      */
     @ApiOperation(value = "身份证照片识别")
     @GetMapping("/idcardPhoto")
-    public Result<Object> idcardPhoto(int id, String idCardSide, String base64Data) {
+    public Result<Object> idcardPhoto(int id, String idCardSide, String base64Data, String image) {
         if (StringUtils.isEmpty(idCardSide) || StringUtils.isEmpty(base64Data))
             return new ResultUtil<Object>().setErrorMsg("参数不足");
 
@@ -368,7 +365,7 @@ public class RipController {
         map.put("base64Data", base64Data);
 
         String suffixUrl = "/identificationbd/result";
-        Map<String, String> map1 = ripService.idcardPhotoService(id, map, suffixUrl);
+        Map<String, String> map1 = ripService.idcardPhotoService(id, map, suffixUrl, image);
         String result = map1.get("result");
         if(result.equals("1"))
             return new ResultUtil<Object>().set();
@@ -383,7 +380,7 @@ public class RipController {
      */
     @ApiOperation(value = "银行卡照片识别")
     @GetMapping("/bankcardPhoto")
-    public Result<Object> bankcardPhoto(int id, String base64Data) {
+    public Result<Object> bankcardPhoto(int id, String base64Data, String image) {
         if (StringUtils.isEmpty(base64Data))
             return new ResultUtil<Object>().setErrorMsg("参数不足");
 
@@ -391,12 +388,95 @@ public class RipController {
         map.put("base64Data", base64Data);
 
         String suffixUrl = "/cardIdentificationOCR/result";
-        Map<String, String> map1 = ripService.bankcardPhotoService(id, map, suffixUrl);
+        Map<String, String> map1 = ripService.bankcardPhotoService(id, map, suffixUrl, image);
         String result = map1.get("result");
         if(result.equals("1"))
             return new ResultUtil<Object>().set();
         else
             return new ResultUtil<Object>().setData(result);
+    }
+
+    @Autowired
+    OrderService orderService;
+    @Autowired
+    ProductService productService;
+    @Autowired
+    RiskService riskService;
+    @Autowired
+    RiskRuleService riskRuleService;
+    @Autowired
+    RuleService ruleService;
+    @Autowired
+    ReportItemService reportItemService;
+    @Autowired
+    ReportService reportService;
+
+    @ApiOperation(value = "生成弱授权风控报告")
+    @GetMapping("/createReport")
+    public Result<Object> createReport(int orderId, String remark){
+        Order order = orderService.selectById(orderId);
+
+
+        int id = order.getUid();
+        Report report = new Report();
+        report.setUserId(id);
+        report.setRemark(remark);
+        report.setCreatetime(new Date());
+        reportService.insert(report);
+
+        Integer productId = order.getProductId();
+        Product product = productService.selectById(productId);
+        Integer riskId = product.getRiskId();
+        Risk risk = riskService.selectById(riskId);
+        List<RiskRule> riskRules = riskRuleService.selectList(new EntityWrapper<RiskRule>().eq("risk_id", risk.getId()));
+        for(RiskRule riskRule : riskRules){
+            Rule rule = ruleService.selectById(riskRule.getId());
+            //查询风控
+            String method = rule.getMethod();
+            RiskMethodService methodService = new RiskMethodService();
+
+            if(method.equals("idCardElements")){
+                String s = ripService.idCardElementsService(id, report.getId());
+                List<ReportItem> reportItems = reportItemService.selectList(new EntityWrapper<ReportItem>().eq("report_id", report.getId()));
+                for(ReportItem reportItem : reportItems){
+                    Item item = itemService.selectById(reportItem.getItemId());
+                    boolean b = methodService.idCardElements(riskRule, item);
+
+//                    if(b)
+//                        riskRule.setFlag(1);
+//                    else
+//                        riskRule.setFlag(0);
+                    riskRuleService.updateById(riskRule);
+                }
+            }
+        }
+
+        return new ResultUtil<Object>().set();
+    }
+
+    @ApiOperation(value = "生成弱授权风控报告")
+    @GetMapping("/takeReport")
+    public Result<Object> takeReport(int orderId, int reportId){
+
+        Order order = orderService.selectById(orderId);
+        int userId = order.getUid();
+        List<Report> reports = reportService.selectList(new EntityWrapper<Report>().eq("user_id", userId));
+        for(Report report : reports){
+            List<ReportItem> reportItems = reportItemService.selectList(new EntityWrapper<ReportItem>().eq("report_id", report.getId()));
+            List<Item> list = new ArrayList<>();
+            for(ReportItem reportItem : reportItems){
+                Item item = itemService.selectById(reportItem.getItemId());
+                list.add(item);
+            }
+            report.setItemList(list);
+        }
+
+        Integer productId = order.getProductId();
+        Product product = productService.selectById(productId);
+        Integer riskId = product.getRiskId();
+        Risk risk = riskService.selectById(riskId);
+        List<RiskRule> riskRules = riskRuleService.selectList(new EntityWrapper<RiskRule>().eq("risk_id", risk.getId()));
+        return null;
     }
 
 }

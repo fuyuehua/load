@@ -4,16 +4,10 @@ import com.alibaba.fastjson.JSON;
 import com.rip.load.otherPojo.bankcardPhoto.BankcardPhoto;
 import com.rip.load.otherPojo.idcardPhoto.IdcardPhoto;
 import com.rip.load.otherPojo.idcardPhoto.Words_result;
-import com.rip.load.pojo.Item;
-import com.rip.load.pojo.User;
-import com.rip.load.pojo.UserCustomer;
-import com.rip.load.pojo.UserDistributor;
+import com.rip.load.pojo.*;
 import com.rip.load.pojo.nativePojo.UserThreadLocal;
 import com.rip.load.otherPojo.personalComplaintInquiryC.PersonalComplaintInquiryC;
-import com.rip.load.service.ItemService;
-import com.rip.load.service.RipService;
-import com.rip.load.service.UserCustomerService;
-import com.rip.load.service.UserDistributorService;
+import com.rip.load.service.*;
 import com.rip.load.utils.HttpUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -38,7 +32,8 @@ public class RipServiceImpl implements RipService {
     private UserDistributorService userDistributorService;
     @Autowired
     private ItemService itemService;
-
+    @Autowired
+    private ReportItemService reportItemService;
 
     @Override
     public Map<String, Object> getOperatorCreditReports(Map<String, Object> map) {
@@ -182,7 +177,7 @@ public class RipServiceImpl implements RipService {
         return resultMap;
     }
     @Override
-    public String idCardElementsService(int id) {
+    public String idCardElementsService(int id, Integer reportId) {
 
         if(id == 0){
             User user = UserThreadLocal.get();
@@ -210,6 +205,13 @@ public class RipServiceImpl implements RipService {
         item.setUserId(id);
         item.setType("1");
         boolean insert = itemService.insert(item);
+
+        if(reportId != null && reportId != 0){
+            ReportItem reportItem = new ReportItem();
+            reportItem.setItemId(item.getId());
+            reportItem.setReportId(reportId);
+            reportItemService.insert(reportItem);
+        }
         if(insert){
             return "1";
         }else{
@@ -528,7 +530,7 @@ public class RipServiceImpl implements RipService {
     }
 
     @Override
-    public Map<String, String> idcardPhotoService(int id, Map<String, Object> map, String suffixUrl) {
+    public Map<String, String> idcardPhotoService(int id, Map<String, Object> map, String suffixUrl, String image) {
         Map<String, String> resultMap = new HashMap<>();
         if(id == 0){
             User user = UserThreadLocal.get();
@@ -559,15 +561,22 @@ public class RipServiceImpl implements RipService {
 
         IdcardPhoto idcardPhoto = JSON.parseObject(json, IdcardPhoto.class);
         Words_result words_result = idcardPhoto.getWords_result();
-        userCustomer.setIdcardAddress(words_result.get住址().getWords());
-        userCustomer.setIdcardBirthday(words_result.get出生().getWords());
-        userCustomer.setIdcardExpiration(words_result.get失效日期().getWords());
-        userCustomer.setIdcardIdcard(words_result.get公民身份号码().getWords());
-        userCustomer.setIdcardLocation(words_result.get签发机关().getWords());
-        userCustomer.setIdcardSex(words_result.get性别().getWords());
-        userCustomer.setIdcardName(words_result.get姓名().getWords());
-        userCustomer.setIdcardSign(words_result.get签发日期().getWords());
-        userCustomer.setIdcardNation(words_result.get民族().getWords());
+            //正面
+        if(((String)map.get("idCardSide")).equals("front")) {
+            userCustomer.setIdcardName(words_result.get姓名().getWords());
+            userCustomer.setIdcardSex(words_result.get性别().getWords());
+            userCustomer.setIdcardNation(words_result.get民族().getWords());
+            userCustomer.setIdcardBirthday(words_result.get出生().getWords());
+            userCustomer.setIdcardAddress(words_result.get住址().getWords());
+            userCustomer.setIdcardIdcard(words_result.get公民身份号码().getWords());
+            userCustomer.setIdcardPhotoa(image);
+        }else {
+            //反面
+            userCustomer.setIdcardExpiration(words_result.get失效日期().getWords());
+            userCustomer.setIdcardLocation(words_result.get签发机关().getWords());
+            userCustomer.setIdcardSign(words_result.get签发日期().getWords());
+            userCustomer.setIdcardPhotob(image);
+        }
 
         boolean b = userCustomerService.updateById(userCustomer);
 
@@ -581,7 +590,7 @@ public class RipServiceImpl implements RipService {
     }
 
     @Override
-    public Map<String, String> bankcardPhotoService(int id, Map<String, Object> map, String suffixUrl) {
+    public Map<String, String> bankcardPhotoService(int id, Map<String, Object> map, String suffixUrl, String image) {
         Map<String, String> resultMap = new HashMap<>();
         if(id == 0){
             User user = UserThreadLocal.get();
@@ -614,6 +623,7 @@ public class RipServiceImpl implements RipService {
         userCustomer.setBankcardCardnumber(bankcardPhoto.getResult().getCardnumber());
         userCustomer.setBankcardCardtype(bankcardPhoto.getResult().getCardtype());
         userCustomer.setBankcardCardname(bankcardPhoto.getResult().getCardname());
+        userCustomer.setBankcardPhoto(image);
 
         boolean b = userCustomerService.updateById(userCustomer);
 

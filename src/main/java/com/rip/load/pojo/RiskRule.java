@@ -35,6 +35,9 @@ public class RiskRule extends Model<RiskRule> {
     @TableField("rule_id")
     private Integer ruleId;
 
+    @TableField(exist = false)
+    private Rule rule;
+
     /**
      * 参数1
      */
@@ -61,9 +64,9 @@ public class RiskRule extends Model<RiskRule> {
     private String paramE;
 
     /**
-     * 通过：1：通过  0：未通过
+     * 分数
      */
-    private Integer flag;
+    private String grade;
 
     public Integer getId() {
         return id;
@@ -114,13 +117,6 @@ public class RiskRule extends Model<RiskRule> {
     public void setParamE(String paramE) {
         this.paramE = paramE;
     }
-    public Integer getFlag() {
-        return flag;
-    }
-
-    public void setFlag(Integer flag) {
-        this.flag = flag;
-    }
 
     public Integer getRuleId() {
         return ruleId;
@@ -128,6 +124,22 @@ public class RiskRule extends Model<RiskRule> {
 
     public void setRuleId(Integer ruleId) {
         this.ruleId = ruleId;
+    }
+
+    public String getGrade() {
+        return grade;
+    }
+
+    public void setGrade(String grade) {
+        this.grade = grade;
+    }
+
+    public Rule getRule() {
+        return rule;
+    }
+
+    public void setRule(Rule rule) {
+        this.rule = rule;
     }
 
     @Override
@@ -145,7 +157,6 @@ public class RiskRule extends Model<RiskRule> {
         ", paramC=" + paramC +
         ", paramD=" + paramD +
         ", paramE=" + paramE +
-        ", flag=" + flag +
         "}";
     }
 }

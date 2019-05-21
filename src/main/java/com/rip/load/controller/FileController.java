@@ -1,27 +1,30 @@
 package com.rip.load.controller;
 
 import com.alibaba.fastjson.JSON;
+import com.rip.load.otherPojo.city.*;
+import com.rip.load.pojo.RegionArea;
+import com.rip.load.pojo.RegionCity;
+import com.rip.load.pojo.RegionProvince;
 import com.rip.load.pojo.nativePojo.Result;
+import com.rip.load.service.RegionAreaService;
+import com.rip.load.service.RegionCityService;
+import com.rip.load.service.RegionProvinceService;
 import com.rip.load.utils.HttpUtil;
 import com.rip.load.utils.ResultUtil;
+import com.rip.load.utils.Test;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import org.apache.commons.io.FileUtils;
 import javax.servlet.http.HttpServletRequest;
 import java.io.File;
 import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 
 @Api(tags = {"文件系统"})
 @RestController
@@ -123,5 +126,21 @@ public class FileController {
 
         return result;
 
+    }
+
+
+    @Autowired
+    RegionProvinceService regionProvinceService;
+
+
+    /**
+     * 测试存储一手省市区信息，顺便测试一手回退
+     * @return
+     */
+//    @GetMapping("/test")
+    public Result<Object> test(){
+
+        String s = regionProvinceService.inserttest();
+      return new ResultUtil<Object>().set();
     }
 }

@@ -3,10 +3,7 @@ package com.rip.load.controller;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
-import com.rip.load.pojo.Token;
-import com.rip.load.pojo.User;
-import com.rip.load.pojo.UserDistributor;
-import com.rip.load.pojo.UserPlatform;
+import com.rip.load.pojo.*;
 import com.rip.load.pojo.nativePojo.Result;
 import com.rip.load.pojo.nativePojo.UserThreadLocal;
 import com.rip.load.service.TokenService;
@@ -23,6 +20,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
+
+import javax.validation.Valid;
+import java.util.List;
 
 /**
  * <p>
@@ -44,6 +44,8 @@ public class UserDistributorController {
     private UserService userService;
     @Autowired
     private TokenService tokenService;
+    @Autowired
+    private UserPlatformService userPlatformService;
 
     @ApiOperation(value = "渠道商用户自己修改基本信息")
     @PostMapping("/improveself")
@@ -67,13 +69,10 @@ public class UserDistributorController {
         }
     }
 
-    @ApiOperation(value = "平台完善渠道商信息")
-    @PostMapping("/improve")
-    public Result<Object> improve(@ApiParam(value = "渠道商实体类") @RequestBody UserDistributor distributor){
-        if(distributor.getUserId() == null || distributor.getUserId() == 0 || distributor.getFatherId() == null || distributor.getFatherId() == 0
-                || distributor.getPoundage() == null){
-            return new ResultUtil<Object>().setErrorMsg("参数为空");
-        }
+//    @ApiOperation(value = "平台完善渠道商信息")
+//    @PostMapping("/improve")
+    public Result<Object> improve(@ApiParam(value = "渠道商实体类") @Valid @RequestBody UserDistributor distributor){
+
         User user = userService.selectById(distributor.getUserId());
         if(user == null){
             return new ResultUtil<Object>().setErrorMsg("该渠道商不存在");
@@ -90,16 +89,16 @@ public class UserDistributorController {
         }
     }
 
-    @ApiOperation(value = "管理员创建渠道商信息")
+    @ApiOperation(value = "管理员创建渠道商信息(也可以修改)")
     @PostMapping("/adminAdd")
-    public Result<Object> adminAdd(@ApiParam(value = "渠道商实体类") @RequestBody UserDistributor distributor){
-        if(distributor.getUserId() == null || distributor.getUserId() == 0 || distributor.getFatherId() == null || distributor.getFatherId() == 0){
-            return new ResultUtil<Object>().setErrorMsg("参数为空");
-        }
+    public Result<Object> adminAdd(@ApiParam(value = "渠道商实体类") @Valid @RequestBody UserDistributor distributor){
+
         User user = userService.selectById(distributor.getUserId());
         if(user == null){
             return new ResultUtil<Object>().setErrorMsg("该渠道商不存在");
         }
+        List<UserPlatform> list = userPlatformService.selectList(null);
+        distributor.setFatherId(list.get(0).getUserId());
         boolean b = userDistributorService.insertOrUpdate(distributor);
         if(b){
             return new ResultUtil<Object>().set();
@@ -146,8 +145,8 @@ public class UserDistributorController {
         return new ResultUtil<UserDistributor>().setData(userPlatform);
     }
 
-    @ApiOperation("管理员新增和修改秘钥给渠道商")
-    @PostMapping("/bindToken")
+//    @ApiOperation("管理员新增和修改秘钥给渠道商")
+//    @PostMapping("/bindToken")
     public Result<Object> bindToken(@ApiParam(value = "渠道商实体类") @RequestBody UserDistributor distributor
     ){
 

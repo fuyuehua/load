@@ -34,27 +34,21 @@ public class OrderController {
     @Autowired
     private OrderService orderService;
 
-    @ApiOperation("新增订单")
-    @PostMapping("/add")
+    @ApiOperation("生成订单")
+    @GetMapping("/add")
     public Result<Object> add(
-            @ApiParam("订单实体类")
-            @RequestBody Order order
+            @ApiParam("客户Id")
+            @RequestParam Integer userId,
+            @ApiParam("产品Id")
+            @RequestParam Integer productId
             ){
-        if(order.getUid() == null || order.getUid() == 0 ||
-                StringUtils.isEmpty(order.getRealname()) ||
-                StringUtils.isEmpty(order.getPhone()) ||
-                order.getBorrowMoney() == null ||
-                order.getTimeLimit() == null || order.getTimeLimit() == 0 )
-            return new ResultUtil<Object>().setErrorMsg("参数不足");
-        Order finalOrder = new Order();
-        finalOrder.setUid(order.getUid());
-        finalOrder.setRealname(order.getRealname());
-        finalOrder.setPhone(order.getPhone());
-        finalOrder.setBorrowMoney(order.getBorrowMoney());
-        finalOrder.setTimeLimit(order.getTimeLimit());
-        boolean b = orderService.insert(finalOrder);
+        Order order = new Order();
+        order.setUid(userId);
+        order.setProductId(productId);
+
+        boolean b = orderService.insert(order);
         if (b) {
-            return new ResultUtil<Object>().set();
+            return new ResultUtil<Object>().setData(order);
         } else {
             return new ResultUtil<Object>().setErrorMsg("数据库错误");
         }
@@ -100,6 +94,7 @@ public class OrderController {
             return new ResultUtil<Object>().setErrorMsg("数据库错误");
         }
     }
+
 
 
 

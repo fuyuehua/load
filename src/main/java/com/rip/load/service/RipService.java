@@ -18,7 +18,7 @@ public interface RipService {
      * @param id
      * @return
      */
-    String idCardElementsService(int id);
+    String idCardElementsService(int id, Integer reportId);
 
     String operatorThreeElementsService(int id);
 
@@ -34,11 +34,11 @@ public interface RipService {
 
     String personalComplaintInquiryCService(int id);
 
-    Map<String, String> idcardPhotoService(int id, Map<String, Object> map, String suffixUrl);
+    Map<String, String> idcardPhotoService(int id, Map<String, Object> map, String suffixUrl, String image);
 
     String fourElementsOfBankCardService(int id);
 
-    Map<String, String> bankcardPhotoService(int id, Map<String, Object> map, String suffixUrl);
+    Map<String, String> bankcardPhotoService(int id, Map<String, Object> map, String suffixUrl, String image);
 
     String operatorTwoElementsService(int id);
 }

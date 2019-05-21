@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -40,6 +41,9 @@ public class Report extends Model<Report> {
      */
     private String remark;
 
+    @TableField(exist = false)
+    private List<Item> itemList;
+
     public Integer getId() {
         return id;
     }
@@ -67,6 +71,14 @@ public class Report extends Model<Report> {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public List<Item> getItemList() {
+        return itemList;
+    }
+
+    public void setItemList(List<Item> itemList) {
+        this.itemList = itemList;
     }
 
     @Override
