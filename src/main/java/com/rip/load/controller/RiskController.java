@@ -91,7 +91,7 @@ public class RiskController {
             return new ResultUtil<Risk>().setErrorMsg("这个风控表不属于该用户");
         }
         List<RiskRule> list = riskRuleService.selectList(new EntityWrapper<RiskRule>().eq("risk_id", id));
-        risk.setRiskRuleList(list);
+        risk.setRiskRuleList(riskRuleService.setRule4RiskRule(list));
         return new ResultUtil<Risk>().setData(risk);
     }
 

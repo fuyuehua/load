@@ -11,6 +11,7 @@ import com.rip.load.utils.ResultUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
+import io.swagger.models.auth.In;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -410,6 +411,8 @@ public class RipController {
     ReportItemService reportItemService;
     @Autowired
     ReportService reportService;
+    @Autowired
+    RiskRuleItemService riskRuleItemService;
 
     @ApiOperation(value = "生成弱授权风控报告")
     @GetMapping("/createReport")
@@ -441,11 +444,13 @@ public class RipController {
                 for(ReportItem reportItem : reportItems){
                     Item item = itemService.selectById(reportItem.getItemId());
                     boolean b = methodService.idCardElements(riskRule, item);
-
-//                    if(b)
-//                        riskRule.setFlag(1);
-//                    else
-//                        riskRule.setFlag(0);
+                    RiskRuleItem riskRuleItem = new RiskRuleItem();
+                    riskRuleItem.setRiskRuleId(item.getId());
+                    riskRuleItem.setItemId(riskRule.getId());
+                    if(b)
+                        riskRuleItem.setFlag(1);
+                    else
+                        riskRuleItem.setFlag(0);
                     riskRuleService.updateById(riskRule);
                 }
             }
@@ -457,6 +462,7 @@ public class RipController {
     @ApiOperation(value = "生成弱授权风控报告")
     @GetMapping("/takeReport")
     public Result<Object> takeReport(int orderId, int reportId){
+        List<RiskRuleItem> linkList = new ArrayList<>();
 
         Order order = orderService.selectById(orderId);
         int userId = order.getUid();
@@ -467,16 +473,37 @@ public class RipController {
             for(ReportItem reportItem : reportItems){
                 Item item = itemService.selectById(reportItem.getItemId());
                 list.add(item);
+                List<RiskRuleItem> kk = riskRuleItemService.selectList(new EntityWrapper<RiskRuleItem>().eq("item_id", item.getId()));
+                linkList.addAll(kk);
             }
             report.setItemList(list);
         }
 
-        Integer productId = order.getProductId();
-        Product product = productService.selectById(productId);
-        Integer riskId = product.getRiskId();
-        Risk risk = riskService.selectById(riskId);
-        List<RiskRule> riskRules = riskRuleService.selectList(new EntityWrapper<RiskRule>().eq("risk_id", risk.getId()));
-        return null;
+        List<Integer> temp = new ArrayList<>();
+        List<Integer> temp1 = new ArrayList<>();
+        for(RiskRuleItem link : linkList){
+            temp.add(link.getItemId());
+            temp1.add(link.getRiskRuleId());
+        }
+        List<Item> items = itemService.selectBatchIds(temp);
+        List<RiskRule> riskRules = riskRuleService.selectBatchIds(temp1);
+
+        List<RiskRule> newRiskRules = riskRuleService.setRule4RiskRule(riskRules);
+
+        for(RiskRuleItem link : linkList){
+            for(Item item : items){
+                if(item.getId().equals(link.getItemId())){
+                    link.setItem(item);
+                }
+            }
+            for(RiskRule riskRule : newRiskRules){
+                if(riskRule.getId().equals(link.getRiskRuleId())){
+                    link.setRiskRule(riskRule);
+                }
+
+            }
+        }
+        return new ResultUtil<Object>().setData(linkList);
     }
 
 }
