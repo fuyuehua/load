@@ -13,4 +13,5 @@ import com.baomidou.mybatisplus.service.IService;
  */
 public interface ReportService extends IService<Report> {
 
+    Report setItem(Report report);
 }

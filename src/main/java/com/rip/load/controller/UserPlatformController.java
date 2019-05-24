@@ -40,7 +40,7 @@ public class UserPlatformController {
 
     @ApiOperation(value = "平台用户自己完善和修改信息")
     @PostMapping("/improve")
-    public Result<Object> add(@ApiParam(value = "平台实体类") @RequestBody UserPlatform platform){
+    public Result<Object> improve(@ApiParam(value = "平台实体类") @RequestBody UserPlatform platform){
         if(platform.getUserId() == null || platform.getUserId() == 0){
             return new ResultUtil<Object>().setErrorMsg("用户ID为空");
         }
@@ -48,6 +48,21 @@ public class UserPlatformController {
         if(user.getId() != platform.getUserId()){
             return new ResultUtil<Object>().setErrorMsg("被修改用户不是本人");
         }
+        boolean b = userPlatformService.insertOrUpdate(platform);
+        if(b){
+            return new ResultUtil<Object>().set();
+        }else{
+            return new ResultUtil<Object>().setErrorMsg("完善失败");
+        }
+    }
+
+    @ApiOperation(value = "管理员修改平台商信息")
+    @PostMapping("/updateByAdmin")
+    public Result<Object> updateByAdmin(@ApiParam(value = "平台实体类") @RequestBody UserPlatform platform){
+        if(platform.getUserId() == null || platform.getUserId() == 0){
+            return new ResultUtil<Object>().setErrorMsg("用户ID为空");
+        }
+
         boolean b = userPlatformService.insertOrUpdate(platform);
         if(b){
             return new ResultUtil<Object>().set();

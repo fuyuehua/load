@@ -47,6 +47,24 @@ public class UserDistributorController {
     @Autowired
     private UserPlatformService userPlatformService;
 
+    @ApiOperation(value = "管理员创建渠道商信息(也可以修改)")
+    @PostMapping("/adminAdd")
+    public Result<Object> adminAdd(@ApiParam(value = "渠道商实体类") @Valid @RequestBody UserDistributor distributor){
+
+        User user = userService.selectById(distributor.getUserId());
+        if(user == null){
+            return new ResultUtil<Object>().setErrorMsg("改ID不存在");
+        }
+        List<UserPlatform> list = userPlatformService.selectList(null);
+        distributor.setFatherId(list.get(0).getUserId());
+        boolean b = userDistributorService.insertUpdateAndSetType(distributor, user);
+        if(b){
+            return new ResultUtil<Object>().set();
+        }else{
+            return new ResultUtil<Object>().setErrorMsg("创建失败");
+        }
+    }
+
     @ApiOperation(value = "渠道商用户自己修改基本信息")
     @PostMapping("/improveself")
     public Result<Object> improveself(@ApiParam(value = "渠道商实体类") @RequestBody UserDistributor distributor){
@@ -68,7 +86,6 @@ public class UserDistributorController {
             return new ResultUtil<Object>().setErrorMsg("完善失败");
         }
     }
-
 //    @ApiOperation(value = "平台完善渠道商信息")
 //    @PostMapping("/improve")
     public Result<Object> improve(@ApiParam(value = "渠道商实体类") @Valid @RequestBody UserDistributor distributor){
@@ -86,24 +103,6 @@ public class UserDistributorController {
             return new ResultUtil<Object>().set();
         }else{
             return new ResultUtil<Object>().setErrorMsg("完善失败");
-        }
-    }
-
-    @ApiOperation(value = "管理员创建渠道商信息(也可以修改)")
-    @PostMapping("/adminAdd")
-    public Result<Object> adminAdd(@ApiParam(value = "渠道商实体类") @Valid @RequestBody UserDistributor distributor){
-
-        User user = userService.selectById(distributor.getUserId());
-        if(user == null){
-            return new ResultUtil<Object>().setErrorMsg("该渠道商不存在");
-        }
-        List<UserPlatform> list = userPlatformService.selectList(null);
-        distributor.setFatherId(list.get(0).getUserId());
-        boolean b = userDistributorService.insertOrUpdate(distributor);
-        if(b){
-            return new ResultUtil<Object>().set();
-        }else{
-            return new ResultUtil<Object>().setErrorMsg("创建失败");
         }
     }
 
@@ -145,8 +144,8 @@ public class UserDistributorController {
         return new ResultUtil<UserDistributor>().setData(userPlatform);
     }
 
-//    @ApiOperation("管理员新增和修改秘钥给渠道商")
-//    @PostMapping("/bindToken")
+    @ApiOperation("管理员新增和修改秘钥给渠道商")
+    @PostMapping("/bindToken")
     public Result<Object> bindToken(@ApiParam(value = "渠道商实体类") @RequestBody UserDistributor distributor
     ){
 

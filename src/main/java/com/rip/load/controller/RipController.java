@@ -25,13 +25,7 @@ import java.util.*;
 public class RipController {
 
     @Autowired
-    private UserCustomerService userCustomerService;
-    @Autowired
-    private UserDistributorService userDistributorService;
-    @Autowired
     private RipService ripService;
-    @Autowired
-    private ItemService itemService;
 
     /** 运营商信用报告高级版  start**/
 
@@ -152,7 +146,7 @@ public class RipController {
     @GetMapping("/operatorThreeElements")
     public Result<Object> operatorThreeElements(int id) {
 
-        String s = ripService.operatorThreeElementsService(id);
+        String s = ripService.operatorThreeElementsService(id, null);
         if(!s.equals("1")){
             return new ResultUtil<Object>().setErrorMsg(s);
         }
@@ -162,7 +156,7 @@ public class RipController {
     @GetMapping("/operatorTwoElements")
     public Result<Object> operatorTwoElements(int id) {
 
-        String s = ripService.operatorTwoElementsService(id);
+        String s = ripService.operatorTwoElementsService(id,null);
         if(!s.equals("1")){
             return new ResultUtil<Object>().setErrorMsg(s);
         }
@@ -172,7 +166,7 @@ public class RipController {
     @GetMapping("/inTheNetworkTime")
     public Result<Object> inTheNetworkTime(int id) {
 
-        String s = ripService.inTheNetworkTimeService(id);
+        String s = ripService.inTheNetworkTimeService(id, null);
         if(!s.equals("1")){
             return new ResultUtil<Object>().setErrorMsg(s);
         }
@@ -192,7 +186,7 @@ public class RipController {
     @GetMapping("/businessData")
     public Result<Object> businessData(int id) {
 
-        String s = ripService.businessDataService(id);
+        String s = ripService.businessDataService(id, null);
         if(!s.equals("1")){
             return new ResultUtil<Object>().setErrorMsg(s);
         }
@@ -202,7 +196,7 @@ public class RipController {
     @GetMapping("/personalEnterprise")
     public Result<Object> personalEnterprise(int id) {
 
-        String s = ripService.personalEnterpriseService(id);
+        String s = ripService.personalEnterpriseService(id,null);
         if(!s.equals("1")){
             return new ResultUtil<Object>().setErrorMsg(s);
         }
@@ -222,7 +216,7 @@ public class RipController {
     @GetMapping("/personalRiskInformation")
     public Result<Object> personalRiskInformation(int id) {
 
-        String s = ripService.personalRiskInformationService(id);
+        String s = ripService.personalRiskInformationService(id,null);
         if(!s.equals("1")){
             return new ResultUtil<Object>().setErrorMsg(s);
         }
@@ -233,7 +227,7 @@ public class RipController {
     @GetMapping("/personalComplaintInquiryC")
     public Result<Object> personalComplaintInquiryC(int id) {
 
-        String s = ripService.personalComplaintInquiryCService(id);
+        String s = ripService.personalComplaintInquiryCService(id,null);
         if(!s.equals("1")){
             return new ResultUtil<Object>().setErrorMsg(s);
         }
@@ -397,113 +391,6 @@ public class RipController {
             return new ResultUtil<Object>().setData(result);
     }
 
-    @Autowired
-    OrderService orderService;
-    @Autowired
-    ProductService productService;
-    @Autowired
-    RiskService riskService;
-    @Autowired
-    RiskRuleService riskRuleService;
-    @Autowired
-    RuleService ruleService;
-    @Autowired
-    ReportItemService reportItemService;
-    @Autowired
-    ReportService reportService;
-    @Autowired
-    RiskRuleItemService riskRuleItemService;
 
-    @ApiOperation(value = "生成弱授权风控报告")
-    @GetMapping("/createReport")
-    public Result<Object> createReport(int orderId, String remark){
-        Order order = orderService.selectById(orderId);
-
-
-        int id = order.getUid();
-        Report report = new Report();
-        report.setUserId(id);
-        report.setRemark(remark);
-        report.setCreatetime(new Date());
-        reportService.insert(report);
-
-        Integer productId = order.getProductId();
-        Product product = productService.selectById(productId);
-        Integer riskId = product.getRiskId();
-        Risk risk = riskService.selectById(riskId);
-        List<RiskRule> riskRules = riskRuleService.selectList(new EntityWrapper<RiskRule>().eq("risk_id", risk.getId()));
-        for(RiskRule riskRule : riskRules){
-            Rule rule = ruleService.selectById(riskRule.getId());
-            //查询风控
-            String method = rule.getMethod();
-            RiskMethodService methodService = new RiskMethodService();
-
-            if(method.equals("idCardElements")){
-                String s = ripService.idCardElementsService(id, report.getId());
-                List<ReportItem> reportItems = reportItemService.selectList(new EntityWrapper<ReportItem>().eq("report_id", report.getId()));
-                for(ReportItem reportItem : reportItems){
-                    Item item = itemService.selectById(reportItem.getItemId());
-                    boolean b = methodService.idCardElements(riskRule, item);
-                    RiskRuleItem riskRuleItem = new RiskRuleItem();
-                    riskRuleItem.setRiskRuleId(item.getId());
-                    riskRuleItem.setItemId(riskRule.getId());
-                    if(b)
-                        riskRuleItem.setFlag(1);
-                    else
-                        riskRuleItem.setFlag(0);
-                    riskRuleService.updateById(riskRule);
-                }
-            }
-        }
-
-        return new ResultUtil<Object>().set();
-    }
-
-    @ApiOperation(value = "生成弱授权风控报告")
-    @GetMapping("/takeReport")
-    public Result<Object> takeReport(int orderId, int reportId){
-        List<RiskRuleItem> linkList = new ArrayList<>();
-
-        Order order = orderService.selectById(orderId);
-        int userId = order.getUid();
-        List<Report> reports = reportService.selectList(new EntityWrapper<Report>().eq("user_id", userId));
-        for(Report report : reports){
-            List<ReportItem> reportItems = reportItemService.selectList(new EntityWrapper<ReportItem>().eq("report_id", report.getId()));
-            List<Item> list = new ArrayList<>();
-            for(ReportItem reportItem : reportItems){
-                Item item = itemService.selectById(reportItem.getItemId());
-                list.add(item);
-                List<RiskRuleItem> kk = riskRuleItemService.selectList(new EntityWrapper<RiskRuleItem>().eq("item_id", item.getId()));
-                linkList.addAll(kk);
-            }
-            report.setItemList(list);
-        }
-
-        List<Integer> temp = new ArrayList<>();
-        List<Integer> temp1 = new ArrayList<>();
-        for(RiskRuleItem link : linkList){
-            temp.add(link.getItemId());
-            temp1.add(link.getRiskRuleId());
-        }
-        List<Item> items = itemService.selectBatchIds(temp);
-        List<RiskRule> riskRules = riskRuleService.selectBatchIds(temp1);
-
-        List<RiskRule> newRiskRules = riskRuleService.setRule4RiskRule(riskRules);
-
-        for(RiskRuleItem link : linkList){
-            for(Item item : items){
-                if(item.getId().equals(link.getItemId())){
-                    link.setItem(item);
-                }
-            }
-            for(RiskRule riskRule : newRiskRules){
-                if(riskRule.getId().equals(link.getRiskRuleId())){
-                    link.setRiskRule(riskRule);
-                }
-
-            }
-        }
-        return new ResultUtil<Object>().setData(linkList);
-    }
 
 }

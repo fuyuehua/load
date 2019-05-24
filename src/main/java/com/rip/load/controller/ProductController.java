@@ -76,12 +76,7 @@ public class ProductController {
         Page<Product> pages = productService.selectPage(page, new EntityWrapper<Product>().eq("user_id", id)
                 .like(!StringUtils.isEmpty(name),"name", name));
         List<Product> list = pages.getRecords();
-        for (Product product: list) {
-            Config config = configService.selectById(product.getConfigId());
-            product.setConfig(config);
-            Risk risk = riskService.selectById(product.getRiskId());
-            product.setRisk(risk);
-        }
+        list = productService.settleConfigRisk(list);
         pages.setRecords(list);
         return new ResultUtil<Page<Product>>().setData(pages);
     }

@@ -27,4 +27,15 @@ public interface UserService extends IService<User> {
      *     permission,list<Permission>
      */
     public Map<String, Object> getRolePermission(int userId);
+
+    /**
+     * 渠道商创建下级
+     */
+    boolean createAndSetRole(User readyUser);
+
+    List<User> setRoleAndInfo(List<User> allUser);
+
+    List<Integer> getSon4Platform(User user);
+
+    List<Integer> getSon4Distributor(User user);
 }

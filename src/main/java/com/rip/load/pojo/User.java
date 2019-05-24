@@ -1,11 +1,16 @@
 package com.rip.load.pojo;
 
+import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.enums.IdType;
 import java.util.Date;
 import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
+
+import javax.validation.constraints.NotBlank;
+import javax.validation.constraints.NotNull;
 import java.io.Serializable;
+import java.util.List;
 
 /**
  * <p>
@@ -26,21 +31,25 @@ public class User extends Model<User> {
     /**
      * 账户
      */
+    @NotBlank
     private String username;
 
     /**
      * 密码
      */
+    @NotBlank
     private String password;
 
     /**
      * 昵称
      */
+    @NotBlank
     private String nickname;
 
     /**
      * 手机号码
      */
+    @NotBlank
     private String phone;
 
     /**
@@ -57,6 +66,17 @@ public class User extends Model<User> {
      * 禁用或启用
      */
     private Integer onoff = 1;
+
+    /**
+     * 用户类型
+     */
+    private Integer type;
+
+    @TableField(exist = false)
+    private List<Role> roleList;
+
+    @TableField(exist = false)
+    private Object infoObj;
 
     public Integer getId() {
         return id;
@@ -113,6 +133,30 @@ public class User extends Model<User> {
 
     public void setOnoff(Integer onoff) {
         this.onoff = onoff;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
+    }
+
+    public List<Role> getRoleList() {
+        return roleList;
+    }
+
+    public void setRoleList(List<Role> roleList) {
+        this.roleList = roleList;
+    }
+
+    public Object getInfoObj() {
+        return infoObj;
+    }
+
+    public void setInfoObj(Object infoObj) {
+        this.infoObj = infoObj;
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.rip.load.service;
 import com.rip.load.pojo.RiskRuleItem;
 import com.baomidou.mybatisplus.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -13,4 +15,7 @@ import com.baomidou.mybatisplus.service.IService;
  */
 public interface RiskRuleItemService extends IService<RiskRuleItem> {
 
+    List<RiskRuleItem> setAll(List<RiskRuleItem> linkList);
+
+    List<RiskRuleItem> setRiskRule(List<RiskRuleItem> linkList);
 }

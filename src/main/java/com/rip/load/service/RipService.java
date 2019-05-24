@@ -20,19 +20,21 @@ public interface RipService {
      */
     String idCardElementsService(int id, Integer reportId);
 
-    String operatorThreeElementsService(int id);
+    String operatorThreeElementsService(int id,Integer reportId);
 
-    String inTheNetworkTimeService(int id);
+    String inTheNetworkTimeService(int id, Integer reportId);
+
+    String inTheNetworkTimeBService(int id, Integer reportId);
 
     String vehicleDetailsEnquiryService(int id);
 
-    String businessDataService(int id);
+    String businessDataService(int id, Integer reportId);
 
-    String personalEnterpriseService(int id);
+    String personalEnterpriseService(int id, Integer reportId);
 
-    String personalRiskInformationService(int id);
+    String personalRiskInformationService(int id, Integer reportId);
 
-    String personalComplaintInquiryCService(int id);
+    String personalComplaintInquiryCService(int id, Integer reportId);
 
     Map<String, String> idcardPhotoService(int id, Map<String, Object> map, String suffixUrl, String image);
 
@@ -40,5 +42,13 @@ public interface RipService {
 
     Map<String, String> bankcardPhotoService(int id, Map<String, Object> map, String suffixUrl, String image);
 
-    String operatorTwoElementsService(int id);
+    String operatorTwoElementsService(int id, Integer reportedId);
+
+    String operatorTwoElementsAService(int id, Integer reportId);
+
+    String operatorTwoElementsBService(int id, Integer reportId);
+
+    String ageCheckService(int id, Integer reportId);
+
+    String inTheNetworkTimeAService(int id, Integer reportId);
 }

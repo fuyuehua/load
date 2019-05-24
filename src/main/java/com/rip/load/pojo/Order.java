@@ -72,6 +72,7 @@ public class Order extends Model<Order> {
 
     /**
      * 状态
+     * 状态 1：初审通过，2初审资料待完善，3初审不通过，4复审通过，5复审不通过
      */
     private Integer status;
 
@@ -110,10 +111,34 @@ public class Order extends Model<Order> {
     private Integer contractId;
 
     /**
-     * 驳回原因
+     * 还款计划表ID
      */
-    @TableField("reject_reason")
-    private String rejectReason;
+    @TableField("repay_plan_id")
+    private Integer repayPlanId;
+
+    /**
+     * 初审人员
+     */
+    @TableField("first_reject_man")
+    private Integer firstRejectMan;
+
+    /**
+     * 初审驳回原因
+     */
+    @TableField("first_reject_reason")
+    private String firstRejectReason;
+
+    /**
+     * 复审人员
+     */
+    @TableField("second_reject_man")
+    private Integer secondRejectMan;
+
+    /**
+     * 复审驳回原因
+     */
+    @TableField("second_reject_reason")
+    private String secondRejectReason;
 
     public Integer getId() {
         return id;
@@ -217,14 +242,6 @@ public class Order extends Model<Order> {
     public void setContractId(Integer contractId) {
         this.contractId = contractId;
     }
-    public String getRejectReason() {
-        return rejectReason;
-    }
-
-    public void setRejectReason(String rejectReason) {
-        this.rejectReason = rejectReason;
-    }
-
 
     public Integer getProductId() {
         return productId;
@@ -232,6 +249,46 @@ public class Order extends Model<Order> {
 
     public void setProductId(Integer productId) {
         this.productId = productId;
+    }
+
+    public Integer getRepayPlanId() {
+        return repayPlanId;
+    }
+
+    public void setRepayPlanId(Integer repayPlanId) {
+        this.repayPlanId = repayPlanId;
+    }
+
+    public Integer getFirstRejectMan() {
+        return firstRejectMan;
+    }
+
+    public void setFirstRejectMan(Integer firstRejectMan) {
+        this.firstRejectMan = firstRejectMan;
+    }
+
+    public Integer getSecondRejectMan() {
+        return secondRejectMan;
+    }
+
+    public void setSecondRejectMan(Integer secondRejectMan) {
+        this.secondRejectMan = secondRejectMan;
+    }
+
+    public String getFirstRejectReason() {
+        return firstRejectReason;
+    }
+
+    public void setFirstRejectReason(String firstRejectReason) {
+        this.firstRejectReason = firstRejectReason;
+    }
+
+    public String getSecondRejectReason() {
+        return secondRejectReason;
+    }
+
+    public void setSecondRejectReason(String secondRejectReason) {
+        this.secondRejectReason = secondRejectReason;
     }
 
     @Override
@@ -254,7 +311,6 @@ public class Order extends Model<Order> {
         ", remark=" + remark +
         ", expenseDetailid=" + expenseDetailid +
         ", contractId=" + contractId +
-        ", rejectReason=" + rejectReason +
         "}";
     }
 }

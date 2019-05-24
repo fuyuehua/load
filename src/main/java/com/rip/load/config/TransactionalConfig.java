@@ -66,7 +66,11 @@ public class TransactionalConfig {
             "reSubmit*",
             "close*",
             "register*",
-            "sign*"
+            "sign*",
+            "settle*",
+            "catch*",
+            "set*",
+            "get*"
     };
     /**
      * 默认的只读事务

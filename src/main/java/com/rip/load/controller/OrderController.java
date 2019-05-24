@@ -4,7 +4,9 @@ package com.rip.load.controller;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.baomidou.mybatisplus.plugins.Page;
 import com.rip.load.pojo.Order;
+import com.rip.load.pojo.User;
 import com.rip.load.pojo.nativePojo.Result;
+import com.rip.load.pojo.nativePojo.UserThreadLocal;
 import com.rip.load.service.OrderService;
 import com.rip.load.utils.ResultUtil;
 import com.sun.org.apache.xpath.internal.operations.Or;
@@ -17,6 +19,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
+
+import java.math.BigDecimal;
 
 /**
  * <p>
@@ -73,22 +77,34 @@ public class OrderController {
         return new ResultUtil<Page<Order>>().setData(result);
     }
 
-    @ApiOperation("修改备注和驳回原因")
-    @PostMapping("/updateRemark")
-    public Result<Object> updateRemark(
-            @ApiParam("只填备注和驳回原因")
-            @RequestBody Order order
-            ){
-        if(order.getId() == null || order.getId() == 0 ||
-                StringUtils.isEmpty(order.getRemark()) ||
-                StringUtils.isEmpty(order.getRejectReason()) )
-            return new ResultUtil<Object>().setErrorMsg("参数不足");
-        Order order1 = new Order();
-        order1.setId(order.getId());
-        order1.setRemark(order.getRemark());
-        order1.setRejectReason(order.getRejectReason());
-        boolean b = orderService.updateById(order1);
-        if (b) {
+    @ApiOperation("初审人员审核")
+    @GetMapping("/firstCheck")
+    public Result<Object> firstCheck(
+            @ApiParam("1:通过 0：不通过 2:资料待完善")
+            @RequestParam int result,
+            @ApiParam("填驳回原因")
+            String reason,
+            @ApiParam("订单ID")
+            @RequestParam int orderId){
+        if(orderId == 0){
+            return new ResultUtil<Object>().setErrorMsg("订单ID没有");
+        }
+        Order order = orderService.selectById(orderId);
+        if(order == null){
+            return new ResultUtil<Object>().setErrorMsg("订单不存在");
+        }
+        User user = UserThreadLocal.get();
+        order.setFirstRejectMan(user.getId());
+        if(result == 1){
+            order.setStatus(1);
+        }else if(result == 0){
+            order.setStatus(3);
+            order.setFirstRejectReason(reason);
+        }else if(result == 2){
+            order.setStatus(2);
+        }
+        boolean insert = orderService.insert(order);
+        if (insert) {
             return new ResultUtil<Object>().set();
         } else {
             return new ResultUtil<Object>().setErrorMsg("数据库错误");
@@ -96,6 +112,36 @@ public class OrderController {
     }
 
 
-
+    @ApiOperation("复审人员审核")
+    @GetMapping("/secondCheck")
+    public Result<Object> secondCheck(
+            @ApiParam("1:通过 0：不通过") @RequestParam int result,
+            @ApiParam("填驳回原因") String reason,
+            @ApiParam("订单ID") @RequestParam int orderId,
+            @ApiParam("允许放贷多少钱") String money
+            ){
+        if(orderId == 0){
+            return new ResultUtil<Object>().setErrorMsg("订单ID没有");
+        }
+        Order order = orderService.selectById(orderId);
+        if(order == null){
+            return new ResultUtil<Object>().setErrorMsg("订单不存在");
+        }
+        User user = UserThreadLocal.get();
+        order.setSecondRejectMan(user.getId());
+        if(result == 1){
+            order.setStatus(4);
+            order.setBorrowMoney(new BigDecimal(money));
+        }else if(result == 0){
+            order.setStatus(5);
+            order.setFirstRejectReason(reason);
+        }
+        String resultStr = orderService.createOrderAndRepayPlan(order);
+        if (resultStr.equals("1")) {
+            return new ResultUtil<Object>().set();
+        } else {
+            return new ResultUtil<Object>().setErrorMsg(resultStr);
+        }
+    }
 
 }

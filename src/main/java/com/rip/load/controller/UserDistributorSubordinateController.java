@@ -9,6 +9,7 @@ import com.rip.load.pojo.nativePojo.Result;
 import com.rip.load.pojo.nativePojo.UserThreadLocal;
 import com.rip.load.service.UserDistributorSubordinateService;
 import com.rip.load.service.UserService;
+import com.rip.load.utils.MD5Util;
 import com.rip.load.utils.ResultUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -17,6 +18,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import org.springframework.stereotype.Controller;
+
+import javax.validation.Valid;
+import java.util.Date;
+import java.util.Map;
 
 /**
  * <p>
@@ -36,30 +41,43 @@ public class UserDistributorSubordinateController {
     @Autowired
     private UserService userService;
 
-    @ApiOperation(value = "渠道商下属自己修改基本信息")
-    @PostMapping("/improveself")
-    public Result<Object> improveself(@ApiParam(value = "渠道商下属实体类") @RequestBody UserDistributorSubordinate subordinate){
-        User user = UserThreadLocal.get();
-        if(user.getId() != subordinate.getUserId()){
-            return new ResultUtil<Object>().setErrorMsg("被修改用户不是本人");
+    @ApiOperation(value = "渠道商创建下属")
+    @PostMapping("/addByDistributor")
+    public Result<User> addByDistributor(@ApiParam(value = "白户实体类,type传6：入件；7：审核；8：复审；9：贷后")
+                                      @Valid  @RequestBody User user){
+        Integer type = user.getType();
+        if(type == null || !(type == 6 ||type==7 ||type==8||type==9)){
+            return new ResultUtil<User>().setErrorMsg("未输入角色");
         }
-        UserDistributorSubordinate userSubordinate = subordinateService.selectById(subordinate.getUserId());
+        //账户名去重
+        User username = userService.selectOne(new EntityWrapper<User>().eq("username", user.getUsername()));
+        if(username != null){
+            return new ResultUtil<User>().setErrorMsg("用户名重复");
+        }
 
-        if(userSubordinate == null){
-            return new ResultUtil<Object>().setErrorMsg("没有上级，请联系平台商或管理员");
-        }
-        userSubordinate.setRealName(subordinate.getRealName());
-        boolean b = subordinateService.updateById(userSubordinate);
+        //密码处理
+        Map<String, String> map = MD5Util.getSecert(user.getPassword());
+        User readyUser = new User();
+        readyUser.setUsername(user.getUsername());
+        readyUser.setPassword(map.get("secert"));
+        readyUser.setNickname(user.getNickname());
+        readyUser.setSalt(map.get("salt"));
+        readyUser.setPhone(user.getPhone());
+        readyUser.setOnoff(1);
+        readyUser.setCreatetime(new Date());
+        readyUser.setType(type);
+        boolean b = userService.createAndSetRole(readyUser);
         if(b){
-            return new ResultUtil<Object>().set();
+            return new ResultUtil<User>().setData(readyUser);
         }else{
-            return new ResultUtil<Object>().setErrorMsg("修改失败");
+            return new ResultUtil<User>().setErrorMsg("注册失败");
         }
     }
 
-    @ApiOperation(value = "渠道商创建或完善渠道商下属信息")
-    @PostMapping("/improve")
-    public Result<Object> improve(@ApiParam(value = "渠道商下属实体类")@RequestBody UserDistributorSubordinate subordinate){
+    @ApiOperation(value = "渠道商修改下属信息")
+    @PostMapping("/updateByDistributor")
+    public Result<Object> updateByDistributor(@ApiParam(value = "渠道商下属实体类")
+                                  @RequestBody UserDistributorSubordinate subordinate){
         if(subordinate.getUserId() == null || subordinate.getUserId() == 0 || subordinate.getFatherId() == null || subordinate.getFatherId() == 0){
             return new ResultUtil<Object>().setErrorMsg("参数为空");
         }
@@ -78,9 +96,11 @@ public class UserDistributorSubordinateController {
             return new ResultUtil<Object>().setErrorMsg("完善失败");
         }
     }
-    @ApiOperation(value = "管理员创建渠道商下属信息")
-    @PostMapping("/adminAdd")
-    public Result<Object> adminAdd(@ApiParam(value = "渠道商下属实体类")@RequestBody UserDistributorSubordinate subordinate){
+
+    @ApiOperation(value = "管理员修改下属信息")
+    @PostMapping("/updateByAdmin")
+    public Result<Object> updateByAdmin(@ApiParam(value = "渠道商下属实体类")
+                                              @RequestBody UserDistributorSubordinate subordinate){
         if(subordinate.getUserId() == null || subordinate.getUserId() == 0 || subordinate.getFatherId() == null || subordinate.getFatherId() == 0){
             return new ResultUtil<Object>().setErrorMsg("参数为空");
         }
@@ -92,7 +112,28 @@ public class UserDistributorSubordinateController {
         if(b){
             return new ResultUtil<Object>().set();
         }else{
-            return new ResultUtil<Object>().setErrorMsg("创建失败");
+            return new ResultUtil<Object>().setErrorMsg("修改失败");
+        }
+    }
+
+    @ApiOperation(value = "渠道商下属自己修改基本信息")
+    @PostMapping("/improveself")
+    public Result<Object> improveself(@ApiParam(value = "渠道商下属实体类") @RequestBody UserDistributorSubordinate subordinate){
+        User user = UserThreadLocal.get();
+        if(user.getId() != subordinate.getUserId()){
+            return new ResultUtil<Object>().setErrorMsg("被修改用户不是本人");
+        }
+        UserDistributorSubordinate userSubordinate = subordinateService.selectById(subordinate.getUserId());
+
+        if(userSubordinate == null){
+            return new ResultUtil<Object>().setErrorMsg("没有上级，请联系平台商或管理员");
+        }
+        userSubordinate.setRealName(subordinate.getRealName());
+        boolean b = subordinateService.updateById(userSubordinate);
+        if(b){
+            return new ResultUtil<Object>().set();
+        }else{
+            return new ResultUtil<Object>().setErrorMsg("修改失败");
         }
     }
 

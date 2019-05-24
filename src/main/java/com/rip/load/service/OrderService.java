@@ -13,4 +13,5 @@ import com.baomidou.mybatisplus.service.IService;
  */
 public interface OrderService extends IService<Order> {
 
+    String createOrderAndRepayPlan(Order order);
 }

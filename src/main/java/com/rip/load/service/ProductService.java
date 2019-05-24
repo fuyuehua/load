@@ -3,6 +3,8 @@ package com.rip.load.service;
 import com.rip.load.pojo.Product;
 import com.baomidou.mybatisplus.service.IService;
 
+import java.util.List;
+
 /**
  * <p>
  *  服务类
@@ -13,4 +15,7 @@ import com.baomidou.mybatisplus.service.IService;
  */
 public interface ProductService extends IService<Product> {
 
+    List<Product> settleConfigRisk(List<Product> list);
+
+    List<Product> settleConfig(List<Product> list);
 }

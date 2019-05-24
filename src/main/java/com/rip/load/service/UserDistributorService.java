@@ -1,5 +1,6 @@
 package com.rip.load.service;
 
+import com.rip.load.pojo.User;
 import com.rip.load.pojo.UserDistributor;
 import com.baomidou.mybatisplus.service.IService;
 
@@ -13,4 +14,5 @@ import com.baomidou.mybatisplus.service.IService;
  */
 public interface UserDistributorService extends IService<UserDistributor> {
 
+    boolean insertUpdateAndSetType(UserDistributor distributor, User user);
 }

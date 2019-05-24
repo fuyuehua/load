@@ -42,6 +42,9 @@ public class Report extends Model<Report> {
     private String remark;
 
     @TableField(exist = false)
+    private List<RiskRuleItem> riskRuleItems;
+
+    @TableField(exist = false)
     private List<Item> itemList;
 
     public Integer getId() {
@@ -71,6 +74,14 @@ public class Report extends Model<Report> {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public List<RiskRuleItem> getRiskRuleItems() {
+        return riskRuleItems;
+    }
+
+    public void setRiskRuleItems(List<RiskRuleItem> riskRuleItems) {
+        this.riskRuleItems = riskRuleItems;
     }
 
     public List<Item> getItemList() {

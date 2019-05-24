@@ -45,7 +45,67 @@ public class Data {
     private List<CorporateShareholders> corporateShareholders;
 
 
+    public String getKey() {
+        return key;
+    }
 
+    public void setKey(String key) {
+        this.key = key;
+    }
 
+    public String getStatus() {
+        return status;
+    }
 
+    public void setStatus(String status) {
+        this.status = status;
+    }
+
+    public List<PunishBreaks> getPunishBreaks() {
+        return punishBreaks;
+    }
+
+    public void setPunishBreaks(List<PunishBreaks> punishBreaks) {
+        this.punishBreaks = punishBreaks;
+    }
+
+    public List<Punished> getPunished() {
+        return punished;
+    }
+
+    public void setPunished(List<Punished> punished) {
+        this.punished = punished;
+    }
+
+    public List<CaseInfos> getCaseInfos() {
+        return caseInfos;
+    }
+
+    public void setCaseInfos(List<CaseInfos> caseInfos) {
+        this.caseInfos = caseInfos;
+    }
+
+    public List<Corporates> getCorporates() {
+        return corporates;
+    }
+
+    public void setCorporates(List<Corporates> corporates) {
+        this.corporates = corporates;
+    }
+
+    public List<CorporateManagers> getCorporateManagers() {
+        return corporateManagers;
+    }
+
+    public void setCorporateManagers(List<CorporateManagers> corporateManagers) {
+        this.corporateManagers = corporateManagers;
+    }
+
+    public List<CorporateShareholders> getCorporateShareholders() {
+        return corporateShareholders;
+    }
+
+    public void setCorporateShareholders(List<CorporateShareholders> corporateShareholders) {
+        this.corporateShareholders = corporateShareholders;
+    }
 }

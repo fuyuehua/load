@@ -77,9 +77,8 @@ public class UserController {
         readyUser.setCreatetime(new Date());
 
         boolean b = userService.insert(readyUser);
-        User backUser = userService.selectOne(new EntityWrapper<User>().eq("username", user.getUsername()));
         if(b){
-            return new ResultUtil<User>().setData(backUser);
+            return new ResultUtil<User>().setData(readyUser);
         }else{
             return new ResultUtil<User>().setErrorMsg("注册失败");
         }
@@ -376,7 +375,7 @@ public class UserController {
         readyUser.setPhone(phone);
         readyUser.setOnoff(1);
         readyUser.setCreatetime(new Date());
-
+        readyUser.setType(2);
 
         boolean b1 = userService.insert(readyUser);
         if(!b1){
@@ -457,61 +456,134 @@ public class UserController {
         return new ResultUtil<Object>().setData(map);
     }
 
-//    @ApiOperation(value = "新建一个借贷客户（入件员）")
-//    @PostMapping("/addCustomer")
-    public Result<Object> addCustomer(@ApiParam(value = "借贷客户客户信息实体类")
-                                          @RequestBody UserCustomer user){
-        if(user.getUserId() == null || user.getUserId() == 0 ||
-                StringUtils.isEmpty(user.getRealname()) ||
-                StringUtils.isEmpty(user.getIdcard()) ||
-                StringUtils.isEmpty(user.getCellphone())||
-                StringUtils.isEmpty(user.getBankcard())){
-            return new ResultUtil<Object>().setErrorMsg("用户名不能为空");
-        }
-        //账户名去重
-        User username = userService.selectOne(new EntityWrapper<User>().eq("username", user.getCellphone()));
-        if(username != null){
-            return new ResultUtil<Object>().setErrorMsg("用户名重复");
-        }
 
-        int i = (int)(Math.random()*900000 + 100000);
-        //密码处理(目前设验证码为其密码)
-        Map<String, String> map = MD5Util.getSecert(Integer.toString(i));
-        User readyUser = new User();
-        readyUser.setUsername(user.getCellphone());
-        readyUser.setPassword(map.get("secert"));
-        readyUser.setNickname("随机密码客户");
-        readyUser.setSalt(map.get("salt"));
-        readyUser.setPhone(user.getCellphone());
-        readyUser.setOnoff(1);
-        readyUser.setCreatetime(new Date());
-
-        boolean b1 = userService.insert(readyUser);
-        if(!b1){
-            return new ResultUtil<Object>().setErrorMsg("注册失败");
+    /** 全部用户相关接口 **/
+    @ApiOperation("查到所有的内部工作人员")
+    @GetMapping("/getAllInUser")
+    public Result<Page<User>> getAllInUser(@ApiParam(value = "想要请求的页码")
+                                               @RequestParam int currentPage,
+                                           @ApiParam(value = "一页显示多少数据")
+                                               @RequestParam int pageSize,
+                                           @ApiParam(value = "用户名模糊查询")
+                                               @RequestParam(required = false) String username,
+                                           @ApiParam(value = "手机号精确查询")
+                                               @RequestParam(required = false) String phone,
+                                           @ApiParam(value = "选择角色（3：平台商，4：平台商员工，5：渠道商，6：入件，7：审核，8：复审，9：贷后）")
+                                               @RequestParam(required = false) Integer type
+                                           ){
+        List<Integer> list = new ArrayList<>();
+        if(type == null){
+            list.add(3);list.add(4);list.add(5);
+            list.add(6);list.add(7);list.add(8);
+            list.add(9);
+        }else if(type == 3 || type == 4 || type == 5 || type == 6 || type == 7 || type == 8 || type == 9 ){
+            list.add(type);
+        }else{
+            list.add(3);list.add(4);list.add(5);
+            list.add(6);list.add(7);list.add(8);
+            list.add(9);
         }
-
-        //给客户绑定客户角色，让其有权限
-        User user1 = userService.selectOne(new EntityWrapper<User>().eq("username", user.getCellphone()));
-        if(user1 == null){
-            return new ResultUtil<Object>().setErrorMsg("未知错误，请重新注册或联系客服");
-        }
-        UserRole userRole = new UserRole();
-        userRole.setUid(user1.getId());
-        //固定角色：  1.管理员    2.角色
-        userRole.setRid(2);
-        boolean insert = userRoleService.insert(userRole);
-        if(!insert){
-            return new ResultUtil<Object>().setErrorMsg("赋予角色失败");
-        }
-        boolean b = userCustomerService.insert(user);
-        if (b) {
-            return new ResultUtil<Object>().set();
-        } else {
-            return new ResultUtil<Object>().setErrorMsg("数据库错误");
-        }
-
+        Page<User> page = new Page<>(currentPage, pageSize);
+        Page<User> userPage = userService.selectPage(page, 
+                new EntityWrapper<User>()
+                        .eq("onoff", 1)
+                        .in("type", list)
+                        .like(!(StringUtils.isEmpty(username)), "nickname", username)
+                        .eq(!(StringUtils.isEmpty(phone)), "phone", phone)
+        );
+        List<User> allUser = userPage.getRecords();
+        allUser = userService.setRoleAndInfo(allUser);
+        userPage.setRecords(allUser);
+        return new ResultUtil<Page<User>>().setData(userPage);
     }
+
+    @ApiOperation("平台商查到所有的内部工作人员")
+    @GetMapping("/getAllInUserByPlatform")
+    public Result<Page<User>> getAllInUserByPlatform(@ApiParam(value = "想要请求的页码")
+                                           @RequestParam int currentPage,
+                                           @ApiParam(value = "一页显示多少数据")
+                                           @RequestParam int pageSize,
+                                           @ApiParam(value = "用户名模糊查询")
+                                           @RequestParam(required = false) String username,
+                                           @ApiParam(value = "手机号精确查询")
+                                           @RequestParam(required = false) String phone,
+                                           @ApiParam(value = "选择角色（4：平台商员工，5：渠道商，6：入件，7：审核，8：复审，9：贷后）")
+                                           @RequestParam(required = false) Integer type
+    ){
+        List<Integer> list = new ArrayList<>();
+        if(type == null){
+            list.add(4);list.add(5);
+            list.add(6);list.add(7);list.add(8);
+            list.add(9);
+        }else if(type == 4 || type == 5 || type == 6 || type == 7 || type == 8 || type == 9 ){
+            list.add(type);
+        }else{
+            list.add(4);list.add(5);
+            list.add(6);list.add(7);list.add(8);
+            list.add(9);
+        }
+        //平台商看到的下级
+        User user = UserThreadLocal.get();
+        List<Integer> sonList = userService.getSon4Platform(user);
+        Page<User> page = new Page<>(currentPage, pageSize);
+        Page<User> userPage = userService.selectPage(page,
+                new EntityWrapper<User>()
+                        .eq("onoff", 1)
+                        .in("type", list)
+                        .in("id", sonList)
+                        .like(!(StringUtils.isEmpty(username)), "nickname", username)
+                        .eq(!(StringUtils.isEmpty(phone)), "phone", phone)
+
+        );
+        List<User> allUser = userPage.getRecords();
+        allUser = userService.setRoleAndInfo(allUser);
+        userPage.setRecords(allUser);
+        return new ResultUtil<Page<User>>().setData(userPage);
+    }
+
+    @ApiOperation("渠道商查到所有的内部工作人员")
+    @GetMapping("/getAllInUserByDistributor")
+    public Result<Page<User>> getAllInUserByDistributor(@ApiParam(value = "想要请求的页码")
+                                                     @RequestParam int currentPage,
+                                                     @ApiParam(value = "一页显示多少数据")
+                                                     @RequestParam int pageSize,
+                                                     @ApiParam(value = "用户名模糊查询")
+                                                     @RequestParam(required = false) String username,
+                                                     @ApiParam(value = "手机号精确查询")
+                                                     @RequestParam(required = false) String phone,
+                                                     @ApiParam(value = "选择角色（6：入件，7：审核，8：复审，9：贷后）")
+                                                     @RequestParam(required = false) Integer type
+    ){
+        List<Integer> list = new ArrayList<>();
+        if(type == null){
+            list.add(6);list.add(7);list.add(8);
+            list.add(9);
+        }else if(type == 6 || type == 7 || type == 8 || type == 9 ){
+            list.add(type);
+        }else{
+            list.add(6);list.add(7);list.add(8);
+            list.add(9);
+        }
+        //渠道商看到的下级
+        User user = UserThreadLocal.get();
+        List<Integer> sonList = userService.getSon4Distributor(user);
+        Page<User> page = new Page<>(currentPage, pageSize);
+        Page<User> userPage = userService.selectPage(page,
+                new EntityWrapper<User>()
+                        .eq("onoff", 1)
+                        .in("type", list)
+                        .in("id", sonList)
+                        .like(!(StringUtils.isEmpty(username)), "nickname", username)
+                        .eq(!(StringUtils.isEmpty(phone)), "phone", phone)
+
+        );
+        List<User> allUser = userPage.getRecords();
+        allUser = userService.setRoleAndInfo(allUser);
+        userPage.setRecords(allUser);
+        return new ResultUtil<Page<User>>().setData(userPage);
+    }
+
+
 
 
 }
