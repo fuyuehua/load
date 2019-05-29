@@ -69,7 +69,7 @@ public class Rule extends Model<Rule> {
      */
     private String method;
 
-    private Integer onOff;
+    private Integer onOff = 1;
 
     /**
      * 分数

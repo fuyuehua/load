@@ -26,6 +26,8 @@ public class RipController {
 
     @Autowired
     private RipService ripService;
+    @Autowired
+    private UserCustomerService userCustomerService;
 
     /** 运营商信用报告高级版  start**/
 
@@ -47,7 +49,7 @@ public class RipController {
         map.put("password", password);
 
         String suffixUrl = "/operatorCreditReports/result";
-        Map<String, String> map1 = ripService.operatorCreditReportsService(id, map, suffixUrl);
+        Map<String, String> map1 = ripService.operatorCreditReportsService(id, map, suffixUrl,null);
         String result = map1.get("result");
         if(result.equals("1"))
             return new ResultUtil<Object>().setData(map1.get("data"));
@@ -70,7 +72,7 @@ public class RipController {
         map.put("token", token);
 
         String suffixUrl = "/operatorCreditReports/status";
-        Map<String, String> map1 = ripService.operatorCreditReportsService(id, map, suffixUrl);
+        Map<String, String> map1 = ripService.operatorCreditReportsService(id, map, suffixUrl,null);
         String result = map1.get("result");
         if(result.equals("1"))
             return new ResultUtil<Object>().setData(map1.get("data"));
@@ -96,7 +98,7 @@ public class RipController {
         map.put("input", input);
 
         String suffixUrl = "/operatorCreditReports/input";
-        Map<String, String> map1 = ripService.operatorCreditReportsService(id, map, suffixUrl);
+        Map<String, String> map1 = ripService.operatorCreditReportsService(id, map, suffixUrl, null);
         String result = map1.get("result");
         if(result.equals("1"))
             return new ResultUtil<Object>().setData(map1.get("data"));
@@ -112,7 +114,7 @@ public class RipController {
      */
     @ApiOperation(value = "获取报告")
     @GetMapping("/operatorCreditReports/report")
-    public Result<Object> operatorCreditReportsReport(int id, String token, String rip_id) {
+    public Result<Object> operatorCreditReportsReport(int id, String token, String rip_id, Integer reportId) {
 
         if(StringUtils.isEmpty(token) || StringUtils.isEmpty(rip_id)) {
             return new ResultUtil<Object>().setErrorMsg("params are null");
@@ -122,7 +124,7 @@ public class RipController {
         map.put("rip_id", rip_id);
 
         String suffixUrl = "/operatorCreditReports/report";
-        Map<String, String> map1 = ripService.operatorCreditReportsService(id, map, suffixUrl);
+        Map<String, String> map1 = ripService.operatorCreditReportsService(id, map, suffixUrl,reportId);
         String result = map1.get("result");
         if(result.equals("1"))
             return new ResultUtil<Object>().setData(map1.get("data"));
@@ -256,7 +258,7 @@ public class RipController {
     public Result<Object> taoBaoGet(int id) {
         Map<String, Object> map = new HashMap();
         String suffixUrl = "/taoBao/get";
-        Map<String, String> map1 = ripService.taoBaoService(id, map, suffixUrl);
+        Map<String, String> map1 = ripService.taoBaoService(id, map, suffixUrl,null);
         String result = map1.get("result");
         if(result.equals("1"))
             return new ResultUtil<Object>().setData(map1.get("data"));
@@ -282,7 +284,7 @@ public class RipController {
         map.put("biztype", biztype);
 
         String suffixUrl = "/limu/validate/getStatus";
-        Map<String, String> map1 = ripService.taoBaoService(id, map, suffixUrl);
+        Map<String, String> map1 = ripService.taoBaoService(id, map, suffixUrl,null);
         String result = map1.get("result");
         if(result.equals("1"))
             return new ResultUtil<Object>().setData(map1.get("data"));
@@ -308,7 +310,7 @@ public class RipController {
         map.put("sign", sign);
 
         String suffixUrl = "/limu/validate/getInput";
-        Map<String, String> map1 = ripService.taoBaoService(id, map, suffixUrl);
+        Map<String, String> map1 = ripService.taoBaoService(id, map, suffixUrl, null);
         String result = map1.get("result");
         if(result.equals("1"))
             return new ResultUtil<Object>().setData(map1.get("data"));
@@ -326,7 +328,7 @@ public class RipController {
      */
     @ApiOperation(value = "得到结果")
     @GetMapping("/getResult")
-    public Result<Object> getResult(int id ,String token, String ripId, String biztype) {
+    public Result<Object> getResult(int id ,String token, String ripId, String biztype, Integer reportId) {
         if (StringUtils.isEmpty(token) || StringUtils.isEmpty(ripId) || StringUtils.isEmpty(biztype))
             return new ResultUtil<Object>().setErrorMsg("参数不足");
 
@@ -336,7 +338,7 @@ public class RipController {
         map.put("biztype", biztype);
 
         String suffixUrl = "/limu/validate/getResult";
-        Map<String, String> map1 = ripService.taoBaoService(id, map, suffixUrl);
+        Map<String, String> map1 = ripService.taoBaoService(id, map, suffixUrl, reportId);
         String result = map1.get("result");
         if(result.equals("1"))
             return new ResultUtil<Object>().setData(map1.get("data"));
@@ -350,8 +352,8 @@ public class RipController {
      * @return
      */
     @ApiOperation(value = "身份证照片识别")
-    @GetMapping("/idcardPhoto")
-    public Result<Object> idcardPhoto(int id, String idCardSide, String base64Data, String image) {
+    @PostMapping("/idcardPhoto")
+    public Result<Object> idcardPhoto(int id, String idCardSide, String base64Data) {
         if (StringUtils.isEmpty(idCardSide) || StringUtils.isEmpty(base64Data))
             return new ResultUtil<Object>().setErrorMsg("参数不足");
 
@@ -360,12 +362,103 @@ public class RipController {
         map.put("base64Data", base64Data);
 
         String suffixUrl = "/identificationbd/result";
-        Map<String, String> map1 = ripService.idcardPhotoService(id, map, suffixUrl, image);
+        Map<String, String> map1 = ripService.idcardPhotoService(id, map, suffixUrl);
         String result = map1.get("result");
         if(result.equals("1"))
-            return new ResultUtil<Object>().set();
+            return new ResultUtil<Object>().setData(map1);
         else
             return new ResultUtil<Object>().setData(result);
+    }
+
+    /**
+     * 身份证照片识别
+     *
+     * @return
+     */
+    @ApiOperation(value = "完善照片识别的所有信息")
+    @GetMapping("/AllInfoBack")
+    public Result<Object> AllInfoBack(Integer id,
+                                          String idcardName,
+                                          String idcardSex,
+                                          String idcardNation,
+                                          String idcardBirthday,
+                                          String idcardAddress,
+                                          String idcardIdcard,
+                                          String idcardPhotoa,
+                                          String idcardExpiration,
+                                          String idcardLocation,
+                                          String idcardSign,
+                                          String idcardPhotob,
+
+                                          String bankcardCardnumber,
+                                          String bankcardCardtype,
+                                          String bankcardCardname,
+                                          String bankcardPhoto,
+
+                                          String facePhotoa,
+                                          String facePhotob,
+                                          String facePhotoc
+                                          ) {
+        if (StringUtils.isEmpty(idcardName) ||
+                StringUtils.isEmpty(idcardSex) ||
+                StringUtils.isEmpty(idcardNation) ||
+                StringUtils.isEmpty(idcardBirthday) ||
+                StringUtils.isEmpty(idcardAddress) ||
+                StringUtils.isEmpty(idcardIdcard) ||
+                StringUtils.isEmpty(idcardPhotoa) ||
+                StringUtils.isEmpty(idcardExpiration) ||
+                StringUtils.isEmpty(idcardLocation) ||
+                StringUtils.isEmpty(idcardSign) ||
+                StringUtils.isEmpty(idcardPhotob) ||
+                StringUtils.isEmpty(bankcardCardnumber) ||
+                StringUtils.isEmpty(bankcardCardtype) ||
+                StringUtils.isEmpty(bankcardCardname) ||
+                StringUtils.isEmpty(bankcardPhoto) ||
+                StringUtils.isEmpty(facePhotoa) ||
+                StringUtils.isEmpty(facePhotob) ||
+                StringUtils.isEmpty(facePhotoc)
+        )
+            return new ResultUtil<Object>().setErrorMsg("参数不足");
+
+        if(id == null || id == 0){
+            User user = UserThreadLocal.get();
+            id = user.getId();
+        }
+        UserCustomer userCustomer = userCustomerService.selectOne(new EntityWrapper<UserCustomer>().eq("userId", id));
+        if(userCustomer == null){
+            return new ResultUtil<Object>().setErrorMsg("客户不存在");
+        }
+        //正面
+        userCustomer.setIdcardName(idcardName);
+        userCustomer.setIdcardSex(idcardSex);
+        userCustomer.setIdcardNation(idcardNation);
+        userCustomer.setIdcardBirthday(idcardBirthday);
+        userCustomer.setIdcardAddress(idcardAddress);
+        userCustomer.setIdcardIdcard(idcardIdcard);
+        userCustomer.setIdcardPhotoa(idcardPhotoa);
+        //反面
+        userCustomer.setIdcardExpiration(idcardExpiration);
+        userCustomer.setIdcardLocation(idcardLocation);
+        userCustomer.setIdcardSign(idcardSign);
+        userCustomer.setIdcardPhotob(idcardPhotob);
+
+        //银行卡
+        userCustomer.setBankcardCardnumber(bankcardCardnumber);
+        userCustomer.setBankcardCardtype(bankcardCardtype);
+        userCustomer.setBankcardCardname(bankcardCardname);
+        userCustomer.setBankcardPhoto(bankcardPhoto);
+
+        //人脸识别
+        userCustomer.setFacePhotoa(facePhotoa);
+        userCustomer.setFacePhotob(facePhotob);
+        userCustomer.setFacePhotoC(facePhotoc);
+
+        userCustomer.setInfoStatus("2");
+        boolean b = userCustomerService.update(userCustomer, new EntityWrapper<UserCustomer>().eq("userId", id));
+        if(b)
+            return new ResultUtil<Object>().set();
+        else
+            return new ResultUtil<Object>().setErrorMsg("存储错误");
     }
 
     /**
@@ -374,21 +467,21 @@ public class RipController {
      * @return
      */
     @ApiOperation(value = "银行卡照片识别")
-    @GetMapping("/bankcardPhoto")
-    public Result<Object> bankcardPhoto(int id, String base64Data, String image) {
+    @PostMapping("/bankcardPhoto")
+    public Result<Object> bankcardPhoto(int id, String base64Data) {
         if (StringUtils.isEmpty(base64Data))
             return new ResultUtil<Object>().setErrorMsg("参数不足");
 
         Map<String, Object> map = new HashMap();
         map.put("base64Data", base64Data);
 
-        String suffixUrl = "/cardIdentificationOCR/result";
-        Map<String, String> map1 = ripService.bankcardPhotoService(id, map, suffixUrl, image);
+        String suffixUrl = "/cardIdentificationbd/result";
+        Map<String, String> map1 = ripService.bankcardPhotoService(id, map, suffixUrl);
         String result = map1.get("result");
         if(result.equals("1"))
-            return new ResultUtil<Object>().set();
+            return new ResultUtil<Object>().setData(map1);
         else
-            return new ResultUtil<Object>().setData(result);
+            return new ResultUtil<Object>().setErrorMsg(result);
     }
 
 

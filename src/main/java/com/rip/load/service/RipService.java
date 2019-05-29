@@ -1,5 +1,7 @@
 package com.rip.load.service;
 
+import io.swagger.models.auth.In;
+
 import java.util.Map;
 
 public interface RipService {
@@ -9,9 +11,9 @@ public interface RipService {
 
     String ripSetTokenService(Map<String, Object> map, String suffixUrl);
 
-    Map<String, String> operatorCreditReportsService(int id, Map<String, Object> map, String suffixUrl);
+    Map<String, String> operatorCreditReportsService(int id, Map<String, Object> map, String suffixUrl, Integer reportId);
 
-    Map<String, String> taoBaoService(int id, Map<String, Object> map, String suffixUrl);
+    Map<String, String> taoBaoService(int id, Map<String, Object> map, String suffixUrl, Integer reportId);
 
     /**
      * 不传ID就是ThreadLocal本身
@@ -36,11 +38,11 @@ public interface RipService {
 
     String personalComplaintInquiryCService(int id, Integer reportId);
 
-    Map<String, String> idcardPhotoService(int id, Map<String, Object> map, String suffixUrl, String image);
+    Map<String, String> idcardPhotoService(int id, Map<String, Object> map, String suffixUrl);
 
     String fourElementsOfBankCardService(int id);
 
-    Map<String, String> bankcardPhotoService(int id, Map<String, Object> map, String suffixUrl, String image);
+    Map<String, String> bankcardPhotoService(int id, Map<String, Object> map, String suffixUrl);
 
     String operatorTwoElementsService(int id, Integer reportedId);
 

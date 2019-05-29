@@ -6,6 +6,8 @@ import com.baomidou.mybatisplus.annotations.TableId;
 import com.baomidou.mybatisplus.annotations.TableField;
 import com.baomidou.mybatisplus.activerecord.Model;
 import com.baomidou.mybatisplus.annotations.TableName;
+import org.springframework.web.bind.annotation.RequestParam;
+
 import java.io.Serializable;
 import java.util.List;
 
@@ -41,6 +43,14 @@ public class Report extends Model<Report> {
      */
     private String remark;
 
+    @TableField("order_id")
+    private Integer orderId;
+
+    /**
+     * 1:第一次完整报告 2：后来的弱授权报告
+     */
+    private Integer type;
+
     @TableField(exist = false)
     private List<RiskRuleItem> riskRuleItems;
 
@@ -74,6 +84,22 @@ public class Report extends Model<Report> {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public Integer getOrderId() {
+        return orderId;
+    }
+
+    public void setOrderId(Integer orderId) {
+        this.orderId = orderId;
+    }
+
+    public Integer getType() {
+        return type;
+    }
+
+    public void setType(Integer type) {
+        this.type = type;
     }
 
     public List<RiskRuleItem> getRiskRuleItems() {

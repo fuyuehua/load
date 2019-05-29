@@ -57,7 +57,7 @@ public class RiskMethodService {
         String paramA = riskRule.getParamA();
         String paramB = riskRule.getParamB();
         String json = item.getResultJson();
-        String age = json.substring(5, 14);
+        String age = json.substring(6, 14);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         int ageByBirth = 0;
         try {

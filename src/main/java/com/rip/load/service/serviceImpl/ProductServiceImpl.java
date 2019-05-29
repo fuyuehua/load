@@ -55,8 +55,10 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             for (Risk risk : risks) {
                 if (risk.getId().equals(product.getRiskId())) {
                     List<RiskRule> riskRules = riskRuleService.selectList(new EntityWrapper<RiskRule>().eq("risk_id", risk.getId()));
-                    riskRules = riskRuleService.setRule4RiskRule(riskRules);
-                    risk.setRiskRuleList(riskRules);
+                    if(riskRules.size() != 0){
+                        riskRules = riskRuleService.setRule4RiskRule(riskRules);
+                        risk.setRiskRuleList(riskRules);
+                    }
                     product.setRisk(risk);
                 }
             }
@@ -79,6 +81,26 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
                 }
             }
         }
+        return list;
+    }
+    @Override
+    public List<Product> settleRisk(List<Product> list) {
+        List<Integer> riskIdList = new ArrayList<>();
+        for(Product product : list){
+            riskIdList.add(product.getRiskId());
+        }
+        List<Risk> risks = riskService.selectBatchIds(riskIdList);
+        for(Product product : list) {
+            for (Risk risk : risks) {
+                if (risk.getId().equals(product.getRiskId())) {
+                    List<RiskRule> riskRules = riskRuleService.selectList(new EntityWrapper<RiskRule>().eq("risk_id", risk.getId()));
+                    riskRules = riskRuleService.setRule4RiskRule(riskRules);
+                    risk.setRiskRuleList(riskRules);
+                    product.setRisk(risk);
+                }
+            }
+        }
+
         return list;
     }
 }

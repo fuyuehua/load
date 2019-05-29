@@ -71,7 +71,7 @@ public class Config extends Model<Config> {
     private Integer repayType;
 
     /**
-     * 利率 单位：% 默认月利率 如果履约期限单位是日，那就是日利率
+     * 利率 单位：% 全部年利率
      */
     @NotBlank
     private String interest;

@@ -179,7 +179,10 @@ public class UserController {
     public Result<User> getSelf(
     ){
         User user = UserThreadLocal.get();
-        return new ResultUtil<User>().setData(user);
+        List<User> list = new ArrayList<>();
+        list.add(user);
+        List<User> users = userService.setRoleAndInfo(list,null);
+        return new ResultUtil<User>().setData(users.get(0));
     }
 
 
@@ -394,6 +397,8 @@ public class UserController {
         UserCustomer userCustomer = new UserCustomer();
         userCustomer.setUserId(readyUser.getId());
         userCustomer.setFatherId(distributorId);
+        userCustomer.setInfoStatus("1");
+        userCustomer.setCellphone(readyUser.getPhone());
         boolean insert1 = userCustomerService.insert(userCustomer);
         if(insert1){
             return new ResultUtil<Object>().setData(readyUser);
@@ -492,7 +497,7 @@ public class UserController {
                         .eq(!(StringUtils.isEmpty(phone)), "phone", phone)
         );
         List<User> allUser = userPage.getRecords();
-        allUser = userService.setRoleAndInfo(allUser);
+        allUser = userService.setRoleAndInfo(allUser,null);
         userPage.setRecords(allUser);
         return new ResultUtil<Page<User>>().setData(userPage);
     }
@@ -536,7 +541,7 @@ public class UserController {
 
         );
         List<User> allUser = userPage.getRecords();
-        allUser = userService.setRoleAndInfo(allUser);
+        allUser = userService.setRoleAndInfo(allUser, null);
         userPage.setRecords(allUser);
         return new ResultUtil<Page<User>>().setData(userPage);
     }
@@ -578,13 +583,108 @@ public class UserController {
 
         );
         List<User> allUser = userPage.getRecords();
-        allUser = userService.setRoleAndInfo(allUser);
+        allUser = userService.setRoleAndInfo(allUser,null);
         userPage.setRecords(allUser);
         return new ResultUtil<Page<User>>().setData(userPage);
     }
 
+    @ApiOperation("查到所有客户（管理员）")
+    @GetMapping("/getAllCustomer")
+    public Result<Page<User>> getAllCustomer(@ApiParam(value = "想要请求的页码")
+                                           @RequestParam int currentPage,
+                                           @ApiParam(value = "一页显示多少数据")
+                                           @RequestParam int pageSize,
+                                           @ApiParam(value = "用户名模糊查询")
+                                           @RequestParam(required = false) String username,
+                                           @ApiParam(value = "手机号精确查询")
+                                           @RequestParam(required = false) String phone,
+                                             @ApiParam(value = "* 客户状态1:已审核0：未审核2：黑名单")
+                                                 @RequestParam String status
+    ){
+        List<Integer> list = new ArrayList<>();
+        list.add(2);
+        Page<User> page = new Page<>(currentPage, pageSize);
+        Page<User> userPage = userService.selectPage(page,
+                new EntityWrapper<User>()
+                        .eq("onoff", 1)
+                        .in("type", list)
+                        .like(!(StringUtils.isEmpty(username)), "nickname", username)
+                        .eq(!(StringUtils.isEmpty(phone)), "phone", phone)
+        );
+        List<User> allUser = userPage.getRecords();
+        allUser = userService.setRoleAndInfo(allUser,status);
+        userPage.setRecords(allUser);
+        return new ResultUtil<Page<User>>().setData(userPage);
+    }
 
+    @ApiOperation("平台商查到所有客户")
+    @GetMapping("/getAllCustomerByPlatform")
+    public Result<Page<User>> getAllCustomerByPlatform(@ApiParam(value = "想要请求的页码")
+                                                     @RequestParam int currentPage,
+                                                     @ApiParam(value = "一页显示多少数据")
+                                                     @RequestParam int pageSize,
+                                                     @ApiParam(value = "用户名模糊查询")
+                                                     @RequestParam(required = false) String username,
+                                                     @ApiParam(value = "手机号精确查询")
+                                                     @RequestParam(required = false) String phone,
+                                                       @ApiParam(value = "* 客户状态1:已审核0：未审核2：黑名单")
+                                                           @RequestParam String status
+    ){
+        List<Integer> list = new ArrayList<>();
+        list.add(2);
+        //平台商看到的下级
+        User user = UserThreadLocal.get();
+        List<Integer> sonList = userService.getSon4Platform(user);
 
+        Page<User> page = new Page<>(currentPage, pageSize);
+        Page<User> userPage = userService.selectPage(page,
+                new EntityWrapper<User>()
+                        .eq("onoff", 1)
+                        .in("type", list)
+                        .in("id", sonList)
+                        .like(!(StringUtils.isEmpty(username)), "nickname", username)
+                        .eq(!(StringUtils.isEmpty(phone)), "phone", phone)
+
+        );
+        List<User> allUser = userPage.getRecords();
+        allUser = userService.setRoleAndInfo(allUser,status);
+        userPage.setRecords(allUser);
+        return new ResultUtil<Page<User>>().setData(userPage);
+    }
+
+    @ApiOperation("渠道商查到所有的客户")
+    @GetMapping("/getAllCustomerByDistributor")
+    public Result<Page<User>> getAllCustomerByDistributor(@ApiParam(value = "想要请求的页码")
+                                                        @RequestParam int currentPage,
+                                                        @ApiParam(value = "一页显示多少数据")
+                                                        @RequestParam int pageSize,
+                                                        @ApiParam(value = "用户名模糊查询")
+                                                        @RequestParam(required = false) String username,
+                                                        @ApiParam(value = "手机号精确查询")
+                                                        @RequestParam(required = false) String phone,
+                                                          @ApiParam(value = "* 客户状态1:已审核0：未审核2：黑名单")
+                                                              @RequestParam String status
+    ){
+        List<Integer> list = new ArrayList<>();
+        list.add(2);
+        //渠道商看到的下级
+        User user = UserThreadLocal.get();
+        List<Integer> sonList = userService.getSon4Distributor(user);
+        Page<User> page = new Page<>(currentPage, pageSize);
+        Page<User> userPage = userService.selectPage(page,
+                new EntityWrapper<User>()
+                        .eq("onoff", 1)
+                        .in("type", list)
+                        .in("id", sonList)
+                        .like(!(StringUtils.isEmpty(username)), "nickname", username)
+                        .eq(!(StringUtils.isEmpty(phone)), "phone", phone)
+
+        );
+        List<User> allUser = userPage.getRecords();
+        allUser = userService.setRoleAndInfo(allUser,status);
+        userPage.setRecords(allUser);
+        return new ResultUtil<Page<User>>().setData(userPage);
+    }
 
 }
 

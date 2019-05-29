@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.stereotype.Controller;
 
 import javax.validation.Valid;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -62,6 +63,21 @@ public class ProductController {
         }
     }
 
+    @ApiOperation(value = "查看贷款产品")
+    @GetMapping("/get")
+    public Result<Object> get(
+            @ApiParam(value = "产品ID")
+            @RequestParam Integer productId) {
+        if(productId == null){
+            return new ResultUtil<Object>().setErrorMsg("产品ID为空");
+        }
+        Product product = productService.selectById(productId);
+        List<Product> list = new ArrayList<>();
+        list.add(product);
+        list = productService.settleConfigRisk(list);
+        return new ResultUtil<Object>().setData(list.get(0));
+    }
+
     @ApiOperation(value = "查看渠道商的产品")
     @GetMapping("/listByDistributorId")
     public Result<Page<Product>>  listByDistributorId(@ApiParam(value = "渠道商ID")
@@ -76,6 +92,9 @@ public class ProductController {
         Page<Product> pages = productService.selectPage(page, new EntityWrapper<Product>().eq("user_id", id)
                 .like(!StringUtils.isEmpty(name),"name", name));
         List<Product> list = pages.getRecords();
+        if(list.size() == 0){
+            return new ResultUtil<Page<Product>>().setData(pages);
+        }
         list = productService.settleConfigRisk(list);
         pages.setRecords(list);
         return new ResultUtil<Page<Product>>().setData(pages);

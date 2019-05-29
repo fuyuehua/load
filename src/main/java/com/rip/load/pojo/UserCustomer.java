@@ -232,7 +232,31 @@ public class UserCustomer extends Model<UserCustomer> {
      */
     @TableField("bankcard_cardname")
     private String bankcardCardname;
+    /**
+     * 注册填写信息状态查询
+     * 1:注册完成
+     * 2：身份证银行卡照片传回信息储存成功
+     * 3：储存其他客户信息成功
+     * 4：确认所有信息成功
+     */
+    @TableField("info_status")
+    private String infoStatus;
 
+    /**
+     *0：等待初审1：初审通过，2初审资料待完善，3初审不通过，4复审通过，5复审不通过6:黑名单
+     */
+    private Integer status = 0;
+
+    @TableField(exist = false)
+    private UserDistributor userDistributor;
+
+    public UserDistributor getUserDistributor() {
+        return userDistributor;
+    }
+
+    public void setUserDistributor(UserDistributor userDistributor) {
+        this.userDistributor = userDistributor;
+    }
 
     public Integer getUserId() {
         return userId;
@@ -518,6 +542,22 @@ public class UserCustomer extends Model<UserCustomer> {
 
     public void setBankcardCardname(String bankcardCardname) {
         this.bankcardCardname = bankcardCardname;
+    }
+
+    public String getInfoStatus() {
+        return infoStatus;
+    }
+
+    public void setInfoStatus(String infoStatus) {
+        this.infoStatus = infoStatus;
+    }
+
+    public Integer getStatus() {
+        return status;
+    }
+
+    public void setStatus(Integer status) {
+        this.status = status;
     }
 
     @Override

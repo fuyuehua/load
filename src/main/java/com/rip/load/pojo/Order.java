@@ -72,9 +72,9 @@ public class Order extends Model<Order> {
 
     /**
      * 状态
-     * 状态 1：初审通过，2初审资料待完善，3初审不通过，4复审通过，5复审不通过
+     * 状态 0：等待初审1：初审通过，2初审资料待完善，3初审不通过，4复审通过，5复审不通过
      */
-    private Integer status;
+    private Integer status = 0;
 
     /**
      * 申请时间
@@ -139,6 +139,9 @@ public class Order extends Model<Order> {
      */
     @TableField("second_reject_reason")
     private String secondRejectReason;
+
+    @TableField(exist = false)
+    private UserCustomer userCustomer;
 
     public Integer getId() {
         return id;
@@ -289,6 +292,14 @@ public class Order extends Model<Order> {
 
     public void setSecondRejectReason(String secondRejectReason) {
         this.secondRejectReason = secondRejectReason;
+    }
+
+    public UserCustomer getUserCustomer() {
+        return userCustomer;
+    }
+
+    public void setUserCustomer(UserCustomer userCustomer) {
+        this.userCustomer = userCustomer;
     }
 
     @Override

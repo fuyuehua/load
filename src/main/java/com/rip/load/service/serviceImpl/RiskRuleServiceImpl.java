@@ -30,6 +30,7 @@ public class RiskRuleServiceImpl extends ServiceImpl<RiskRuleMapper, RiskRule> i
 
     @Override
     public List<RiskRule> setRule4RiskRule(List<RiskRule> list) {
+
         List<Integer> temp = new ArrayList<>();
         for(RiskRule item : list){
             temp.add(item.getRuleId());

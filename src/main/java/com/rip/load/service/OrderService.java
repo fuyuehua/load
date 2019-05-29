@@ -2,6 +2,9 @@ package com.rip.load.service;
 
 import com.rip.load.pojo.Order;
 import com.baomidou.mybatisplus.service.IService;
+import com.rip.load.pojo.UserDistributor;
+
+import java.util.List;
 
 /**
  * <p>
@@ -14,4 +17,6 @@ import com.baomidou.mybatisplus.service.IService;
 public interface OrderService extends IService<Order> {
 
     String createOrderAndRepayPlan(Order order);
+
+    List<Order> makeupInfo(List<Order> records, List<UserDistributor> distributors);
 }

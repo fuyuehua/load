@@ -6,6 +6,7 @@ import com.rip.load.mapper.UserMapper;
 import com.rip.load.pojo.nativePojo.UserThreadLocal;
 import com.rip.load.service.*;
 import com.baomidou.mybatisplus.service.impl.ServiceImpl;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -86,7 +87,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public List<User> setRoleAndInfo(List<User> allUser) {
+    public List<User> setRoleAndInfo(List<User> allUser, String status) {
         //客户
         List<Integer> list2 = new ArrayList<>();
         //平台商
@@ -113,7 +114,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setRoleList(role);
         }
         if(list2.size() > 0) {
-            List<UserCustomer> userCustomers = userCustomerService.selectBatchIds(list2);
+            List<UserCustomer> userCustomers = userCustomerService.selectList(new EntityWrapper<UserCustomer>().in("userId",list2)
+                    .eq(StringUtils.isEmpty(status),"status",status));
             for (UserCustomer k : userCustomers) {
                 for (User user : allUser) {
                     if (k.getUserId().equals(user.getId())) {
@@ -123,7 +125,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             }
         }
         if(list3.size() > 0) {
-            List<UserPlatform> userPlatforms = userPlatformService.selectBatchIds(list3);
+            List<UserPlatform> userPlatforms = userPlatformService.selectList(new EntityWrapper<UserPlatform>().in("user_id",list3));
             for (UserPlatform k : userPlatforms) {
                 for (User user : allUser) {
                     if (k.getUserId().equals(user.getId())) {
@@ -134,7 +136,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         if(list4.size() > 0) {
-            List<UserPlatformSubordinate> userPlatformSubordinates = userPlatformSubordinateService.selectBatchIds(list4);
+            List<UserPlatformSubordinate> userPlatformSubordinates = userPlatformSubordinateService.selectList(new EntityWrapper<UserPlatformSubordinate>().in("user_id",list4));
             for (UserPlatformSubordinate k : userPlatformSubordinates) {
                 for (User user : allUser) {
                     if (k.getUserId().equals(user.getId())) {
@@ -145,7 +147,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         if(list5.size() > 0) {
-            List<UserDistributor> userDistributors = userDistributorService.selectBatchIds(list5);
+            List<UserDistributor> userDistributors = userDistributorService.selectList(new EntityWrapper<UserDistributor>().in("user_id",list5));
             for (UserDistributor k : userDistributors) {
                 for (User user : allUser) {
                     if (k.getUserId().equals(user.getId())) {
@@ -156,7 +158,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         if(list6.size() > 0) {
-            List<UserDistributorSubordinate> userDistributorSubordinates = userDistributorSubordinateService.selectBatchIds(list6);
+            List<UserDistributorSubordinate> userDistributorSubordinates = userDistributorSubordinateService.selectList(new EntityWrapper<UserDistributorSubordinate>().in("user_id",list6));
             for (UserDistributorSubordinate k : userDistributorSubordinates) {
                 for (User user : allUser) {
                     if (k.getUserId().equals(user.getId())) {
@@ -173,24 +175,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     public List<Integer> getSon4Platform(User user) {
         List<Integer> resultList= new ArrayList<>();
         List<UserPlatformSubordinate> subordinates = userPlatformSubordinateService.selectList(new EntityWrapper<UserPlatformSubordinate>()
-                .setSqlSelect("user_id")
+                .setSqlSelect("user_id as userId")
                 .eq("father_id", user.getId()));
         for(UserPlatformSubordinate s: subordinates){
             resultList.add(s.getUserId());
         }
         List<UserDistributor> userDistributors = userDistributorService.selectList(new EntityWrapper<UserDistributor>()
-                .setSqlSelect("user_id")
+                .setSqlSelect("user_id as userId")
                 .eq("father_id", user.getId()));
+        List<Integer> distributorList = new ArrayList<>();
         for(UserDistributor s: userDistributors){
             resultList.add(s.getUserId());
+            distributorList.add(s.getUserId());
         }
+
         List<UserDistributorSubordinate> userDistributorSubordinates = userDistributorSubordinateService.selectList(new EntityWrapper<UserDistributorSubordinate>()
-                .setSqlSelect("user_id")
-                .eq("father_id", user.getId()));
+                .setSqlSelect("user_id as userId")
+                .in(distributorList.size()>0,"father_id", distributorList));
         for(UserDistributorSubordinate s: userDistributorSubordinates){
             resultList.add(s.getUserId());
         }
-
         return resultList;
     }
 
@@ -208,4 +212,29 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         return resultList;
     }
+
+    @Override
+    public List<Integer> getCustomer4Distributor(User user) {
+        List<UserCustomer> list = userCustomerService.selectList(new EntityWrapper<UserCustomer>().setSqlSelect("userId").eq("father_id",user.getId()));
+        List<Integer> intList = new ArrayList<>();
+        for (UserCustomer uc: list) {
+            intList.add(uc.getUserId());
+        }
+        return intList;
+    }
+    @Override
+    public List<Integer> getCustomer4Platform(User user) {
+        List<Integer> resultList= new ArrayList<>();
+        List<Integer> tempList= new ArrayList<>();
+        List<UserDistributor> userDistributors = userDistributorService.selectList(new EntityWrapper<UserDistributor>().setSqlSelect("user_id as userId").eq("father_id", user.getId()));
+        for (UserDistributor ud: userDistributors) {
+            tempList.add(ud.getUserId());
+        }
+        List<UserCustomer> list = userCustomerService.selectList(new EntityWrapper<UserCustomer>().setSqlSelect("userId").in("father_id",tempList));
+        for (UserCustomer uc: list) {
+            resultList.add(uc.getUserId());
+        }
+        return resultList;
+    }
+
 }

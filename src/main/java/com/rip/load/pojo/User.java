@@ -68,7 +68,7 @@ public class User extends Model<User> {
     private Integer onoff = 1;
 
     /**
-     * 用户类型
+     * 用户类型1:管理员 2：客户3：平台商，4：平台商员工，5：渠道商，6：入件，7：审核，8：复审，9：贷后
      */
     private Integer type;
 

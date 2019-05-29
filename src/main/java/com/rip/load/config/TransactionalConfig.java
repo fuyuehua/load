@@ -62,7 +62,6 @@ public class TransactionalConfig {
             "top*",
             "reset*",
             "bind*",
-            "handle*",
             "reSubmit*",
             "close*",
             "register*",

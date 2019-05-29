@@ -53,7 +53,7 @@ public class RipServiceImpl implements RipService {
     }
 
     @Override
-    public Map<String, String> operatorCreditReportsService(int id, Map<String, Object> map, String suffixUrl) {
+    public Map<String, String> operatorCreditReportsService(int id, Map<String, Object> map, String suffixUrl, Integer reportId) {
         Map<String, String> resultMap = new HashMap<>();
         if(id == 0){
             User user = UserThreadLocal.get();
@@ -112,13 +112,8 @@ public class RipServiceImpl implements RipService {
         }
         if(suffixUrl.equals("/operatorCreditReports/report)")){
 
-            Item item = new Item();
-            item.setResultJson(json);
-            item.setTime(new Date());
-            item.setUserId(id);
-            item.setType("10");
-            boolean insert = itemService.insert(item);
-            if(insert){
+            boolean b = handleItemReport(id, json, "10", reportId);
+            if(b){
                 resultMap.put("result", "1");
                 return resultMap;
             }else{
@@ -132,7 +127,7 @@ public class RipServiceImpl implements RipService {
     }
 
     @Override
-    public Map<String, String> taoBaoService(int id, Map<String, Object> map, String suffixUrl) {
+    public Map<String, String> taoBaoService(int id, Map<String, Object> map, String suffixUrl, Integer reportId) {
         Map<String, String> resultMap = new HashMap<>();
         if(id == 0){
             User user = UserThreadLocal.get();
@@ -158,14 +153,8 @@ public class RipServiceImpl implements RipService {
             return resultMap;
         }
         if(suffixUrl.equals("/limu/validate/getResult")){
-
-            Item item = new Item();
-            item.setResultJson(json);
-            item.setTime(new Date());
-            item.setUserId(id);
-            item.setType("11");
-            boolean insert = itemService.insert(item);
-            if(insert){
+            boolean b = handleItemReport(id, json, "11", reportId);
+            if(b){
                 resultMap.put("result", "1");
                 return resultMap;
             }else{
@@ -607,7 +596,7 @@ public class RipServiceImpl implements RipService {
     }
 
     @Override
-    public Map<String, String> idcardPhotoService(int id, Map<String, Object> map, String suffixUrl, String image) {
+    public Map<String, String> idcardPhotoService(int id, Map<String, Object> map, String suffixUrl) {
         Map<String, String> resultMap = new HashMap<>();
         if(id == 0){
             User user = UserThreadLocal.get();
@@ -623,51 +612,23 @@ public class RipServiceImpl implements RipService {
         Map<String, Object> mapToken = (Map)mapReturn.get("map");
         map.put("username", mapToken.get("username"));
         map.put("accessToken", mapToken.get("accessToken"));
-        String json = ripSetTokenService(map, suffixUrl);
+        String json = null;
+        try {
+            json = HttpUtil.httpPost(LINRICO_PREFIX_URL + suffixUrl, map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if(json == null){
             resultMap.put("result", "接口调用失败");
             return resultMap;
         }
-
-        Item item = new Item();
-        item.setResultJson(json);
-        item.setTime(new Date());
-        item.setUserId(id);
-        item.setType("12");
-        boolean insert = itemService.insert(item);
-
-        IdcardPhoto idcardPhoto = JSON.parseObject(json, IdcardPhoto.class);
-        Words_result words_result = idcardPhoto.getWords_result();
-            //正面
-        if(((String)map.get("idCardSide")).equals("front")) {
-            userCustomer.setIdcardName(words_result.get姓名().getWords());
-            userCustomer.setIdcardSex(words_result.get性别().getWords());
-            userCustomer.setIdcardNation(words_result.get民族().getWords());
-            userCustomer.setIdcardBirthday(words_result.get出生().getWords());
-            userCustomer.setIdcardAddress(words_result.get住址().getWords());
-            userCustomer.setIdcardIdcard(words_result.get公民身份号码().getWords());
-            userCustomer.setIdcardPhotoa(image);
-        }else {
-            //反面
-            userCustomer.setIdcardExpiration(words_result.get失效日期().getWords());
-            userCustomer.setIdcardLocation(words_result.get签发机关().getWords());
-            userCustomer.setIdcardSign(words_result.get签发日期().getWords());
-            userCustomer.setIdcardPhotob(image);
-        }
-
-        boolean b = userCustomerService.updateById(userCustomer);
-
-        if(insert && b){
-            resultMap.put("result", "1");
-            return resultMap;
-        }else{
-            resultMap.put("result", "储存错误");
-            return resultMap;
-        }
+        resultMap.put("result", "1");
+        resultMap.put("json", json);
+        return resultMap;
     }
 
     @Override
-    public Map<String, String> bankcardPhotoService(int id, Map<String, Object> map, String suffixUrl, String image) {
+    public Map<String, String> bankcardPhotoService(int id, Map<String, Object> map, String suffixUrl) {
         Map<String, String> resultMap = new HashMap<>();
         if(id == 0){
             User user = UserThreadLocal.get();
@@ -683,13 +644,18 @@ public class RipServiceImpl implements RipService {
         Map<String, Object> mapToken = (Map)mapReturn.get("map");
         map.put("username", mapToken.get("username"));
         map.put("accessToken", mapToken.get("accessToken"));
-        String json = ripSetTokenService(map, suffixUrl);
+        String json = null;
+        try {
+            json = HttpUtil.httpPost(LINRICO_PREFIX_URL + suffixUrl, map);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
         if(json == null){
             resultMap.put("result", "接口调用失败");
             return resultMap;
         }
 
-        Item item = new Item();
+        /*Item item = new Item();
         item.setResultJson(json);
         item.setTime(new Date());
         item.setUserId(id);
@@ -701,16 +667,13 @@ public class RipServiceImpl implements RipService {
         userCustomer.setBankcardCardtype(bankcardPhoto.getResult().getCardtype());
         userCustomer.setBankcardCardname(bankcardPhoto.getResult().getCardname());
         userCustomer.setBankcardPhoto(image);
-
         boolean b = userCustomerService.updateById(userCustomer);
+        */
 
-        if(insert && b){
-            resultMap.put("result", "1");
-            return resultMap;
-        }else{
-            resultMap.put("result", "储存错误");
-            return resultMap;
-        }
+        resultMap.put("result", "1");
+        resultMap.put("json", json);
+        return resultMap;
+
     }
 
     @Override

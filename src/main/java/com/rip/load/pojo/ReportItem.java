@@ -29,6 +29,9 @@ public class ReportItem extends Model<ReportItem> {
     @TableField("item_id")
     private Integer itemId;
 
+    @TableField(exist = false)
+    private Item item;
+
     /**
      * 报告ID
      */
@@ -55,6 +58,14 @@ public class ReportItem extends Model<ReportItem> {
 
     public void setReportId(Integer reportId) {
         this.reportId = reportId;
+    }
+
+    public Item getItem() {
+        return item;
+    }
+
+    public void setItem(Item item) {
+        this.item = item;
     }
 
     @Override

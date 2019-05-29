@@ -18,4 +18,6 @@ public interface ProductService extends IService<Product> {
     List<Product> settleConfigRisk(List<Product> list);
 
     List<Product> settleConfig(List<Product> list);
+
+    List<Product> settleRisk(List<Product> list);
 }

@@ -49,6 +49,9 @@ public class AuthorityInterceptor implements HandlerInterceptor {
                                 UserThreadLocal.set(user);
                                 return true;
                             }else{
+                                response.setStatus(405);
+                                response.setContentType("application/json; charset=UTF-8");
+                                response.getWriter().print(JSON.toJSONString(new ResultUtil<Object>().setErrorMsg("没有此接口权限")));
                                 return false;
                             }
                         }else {

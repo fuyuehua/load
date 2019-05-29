@@ -33,9 +33,13 @@ public interface UserService extends IService<User> {
      */
     boolean createAndSetRole(User readyUser);
 
-    List<User> setRoleAndInfo(List<User> allUser);
+    List<User> setRoleAndInfo(List<User> allUser, String status);
 
     List<Integer> getSon4Platform(User user);
 
     List<Integer> getSon4Distributor(User user);
+
+    List<Integer> getCustomer4Distributor(User user);
+
+    List<Integer> getCustomer4Platform(User user);
 }
