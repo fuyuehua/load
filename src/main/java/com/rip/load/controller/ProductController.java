@@ -14,6 +14,7 @@ import com.rip.load.service.ProductService;
 import com.rip.load.service.RiskService;
 import com.rip.load.utils.DateUtil;
 import com.rip.load.utils.ResultUtil;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +36,7 @@ import java.util.List;
  * @author zxh
  * @since 2019-05-09
  */
+@Api(tags = {"贷款产品接口"})
 @RestController
 @RequestMapping("api/product")
 public class ProductController {

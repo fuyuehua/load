@@ -1,6 +1,7 @@
 package com.rip.load.service.serviceImpl;
 
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
+import com.rip.load.mapper.UserCustomerMapper;
 import com.rip.load.pojo.*;
 import com.rip.load.mapper.ReportMapper;
 import com.rip.load.service.*;
@@ -36,6 +37,8 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
     private ProductService productService;
     @Autowired
     private RiskRuleItemService riskRuleItemService;
+    @Autowired
+    private UserCustomerMapper userCustomerMapper;
 
     @Override
     public Report setItem(Report report) {
@@ -261,8 +264,28 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
         List<RiskRuleItem> linkList = riskRuleItemService.selectList(new EntityWrapper<RiskRuleItem>().in("item_id", listTemp));
         linkList = riskRuleItemService.setRiskRule(linkList);
         report.setRiskRuleItems(linkList);
+        List<UserCustomer> userId = userCustomerMapper.selectList(new EntityWrapper<UserCustomer>().eq("userId", id));
+        report.setUserCustomer(userId.get(0));
         return report;
     }
+
+    @Override
+    public Report takeFirstReport(Order order) {
+        Report report = selectOne(new EntityWrapper<Report>().eq("order_id", order.getId()).eq("type",1));
+        report = setItem(report);
+        List<Item> items = report.getItemList();
+        List<Integer> listTemp = new ArrayList<>();
+        for(Item item : items){
+            listTemp.add(item.getId());
+        }
+        List<RiskRuleItem> linkList = riskRuleItemService.selectList(new EntityWrapper<RiskRuleItem>().in("item_id", listTemp));
+        linkList = riskRuleItemService.setRiskRule(linkList);
+        report.setRiskRuleItems(linkList);
+        List<UserCustomer> userId = userCustomerMapper.selectList(new EntityWrapper<UserCustomer>().eq("userId", order.getUid()));
+        report.setUserCustomer(userId.get(0));
+        return report;
+    }
+
 
     private boolean handleRiskRuleItemFlag(boolean b, int riskRuleId, int itemId){
         RiskRuleItem riskRuleItem = new RiskRuleItem();

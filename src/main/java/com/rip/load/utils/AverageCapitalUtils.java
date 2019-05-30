@@ -109,8 +109,10 @@ public class AverageCapitalUtils {
         double yearRate = 0.15; // 年利率
         Map<Integer, Double> getPerMonthPrincipalInterest = getPerMonthPrincipalInterest(invest, yearRate, month);
         System.out.println("等额本金---每月本息：" + getPerMonthPrincipalInterest);
+
         double benjin = getPerMonthPrincipal(invest, month);
         System.out.println("等额本金---每月本金:" + benjin);
+
         Map<Integer, Double> mapInterest = getPerMonthInterest(invest, yearRate, month);
         System.out.println("等额本金---每月利息:" + mapInterest);
 

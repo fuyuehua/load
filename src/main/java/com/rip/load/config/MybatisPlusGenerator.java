@@ -18,7 +18,7 @@ import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 public class MybatisPlusGenerator {
 
     public static void main(String[] args) {
-//        assert (false) : "代码生成属于危险操作，请确定配置后取消断言执行代码生成！";
+        assert (false) : "代码生成属于危险操作，请确定配置后取消断言执行代码生成！";
         AutoGenerator mpg = new AutoGenerator();
         // 选择 freemarker 引擎，默认 Velocity
         mpg.setTemplateEngine(new FreemarkerTemplateEngine());

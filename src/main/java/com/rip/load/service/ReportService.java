@@ -17,4 +17,6 @@ public interface ReportService extends IService<Report> {
     Report setItem(Report report);
 
     Report handleFirstReport(Order order, String remark);
+
+    Report takeFirstReport(Order order);
 }

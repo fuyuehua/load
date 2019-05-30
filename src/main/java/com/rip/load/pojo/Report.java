@@ -57,6 +57,9 @@ public class Report extends Model<Report> {
     @TableField(exist = false)
     private List<Item> itemList;
 
+    @TableField(exist = false)
+    private UserCustomer userCustomer;
+
     public Integer getId() {
         return id;
     }
@@ -116,6 +119,14 @@ public class Report extends Model<Report> {
 
     public void setItemList(List<Item> itemList) {
         this.itemList = itemList;
+    }
+
+    public UserCustomer getUserCustomer() {
+        return userCustomer;
+    }
+
+    public void setUserCustomer(UserCustomer userCustomer) {
+        this.userCustomer = userCustomer;
     }
 
     @Override

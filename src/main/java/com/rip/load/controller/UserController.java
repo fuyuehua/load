@@ -400,8 +400,11 @@ public class UserController {
         userCustomer.setInfoStatus("1");
         userCustomer.setCellphone(readyUser.getPhone());
         boolean insert1 = userCustomerService.insert(userCustomer);
+        List<User> users = new ArrayList<>();
+        users.add(readyUser);
+        users = userService.setRoleAndInfo(users, "0");
         if(insert1){
-            return new ResultUtil<Object>().setData(readyUser);
+            return new ResultUtil<Object>().setData(users.get(0));
         }else{
             return new ResultUtil<Object>().setErrorMsg("注册失败");
         }

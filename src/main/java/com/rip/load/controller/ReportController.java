@@ -49,12 +49,12 @@ public class ReportController {
         if(reportsInDB.size() == 0){
             report = reportService.handleFirstReport(order, remark);
         }else{
-            return new ResultUtil<Object>().setData(reportsInDB.get(0));
+            return new ResultUtil<Object>().setData(reportService.takeFirstReport(order));
         }
         return new ResultUtil<Object>().setData(report);
     }
 
-    /*@ApiOperation(value = "拿到弱授权风控报告")
+   /* @ApiOperation(value = "拿到首次风控报告")
     @GetMapping("/takeReport")
     public Result<Object> takeReport(int orderId, int reportId){
 
