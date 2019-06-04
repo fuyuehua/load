@@ -123,11 +123,10 @@ public class UserCustomerController {
         if(customer == null){
             return new ResultUtil<Object>().setErrorMsg("该用户不存在");
         }
-        if(customer.getInfoStatus().equals("3")){
-            customer.setIdcard(customer.getIdcardIdcard());
+        /*if(customer.getInfoStatus().equals("3")){
             customer.setInfoStatus("4");
             userCustomerService.updateById(customer);
-        }
+        }*/
         return new ResultUtil<Object>().setData(customer);
     }
 

@@ -1,11 +1,15 @@
 package com.rip.load.controller;
 
 
+import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.rip.load.pojo.*;
 import com.rip.load.pojo.nativePojo.Result;
 import com.rip.load.service.*;
 import com.rip.load.utils.ResultUtil;
+import com.rip.load.utils.pdfUtils.OperatorReportPdfUtil;
+import com.rip.load.utils.pdfUtils.TaoBaoReportPdfUtil;
+import com.rip.load.utils.pdfUtils.WindControlReportUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,22 +58,18 @@ public class ReportController {
         return new ResultUtil<Object>().setData(report);
     }
 
-   /* @ApiOperation(value = "拿到首次风控报告")
+    @ApiOperation(value = "拿到首次风控报告")
     @GetMapping("/takeReport")
-    public Result<Object> takeReport(int orderId, int reportId){
-
+    public Result<Object> takeReport(int orderId){
         Order order = orderService.selectById(orderId);
-        int userId = order.getUid();
-        List<Report> reports = reportService.selectList(new EntityWrapper<Report>().eq("user_id", userId));
-        for(Report report : reports){
-            List<RiskRuleItem> result = new ArrayList<>();
-            report = reportService.setItem(report);
-            for(Item item : report.getItemList()) {
-                List<RiskRuleItem> linkList = riskRuleItemService.selectList(new EntityWrapper<RiskRuleItem>().eq("item_id", item.getId()));
-                result = riskRuleItemService.setRiskRule(linkList);
-            }
-            report.setRiskRuleItems(result);
+        if(order == null){
+            return new ResultUtil<Object>().setErrorMsg("此订单不存在");
         }
-        return new ResultUtil<Object>().setData(reports);
-    }*/
+        Report report = reportService.takeFirstReport(order);
+        String json = JSON.toJSONString(report);
+        WindControlReportUtil.windControlReport(json,"D:\\pdf\\1.pdf");
+//        OperatorReportPdfUtil.operatorReport(json,"D:\\pdf\\2.pdf");
+//        TaoBaoReportPdfUtil.taoBaoReport(json,"D:\\pdf\\3.pdf");
+        return new ResultUtil<Object>().setData(report);
+    }
 }

@@ -153,7 +153,7 @@ public class RipServiceImpl implements RipService {
             return resultMap;
         }
         if(suffixUrl.equals("/limu/validate/getResult")){
-            boolean b = handleItemReport(id, json, "11", reportId);
+            boolean b = handleItemReport(id, json, "15", reportId);
             if(b){
                 resultMap.put("result", "1");
                 return resultMap;

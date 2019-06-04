@@ -57,6 +57,7 @@ public class Item extends Model<Item> {
      * 12:身份证拍照
      * 13:银行卡拍照
      * 14:运营商二要素
+     * 15:淘宝
      */
     private String type;
 
