@@ -160,6 +160,15 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
             if (method.equals("personalComplaintInquiryC")) {
                 String s = ripService.personalComplaintInquiryCService(id, report.getId());
             }
+            //车牌号对应车辆属于客户本人
+            if (method.equals("vehicleDetailsEnquiry")) {
+                String s = ripService.vehicleDetailsEnquiryService(id, report.getId());
+            }
+
+            //本人或手机号不在蜜罐黑名单中
+            if (method.equals("honeyportData")) {
+                String s = ripService.honeyportDataService(id, report.getId());
+            }
         }
 
         report = setItem(report);
@@ -254,9 +263,20 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
                     handleRiskRuleItemFlag(b, riskRule.getId(), item.getId());
                     break;
                 }
+                //车牌号对应车辆属于客户本人
+                if (method.equals("vehicleDetailsEnquiry")&&item.getType().equals("4")) {
+                    boolean b = methodService.vehicleDetailsEnquiryCheck(riskRule, item);
+                    handleRiskRuleItemFlag(b, riskRule.getId(), item.getId());
+                    break;
+                }
+                //本人或手机号不在蜜罐黑名单中
+                if (method.equals("honeyportData")&&item.getType().equals("honeyportData")) {
+                    boolean b = methodService.honeyportDataCheck(riskRule, item);
+                    handleRiskRuleItemFlag(b, riskRule.getId(), item.getId());
+                    break;
+                }
             }
         }
-
         List<Integer> listTemp = new ArrayList<>();
         for(Item item : items){
             listTemp.add(item.getId());
@@ -272,6 +292,8 @@ public class ReportServiceImpl extends ServiceImpl<ReportMapper, Report> impleme
     @Override
     public Report takeFirstReport(Order order) {
         Report report = selectOne(new EntityWrapper<Report>().eq("order_id", order.getId()).eq("type",1));
+        if(report == null)
+            return report;
         report = setItem(report);
         List<Item> items = report.getItemList();
         List<Integer> listTemp = new ArrayList<>();

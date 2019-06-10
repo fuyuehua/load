@@ -178,7 +178,7 @@ public class RipController {
     @GetMapping("/vehicleDetailsEnquiry")
     public Result<Object> vehicleDetailsEnquiry(int id) {
 
-        String s = ripService.vehicleDetailsEnquiryService(id);
+        String s = ripService.vehicleDetailsEnquiryService(id,null);
         if(!s.equals("1")){
             return new ResultUtil<Object>().setErrorMsg(s);
         }
@@ -187,7 +187,6 @@ public class RipController {
     @ApiOperation(value = "企业工商数据查询")
     @GetMapping("/businessData")
     public Result<Object> businessData(int id) {
-
         String s = ripService.businessDataService(id, null);
         if(!s.equals("1")){
             return new ResultUtil<Object>().setErrorMsg(s);

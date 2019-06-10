@@ -243,7 +243,7 @@ public class UserCustomer extends Model<UserCustomer> {
     private String infoStatus;
 
     /**
-     *0：等待初审1：初审通过，2初审资料待完善，3初审不通过，4复审通过，5复审不通过6:黑名单
+     *0：等待初审1：初审通过，2初审资料待完善，3初审不通过，4复审通过，5复审不通过, 6:复审资料待完善 7：黑名单
      */
     private Integer status = 0;
 

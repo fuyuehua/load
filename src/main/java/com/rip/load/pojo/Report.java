@@ -51,6 +51,15 @@ public class Report extends Model<Report> {
      */
     private Integer type;
 
+    @TableField("base_url")
+    private String baseUrl;
+
+    @TableField("operator_url")
+    private String operatorUrl;
+
+    @TableField("taobao_url")
+    private String taobaoUrl;
+
     @TableField(exist = false)
     private List<RiskRuleItem> riskRuleItems;
 
@@ -127,6 +136,30 @@ public class Report extends Model<Report> {
 
     public void setUserCustomer(UserCustomer userCustomer) {
         this.userCustomer = userCustomer;
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
+
+    public void setBaseUrl(String baseUrl) {
+        this.baseUrl = baseUrl;
+    }
+
+    public String getOperatorUrl() {
+        return operatorUrl;
+    }
+
+    public void setOperatorUrl(String operatorUrl) {
+        this.operatorUrl = operatorUrl;
+    }
+
+    public String getTaobaoUrl() {
+        return taobaoUrl;
+    }
+
+    public void setTaobaoUrl(String taobaoUrl) {
+        this.taobaoUrl = taobaoUrl;
     }
 
     @Override

@@ -30,25 +30,27 @@ public class OperatorReportPdfUtil {
      * @throws DocumentException
      */
     public static Boolean operatorReport(String json,String savePath) {
-        // 在指定目录下创建一个文件
-        File file = new File(savePath);
         try {
-            file.createNewFile();
-            // 建立一个Document对象
-            Document document = new Document();
-            // 设置页面大小
-            document.setPageSize(PageSize.A4);
-            // 建立一个书写器(Writer)与document对象关联，通过书写器(Writer)可以将文档写入到磁盘中。
-            PdfWriter.getInstance(document, new FileOutputStream(file));
-            document.open();
-
             Map<String, Object> jsonMap = JSON.parseObject(json);
             if (jsonMap.get("code") != null && Integer.valueOf(jsonMap.get("code").toString()) == 200) {
+
                 Map<String, Object> resultMap = JSON.parseObject(jsonMap.get("result").toString());
                 JSONArray itemListArray = JSONArray.parseArray(resultMap.get("itemList").toString());//用户详情
                 for (Object items : itemListArray) {
                     Map<String, Object> itemsMap = JSON.parseObject(String.valueOf(items));
-                    if ("15".equals(String.valueOf(itemsMap.get("type")))) {//运营商信用报告
+                    if ("10".equals(String.valueOf(itemsMap.get("type")))) {//运营商信用报告
+                        // 在指定目录下创建一个文件
+                        File file = new File(savePath);
+                        file.createNewFile();
+                        // 建立一个Document对象
+                        Document document = new Document();
+                        // 设置页面大小
+                        document.setPageSize(PageSize.A4);
+                        // 建立一个书写器(Writer)与document对象关联，通过书写器(Writer)可以将文档写入到磁盘中。
+                        PdfWriter.getInstance(document, new FileOutputStream(file));
+                        document.open();
+
+
                         //从json中取出数据
                         Map<String,Object> resultJsonMap = JSON.parseObject(String.valueOf(itemsMap.get("resultJson")));
                         Map<String,Object> dataMap = JSON.parseObject(resultJsonMap.get("data").toString());
@@ -131,7 +133,7 @@ public class OperatorReportPdfUtil {
                         }
 
                         PdfPTable table = CreateTableUtil.createTable(1);
-                        Image img = Image.getInstance("../img/1.jpg");//图片的地址
+                        Image img = Image.getInstance("../img/homepage.jpg");//图片的地址
                         img.scaleAbsolute(CreateTableUtil.mmTopx(200),CreateTableUtil.mmTopx(297));
                         PdfPCell photoCell = new PdfPCell(img);
                         photoCell.setBorder(0);
@@ -1492,6 +1494,8 @@ public class OperatorReportPdfUtil {
                     }
                 }
             }
+            // 关闭文档
+            //document.close();
             return false;
         }catch (Exception e){
             e.printStackTrace();

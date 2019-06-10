@@ -26,18 +26,7 @@ public class TaoBaoReportPdfUtil {
      * @throws DocumentException
      */
     public static Boolean taoBaoReport(String json,String savePath) {
-        // 在指定目录下创建一个文件
-        File file = new File(savePath);
         try {
-            file.createNewFile();
-            // 建立一个Document对象
-            Document document = new Document();
-            // 设置页面大小
-            document.setPageSize(PageSize.A4);
-            // 建立一个书写器(Writer)与document对象关联，通过书写器(Writer)可以将文档写入到磁盘中。
-            PdfWriter.getInstance(document, new FileOutputStream(file));
-            document.open();
-
             //################################################获取数据############################################################
             Map<String, Object> jsonMap = JSON.parseObject(json);
             if (jsonMap.get("code") != null && Integer.valueOf(jsonMap.get("code").toString()) == 200) {
@@ -46,6 +35,18 @@ public class TaoBaoReportPdfUtil {
                 for (Object items : itemListArray) {
                     Map<String, Object> itemsMap = JSON.parseObject(String.valueOf(items));
                     if ("15".equals(String.valueOf(itemsMap.get("type")))) {//淘宝报告
+
+                        // 在指定目录下创建一个文件
+                        File file = new File(savePath);
+                        file.createNewFile();
+                        // 建立一个Document对象
+                        Document document = new Document();
+                        // 设置页面大小
+                        document.setPageSize(PageSize.A4);
+                        // 建立一个书写器(Writer)与document对象关联，通过书写器(Writer)可以将文档写入到磁盘中。
+                        PdfWriter.getInstance(document, new FileOutputStream(file));
+                        document.open();
+
                         //从json中取出数据
                         Map<String,Object> resultJsonMap = JSON.parseObject(String.valueOf(itemsMap.get("resultJson")));
                         Map<String,Object> dataMap = JSON.parseObject(resultJsonMap.get("data").toString());

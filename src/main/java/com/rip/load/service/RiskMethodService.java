@@ -5,6 +5,9 @@ import com.rip.load.otherPojo.InTheNetworkTime.InTheNetworkTime;
 import com.rip.load.otherPojo.businessData.BreakLaw;
 import com.rip.load.otherPojo.businessData.BusinessData;
 import com.rip.load.otherPojo.businessData.PunishBreaks;
+import com.rip.load.otherPojo.honeyportData.HoneyportData;
+import com.rip.load.otherPojo.honeyportData.Result;
+import com.rip.load.otherPojo.honeyportData.UserBlacklist;
 import com.rip.load.otherPojo.idCardElements.Data;
 import com.rip.load.otherPojo.idCardElements.IdCardElements;
 import com.rip.load.otherPojo.operatorThreeElements.OperatorThreeElements;
@@ -16,6 +19,7 @@ import com.rip.load.otherPojo.personalEnterprise.PersonalEnterprise;
 import com.rip.load.otherPojo.personalEnterprise.Punished;
 import com.rip.load.otherPojo.personalRiskInformation.ListTemp;
 import com.rip.load.otherPojo.personalRiskInformation.PersonalRiskInformation;
+import com.rip.load.otherPojo.vehicleDetailsEnquiry.VehicleDetailsEnquiry;
 import com.rip.load.pojo.Item;
 import com.rip.load.pojo.Report;
 import com.rip.load.pojo.RiskRule;
@@ -57,6 +61,9 @@ public class RiskMethodService {
         String paramA = riskRule.getParamA();
         String paramB = riskRule.getParamB();
         String json = item.getResultJson();
+        if(json.length() != 18){
+            return false;
+        }
         String age = json.substring(6, 14);
         SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
         int ageByBirth = 0;
@@ -276,6 +283,53 @@ public class RiskMethodService {
             }
         }catch (Exception e){
             logger.error("RiskMethodService: personalEnterpriseCheck");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean vehicleDetailsEnquiryCheck(RiskRule riskRule, Item item) {
+        try{
+            String resultJson = item.getResultJson();
+            VehicleDetailsEnquiry vehicleDetailsEnquiry = JSON.parseObject(resultJson, VehicleDetailsEnquiry.class);
+            Boolean success = vehicleDetailsEnquiry.getSuccess();
+            if(!success){
+                return false;
+            }
+            com.rip.load.otherPojo.vehicleDetailsEnquiry.Data data = vehicleDetailsEnquiry.getData();
+            boolean exist = data.getStatus().equals("EXIST");
+            if(exist){
+               return true;
+            }
+        }catch (Exception e){
+            logger.error("RiskMethodService: vehicleDetailsEnquiryCheck");
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean honeyportDataCheck(RiskRule riskRule, Item item) {
+        try{
+            String resultJson = item.getResultJson();
+            HoneyportData honeyportData = JSON.parseObject(resultJson, HoneyportData.class);
+            String code = honeyportData.getCode();
+            if(!code.equals("10000")){
+                return false;
+            }
+            Result result = honeyportData.getResult();
+            Boolean success = result.getSuccess();
+            if(!success){
+                return false;
+            }
+            com.rip.load.otherPojo.honeyportData.Data data = result.getData();
+            UserBlacklist user_blacklist = data.getUser_blacklist();
+            String blacklist_name_with_idcard = user_blacklist.getBlacklist_name_with_idcard();
+            String blacklist_name_with_phone = user_blacklist.getBlacklist_name_with_phone();
+            if(blacklist_name_with_idcard.equals("false") && blacklist_name_with_phone.equals("false")){
+                return true;
+            }
+        }catch (Exception e){
+            logger.error("RiskMethodService: honeyportDataCheck");
             e.printStackTrace();
         }
         return false;

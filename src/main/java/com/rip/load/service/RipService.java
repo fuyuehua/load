@@ -28,7 +28,7 @@ public interface RipService {
 
     String inTheNetworkTimeBService(int id, Integer reportId);
 
-    String vehicleDetailsEnquiryService(int id);
+    String vehicleDetailsEnquiryService(int id, Integer reportId);
 
     String businessDataService(int id, Integer reportId);
 
@@ -37,6 +37,8 @@ public interface RipService {
     String personalRiskInformationService(int id, Integer reportId);
 
     String personalComplaintInquiryCService(int id, Integer reportId);
+
+    String honeyportDataService(int id, Integer reportId);
 
     Map<String, String> idcardPhotoService(int id, Map<String, Object> map, String suffixUrl);
 

@@ -26,34 +26,35 @@ public class WindControlReportUtil {
      * @throws DocumentException
      */
     public static Boolean windControlReport( String json, String savePath ) {
-        // 在指定目录下创建一个文件
-        File file = new File(savePath);
         try {
-            file.createNewFile();
-            // 建立一个Document对象
-            Document document = new Document();
-            // 设置页面大小
-            document.setPageSize(PageSize.A4);
-            // 建立一个书写器(Writer)与document对象关联，通过书写器(Writer)可以将文档写入到磁盘中。
-            PdfWriter.getInstance(document, new FileOutputStream(file));
-            document.open();
-            //################################################封面############################################################
-            PdfPTable table = CreateTableUtil.createTable(1);
-            Image img = Image.getInstance("../img/homepage.jpg");//图片的地址
-            img.scaleAbsolute(CreateTableUtil.mmTopx(200), CreateTableUtil.mmTopx(297));
-            PdfPCell photoCell = new PdfPCell(img);
-            photoCell.setBorder(0);
-            photoCell.setHorizontalAlignment(1);
-            table.addCell(photoCell);
-            document.add(table);
-            //################################################大标题############################################################
-            Paragraph paragraph = new Paragraph("综合风控报告", CreateTableUtil.headfontfirst);
-            paragraph.setAlignment(1);
-            document.add(paragraph);
-            document.add(new Paragraph("\n"));
             //################################################获取数据############################################################
             Map<String, Object> jsonMap = JSON.parseObject(json);
             if (jsonMap.get("code") != null && Integer.valueOf(jsonMap.get("code").toString()) == 200) {
+                // 在指定目录下创建一个文件
+                File file = new File(savePath);
+                file.createNewFile();
+                // 建立一个Document对象
+                Document document = new Document();
+                // 设置页面大小
+                document.setPageSize(PageSize.A4);
+                // 建立一个书写器(Writer)与document对象关联，通过书写器(Writer)可以将文档写入到磁盘中。
+                PdfWriter.getInstance(document, new FileOutputStream(file));
+                document.open();
+                //################################################封面############################################################
+                PdfPTable table = CreateTableUtil.createTable(1);
+                Image img = Image.getInstance("../img/homepage.jpg");//图片的地址
+                img.scaleAbsolute(CreateTableUtil.mmTopx(200), CreateTableUtil.mmTopx(297));
+                PdfPCell photoCell = new PdfPCell(img);
+                photoCell.setBorder(0);
+                photoCell.setHorizontalAlignment(1);
+                table.addCell(photoCell);
+                document.add(table);
+                //################################################大标题############################################################
+                Paragraph paragraph = new Paragraph("综合风控报告", CreateTableUtil.headfontfirst);
+                paragraph.setAlignment(1);
+                document.add(paragraph);
+                document.add(new Paragraph("\n"));
+                
                 Map<String, Object> resultMap = JSON.parseObject(jsonMap.get("result").toString());
                 JSONArray riskRuleItemsArray = JSONArray.parseArray(resultMap.get("riskRuleItems").toString());//风控规则
                 JSONArray itemListArray = JSONArray.parseArray(resultMap.get("itemList").toString());//用户详情
@@ -3861,11 +3862,13 @@ public class WindControlReportUtil {
                 document.add(paragraph);
                 paragraph = new Paragraph("2.睿普征信对本报告不作任何明示或暗示的保证，请您自行承担相关的决策风险。请您按照约定的范围使用本报告，不得将本报告提供给第三人，否则后果自负。\n", CreateTableUtil.textfont);
                 document.add(paragraph);
-
+                // 关闭文档
+                document.close();
+                return true;
             }
             // 关闭文档
-            document.close();
-            return true;
+            //document.close();
+            return false;
         } catch (Exception e) {
             e.printStackTrace();
             return false;

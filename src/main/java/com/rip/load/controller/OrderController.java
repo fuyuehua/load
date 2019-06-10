@@ -100,6 +100,7 @@ public class OrderController {
             temp.add(0);
             temp.add(1);
             temp.add(2);
+            temp.add(6);
         }else if(status == 1){
             temp.add(4);
         }else if(status == 2){
@@ -138,6 +139,7 @@ public class OrderController {
             temp.add(0);
             temp.add(1);
             temp.add(2);
+            temp.add(6);
         }else if(status == 1){
             temp.add(4);
         }else if(status == 2){
@@ -178,6 +180,7 @@ public class OrderController {
             temp.add(0);
             temp.add(1);
             temp.add(2);
+            temp.add(6);
         }else if(status == 1){
             temp.add(4);
         }else if(status == 2){
@@ -220,7 +223,7 @@ public class OrderController {
         if(userId == 0){
             return new ResultUtil<Object>().setErrorMsg("用户ID不能为0");
         }
-        UserCustomer customer = userCustomerService.selectOne(new EntityWrapper<UserCustomer>().eq("user_id", userId));
+        UserCustomer customer = userCustomerService.selectOne(new EntityWrapper<UserCustomer>().eq("userId", userId));
         if(customer == null){
             return new ResultUtil<Object>().setErrorMsg("该客户不存在");
         }
@@ -238,8 +241,8 @@ public class OrderController {
             customer.setStatus(2);
             order.setStatus(2);
         }
-        boolean insert = orderService.insert(order);
-        userCustomerService.updateById(customer);
+        boolean insert = orderService.updateById(order);
+        userCustomerService.update(customer,new EntityWrapper<UserCustomer>().eq("userId", customer.getUserId()));
         if (insert) {
             return new ResultUtil<Object>().set();
         } else {
@@ -251,7 +254,7 @@ public class OrderController {
     @ApiOperation("复审人员审核")
     @GetMapping("/secondCheck")
     public Result<Object> secondCheck(
-            @ApiParam("1:通过 0：不通过") @RequestParam int result,
+            @ApiParam("1:通过 0：不通过 2:资料待完善") @RequestParam int result,
             @ApiParam("填驳回原因") String reason,
             @ApiParam("订单ID") @RequestParam int orderId,
             @ApiParam("允许放贷多少钱") String money
@@ -268,7 +271,7 @@ public class OrderController {
         if(userId == 0){
             return new ResultUtil<Object>().setErrorMsg("用户ID不能为0");
         }
-        UserCustomer customer = userCustomerService.selectOne(new EntityWrapper<UserCustomer>().eq("user_id", userId));
+        UserCustomer customer = userCustomerService.selectOne(new EntityWrapper<UserCustomer>().eq("userId", userId));
         if(customer == null){
             return new ResultUtil<Object>().setErrorMsg("该客户不存在");
         }
@@ -284,9 +287,12 @@ public class OrderController {
             customer.setStatus(5);
             order.setStatus(5);
             order.setFirstRejectReason(reason);
+        }else if(result == 2){
+            customer.setStatus(6);
+            order.setStatus(6);
         }
         String resultStr = orderService.createOrderAndRepayPlan(order);
-        userCustomerService.updateById(customer);
+        userCustomerService.update(customer, new EntityWrapper<UserCustomer>().eq("userId",customer.getUserId()));
 
         if (resultStr.equals("1")) {
             return new ResultUtil<Object>().set();

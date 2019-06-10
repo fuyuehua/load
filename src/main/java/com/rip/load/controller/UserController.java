@@ -637,7 +637,7 @@ public class UserController {
         list.add(2);
         //平台商看到的下级
         User user = UserThreadLocal.get();
-        List<Integer> sonList = userService.getSon4Platform(user);
+        List<Integer> sonList = userService.getCustomer4Platform(user);
 
         Page<User> page = new Page<>(currentPage, pageSize);
         Page<User> userPage = userService.selectPage(page,
@@ -672,7 +672,7 @@ public class UserController {
         list.add(2);
         //渠道商看到的下级
         User user = UserThreadLocal.get();
-        List<Integer> sonList = userService.getSon4Distributor(user);
+        List<Integer> sonList = userService.getCustomer4Distributor(user);
         Page<User> page = new Page<>(currentPage, pageSize);
         Page<User> userPage = userService.selectPage(page,
                 new EntityWrapper<User>()
@@ -681,7 +681,6 @@ public class UserController {
                         .in("id", sonList)
                         .like(!(StringUtils.isEmpty(username)), "nickname", username)
                         .eq(!(StringUtils.isEmpty(phone)), "phone", phone)
-
         );
         List<User> allUser = userPage.getRecords();
         allUser = userService.setRoleAndInfo(allUser,status);

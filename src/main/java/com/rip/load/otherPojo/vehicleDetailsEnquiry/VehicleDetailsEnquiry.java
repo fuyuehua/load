@@ -8,7 +8,7 @@ public class VehicleDetailsEnquiry {
     /**
      * 请求状态（是否成功
      */
-    private String success;
+    private Boolean success;
     /**
      * 唯一订单号
      */
@@ -16,11 +16,11 @@ public class VehicleDetailsEnquiry {
 
     private Data data;
 
-    public String getSuccess() {
+    public Boolean getSuccess() {
         return success;
     }
 
-    public void setSuccess(String success) {
+    public void setSuccess(Boolean success) {
         this.success = success;
     }
 

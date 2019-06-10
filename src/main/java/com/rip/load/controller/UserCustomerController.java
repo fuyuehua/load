@@ -49,6 +49,18 @@ public class UserCustomerController {
         if(user == null){
             return new ResultUtil<Object>().setErrorMsg("该用户不存在");
         }
+        String aRelation = userCustomer.getaRelation();
+        String bRelation = userCustomer.getbRelation();
+        if(!(aRelation.equals("FATHER") || aRelation.equals("MOTHER") || aRelation.equals("SPOUSE") ||
+                aRelation.equals("CHILD") ||aRelation.equals("OTHER_RELATIVE") ||aRelation.equals("FRIEND") ||
+                aRelation.equals("COWORKER") ||aRelation.equals("OTHERS"))){
+            return new ResultUtil<Object>().setErrorMsg("紧急联系人关系A输入错误");
+        }
+        if(!(bRelation.equals("FATHER") || bRelation.equals("MOTHER") || bRelation.equals("SPOUSE") ||
+                bRelation.equals("CHILD") ||bRelation.equals("OTHER_RELATIVE") ||bRelation.equals("FRIEND") ||
+                bRelation.equals("COWORKER") ||bRelation.equals("OTHERS"))){
+            return new ResultUtil<Object>().setErrorMsg("紧急联系人关系B输入错误");
+        }
         if(userCustomer.getInfoStatus().equals("3")){
             userCustomer.setInfoStatus("4");
         }
@@ -84,6 +96,16 @@ public class UserCustomerController {
                 StringUtils.isEmpty(bRelation)
         )
             return new ResultUtil<Object>().setErrorMsg("必填项为空");
+        if(!(aRelation.equals("FATHER") || aRelation.equals("MOTHER") || aRelation.equals("SPOUSE") ||
+                aRelation.equals("CHILD") ||aRelation.equals("OTHER_RELATIVE") ||aRelation.equals("FRIEND") ||
+                aRelation.equals("COWORKER") ||aRelation.equals("OTHERS"))){
+            return new ResultUtil<Object>().setErrorMsg("紧急联系人关系A输入错误");
+        }
+        if(!(bRelation.equals("FATHER") || bRelation.equals("MOTHER") || bRelation.equals("SPOUSE") ||
+                bRelation.equals("CHILD") ||bRelation.equals("OTHER_RELATIVE") ||bRelation.equals("FRIEND") ||
+                bRelation.equals("COWORKER") ||bRelation.equals("OTHERS"))){
+            return new ResultUtil<Object>().setErrorMsg("紧急联系人关系B输入错误");
+        }
         if(userId == 0){
             return new ResultUtil<Object>().setErrorMsg("用户ID不能为空");
         }
@@ -118,7 +140,7 @@ public class UserCustomerController {
         if(userId == 0){
             return new ResultUtil<Object>().setErrorMsg("用户ID不能为0");
         }
-        UserCustomer customer = userCustomerService.selectOne(new EntityWrapper<UserCustomer>().eq("user_id", userId));
+        UserCustomer customer = userCustomerService.selectOne(new EntityWrapper<UserCustomer>().eq("userId", userId));
 
         if(customer == null){
             return new ResultUtil<Object>().setErrorMsg("该用户不存在");
@@ -160,7 +182,7 @@ public class UserCustomerController {
             return new ResultUtil<Object>().setErrorMsg("该用户不存在");
         }
         if(type == 1) {
-            customer.setStatus(6);
+            customer.setStatus(7);
         }else {
             customer.setStatus(0);
         }

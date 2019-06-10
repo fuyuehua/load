@@ -110,7 +110,7 @@ public class RipServiceImpl implements RipService {
             resultMap.put("result", "接口调用失败");
             return resultMap;
         }
-        if(suffixUrl.equals("/operatorCreditReports/report)")){
+        if(suffixUrl.equals("/operatorCreditReports/report")){
 
             boolean b = handleItemReport(id, json, "10", reportId);
             if(b){
@@ -414,7 +414,7 @@ public class RipServiceImpl implements RipService {
     }
 
     @Override
-    public String vehicleDetailsEnquiryService(int id) {
+    public String vehicleDetailsEnquiryService(int id, Integer reportId) {
 
         if(id == 0){
             User user = UserThreadLocal.get();
@@ -441,13 +441,8 @@ public class RipServiceImpl implements RipService {
             return "征信信息获取失败";
         }
 
-        Item item = new Item();
-        item.setResultJson(json);
-        item.setTime(new Date());
-        item.setUserId(id);
-        item.setType("4");
-        boolean insert = itemService.insert(item);
-        if(insert){
+        boolean b = handleItemReport(id, json, "4", reportId);
+        if(b){
             return "1";
         }else{
             return "储存错误";
@@ -588,6 +583,36 @@ public class RipServiceImpl implements RipService {
         }
 
         boolean b = handleItemReport(id, sb.toString(), "9", reportId);
+        if(b){
+            return "1";
+        }else{
+            return "储存错误";
+        }
+    }
+
+    @Override
+    public String honeyportDataService(int id, Integer reportId) {
+
+        if(id == 0){
+            User user = UserThreadLocal.get();
+            id = user.getId();
+        }
+        Map<String, Object> mapReturn = setToken(id);
+        String result = (String) mapReturn.get("result");
+        if(!result.equals("1")){
+            return result;
+        }
+        UserCustomer userCustomer = (UserCustomer) mapReturn.get("customer");
+        Map<String, Object> map = (Map)mapReturn.get("map");
+        map.put("name", userCustomer.getRealname());
+        map.put("idCard", userCustomer.getIdcard());
+        map.put("phone", userCustomer.getCellphone());
+        String suffixUrl = "/honeyportData/result";
+        String json = ripSetTokenService(map, suffixUrl);
+        if(json == null){
+            return "征信信息获取失败";
+        }
+        boolean b = handleItemReport(id, json, "honeyportData", reportId);
         if(b){
             return "1";
         }else{
@@ -745,6 +770,7 @@ public class RipServiceImpl implements RipService {
         map.put("customer", userCustomer);
         return map;
     }
+
 
     /**
      * 处理一下生成的报告单项

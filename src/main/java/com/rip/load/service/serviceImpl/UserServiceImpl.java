@@ -62,14 +62,12 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     @Override
     public boolean createAndSetRole(User readyUser) {
         User user = UserThreadLocal.get();
-
         UserRole userRole = new UserRole();
         Integer type = readyUser.getType();
         userRole.setRid(type);
         if(!(type == 6 || type == 7 || type == 8 || type == 9)){
             return false;
         }
-
         boolean k = insert(readyUser);
         userRole.setUid(readyUser.getId());
         if(!k){
@@ -114,8 +112,24 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setRoleList(role);
         }
         if(list2.size() > 0) {
+            List<Integer> temp =  new ArrayList<>();
+            if(!StringUtils.isEmpty(status)){
+                if(status.equals("0")){
+                    temp.add(0);
+                    temp.add(1);
+                    temp.add(2);
+                    temp.add(6);
+                }else if(status.equals("1")){
+                    temp.add(4);
+                }else if(status.equals("2")){
+                    temp.add(3);
+                    temp.add(5);
+                }else if(status.equals("3")){
+                    temp.add(7);
+                }
+            }
             List<UserCustomer> userCustomers = userCustomerService.selectList(new EntityWrapper<UserCustomer>().in("userId",list2)
-                    .eq(StringUtils.isEmpty(status),"status",status));
+                    .in(StringUtils.isEmpty(status),"status",temp));
             for (UserCustomer k : userCustomers) {
                 for (User user : allUser) {
                     if (k.getUserId().equals(user.getId())) {
@@ -212,6 +226,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
         return resultList;
     }
+
+
 
     @Override
     public List<Integer> getCustomer4Distributor(User user) {

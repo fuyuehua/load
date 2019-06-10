@@ -12,6 +12,7 @@ import com.rip.load.service.RegionProvinceService;
 import com.rip.load.utils.HttpUtil;
 import com.rip.load.utils.ResultUtil;
 import com.rip.load.utils.Test;
+import com.rip.load.utils.qrcode.QRCodeUtil;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.slf4j.Logger;
@@ -126,6 +127,18 @@ public class FileController {
 
         return result;
 
+    }
+
+    @ApiOperation("上传页面地址获得二维码")
+    @PostMapping("/url2qrcode")
+    public Result<Object> url2qrcode(String text, String path){
+        String s = "";
+        try {
+            s = QRCodeUtil.encode2Url(text, path);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return new ResultUtil<Object>().setData(s);
     }
 
 
