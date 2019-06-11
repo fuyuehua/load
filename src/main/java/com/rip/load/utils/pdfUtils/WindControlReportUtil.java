@@ -1,15 +1,18 @@
 package com.rip.load.utils.pdfUtils;
-
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
+
 import com.itextpdf.text.*;
 import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
-
+import com.rip.load.otherPojo.honeyportData.*;
+import com.rip.load.otherPojo.vehicleDetailsEnquiry.VehicleDetailsEnquiry;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -20,7 +23,7 @@ import java.util.Map;
  */
 public class WindControlReportUtil {
     /**
-     * 运营商信用报告
+     * 风控报告
      *
      * @throws IOException
      * @throws DocumentException
@@ -54,104 +57,15 @@ public class WindControlReportUtil {
                 paragraph.setAlignment(1);
                 document.add(paragraph);
                 document.add(new Paragraph("\n"));
-                
+
                 Map<String, Object> resultMap = JSON.parseObject(jsonMap.get("result").toString());
                 JSONArray riskRuleItemsArray = JSONArray.parseArray(resultMap.get("riskRuleItems").toString());//风控规则
                 JSONArray itemListArray = JSONArray.parseArray(resultMap.get("itemList").toString());//用户详情
                 Map<String, Object> userCustomerMap = JSON.parseObject(String.valueOf(resultMap.get("userCustomer")));//用户基本信息
-                //################################################风控规则############################################################
-                table = CreateTableUtil.createTable(6);
-                float[] bisicInfocolumnWidths = {1f, 1f, 1f, 1f, 1f, 1f};
-                table.setWidths(bisicInfocolumnWidths);
-                //######第一行内容######
-                PdfPCell cell = CreateTableUtil.createCell("风控规则", CreateTableUtil.headfontsecond); //表格中添加的文字
-                cell.setColspan(6); //合并列
-                cell.setBackgroundColor(CreateTableUtil.tatleTitle); //表格底色
-                table.addCell(cell);
 
-                cell = CreateTableUtil.createCell("规则说明", CreateTableUtil.textfont);
-                cell.setBackgroundColor(CreateTableUtil.tableBody);//表格底色
-                cell.setColspan(4);
-                table.addCell(cell);
-                cell = CreateTableUtil.createCell("分值", CreateTableUtil.textfont);
-                cell.setBackgroundColor(CreateTableUtil.tableBody);//表格底色
-                table.addCell(cell);
-                cell = CreateTableUtil.createCell("测评结果", CreateTableUtil.textfont);
-                cell.setBackgroundColor(CreateTableUtil.tableBody);//表格底色
-                table.addCell(cell);
-
-                for (Object riskRuleItems : riskRuleItemsArray) {
-                    Map<String, Object> riskRuleItemsMap = JSON.parseObject(String.valueOf(riskRuleItems));
-                    Map<String, Object> riskRuleMap = JSON.parseObject(String.valueOf(riskRuleItemsMap.get("riskRule")));
-                    Map<String, Object> ruleMap = JSON.parseObject(String.valueOf(riskRuleMap.get("rule")));
-                    String info = "";//规则
-                    String grade = ""; //分值
-                    String flag = ""; //是否通过（1：通过，0：不通过）
-                    if ("ageCheck".equals(String.valueOf(ruleMap.get("method")))) {//年龄验证
-                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA"))).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramB")));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("idCardElements".equals(String.valueOf(ruleMap.get("method")))) {//身份证核验
-                        info = String.valueOf(ruleMap.get("info"));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("operatorThreeElements".equals(String.valueOf(ruleMap.get("method")))) {//客户运营商三要素
-                        info = String.valueOf(ruleMap.get("info"));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("operatorTwoElementsA".equals(String.valueOf(ruleMap.get("method")))) {//紧急联系人A运营商三要素
-                        info = String.valueOf(ruleMap.get("info"));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("operatorTwoElementsB".equals(String.valueOf(ruleMap.get("method")))) {//紧急联系人B运营商三要素
-                        info = String.valueOf(ruleMap.get("info"));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("inTheNetworkTime".equals(String.valueOf(ruleMap.get("method")))) {//手机在网时长
-                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("inTheNetworkTimeA".equals(String.valueOf(ruleMap.get("method")))) {//紧急联系人A手机在网时长
-                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("inTheNetworkTimeB".equals(String.valueOf(ruleMap.get("method")))) {//紧急联系人B手机在网时长
-                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("personalEnterprise".equals(String.valueOf(ruleMap.get("method")))) {//个人名下关联企业起诉
-                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("personalEnterprise2".equals(String.valueOf(ruleMap.get("method")))) {//个人名下关联企业行政处罚
-                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("businessData".equals(String.valueOf(ruleMap.get("method")))) {//企业工商数据查询起诉
-                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("businessData2".equals(String.valueOf(ruleMap.get("method")))) {//企业工商数据查询行政处罚
-                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("businessData3".equals(String.valueOf(ruleMap.get("method")))) {//企业工商数据查询严重违法
-                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    } else if ("personalComplaintInquiryC".equals(String.valueOf(ruleMap.get("method")))) {//个人涉诉
-                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
-                        grade = String.valueOf(riskRuleMap.get("grade"));
-                    }
-
-                    Font font;
-                    if ("1".equals(String.valueOf(riskRuleItemsMap.get("flag")))) {
-                        flag = "通过";
-                        font = CreateTableUtil.textGreenFont;
-                    } else {
-                        flag = "不通过";
-                        font = CreateTableUtil.textRedFont;
-                    }
-                    cell = CreateTableUtil.createCell(info, CreateTableUtil.textfont);
-                    cell.setColspan(4);
-                    table.addCell(cell);
-                    cell = CreateTableUtil.createCell(grade, CreateTableUtil.textfont);
-                    table.addCell(cell);
-                    cell = CreateTableUtil.createCell(flag, font);
-                    table.addCell(cell);
-                }
-                document.add(table);
                 //################################################基本验证############################################################
                 table = CreateTableUtil.createTable(6);
-                table.setSpacingBefore(5f); //和上一个表格间距5f
-                cell = CreateTableUtil.createCell("基本验证", CreateTableUtil.headfontsecond); //表格中添加的文字
+                PdfPCell cell = CreateTableUtil.createCell("基本信息", CreateTableUtil.headfontsecond); //表格中添加的文字
                 cell.setColspan(6); //合并列
                 cell.setBackgroundColor(CreateTableUtil.tatleTitle); //表格底色
                 table.addCell(cell);
@@ -484,6 +398,557 @@ public class WindControlReportUtil {
                     }
                 }
                 document.add(table);
+
+                //################################################风控规则############################################################
+                table = CreateTableUtil.createTable(6);
+                table.setSpacingBefore(5f); //和上一个表格间距5f
+//                float[] bisicInfocolumnWidths = {1f, 1f, 1f, 1f, 1f, 1f};
+//                table.setWidths(bisicInfocolumnWidths);
+                //######第一行内容######
+                cell = CreateTableUtil.createCell("风控规则", CreateTableUtil.headfontsecond); //表格中添加的文字
+                cell.setColspan(6); //合并列
+                cell.setBackgroundColor(CreateTableUtil.tatleTitle); //表格底色
+                table.addCell(cell);
+
+                cell = CreateTableUtil.createCell("规则说明", CreateTableUtil.textfont);
+                cell.setBackgroundColor(CreateTableUtil.tableBody);//表格底色
+                cell.setColspan(4);
+                table.addCell(cell);
+                cell = CreateTableUtil.createCell("分值", CreateTableUtil.textfont);
+                cell.setBackgroundColor(CreateTableUtil.tableBody);//表格底色
+                table.addCell(cell);
+                cell = CreateTableUtil.createCell("测评结果", CreateTableUtil.textfont);
+                cell.setBackgroundColor(CreateTableUtil.tableBody);//表格底色
+                table.addCell(cell);
+
+                for (Object riskRuleItems : riskRuleItemsArray) {
+                    Map<String, Object> riskRuleItemsMap = JSON.parseObject(String.valueOf(riskRuleItems));
+                    Map<String, Object> riskRuleMap = JSON.parseObject(String.valueOf(riskRuleItemsMap.get("riskRule")));
+                    Map<String, Object> ruleMap = JSON.parseObject(String.valueOf(riskRuleMap.get("rule")));
+                    String info = "";//规则
+                    String grade = ""; //分值
+                    String f = ""; //是否通过（1：通过，0：不通过）
+                    if ("ageCheck".equals(String.valueOf(ruleMap.get("method")))) {//年龄验证
+                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA"))).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramB")));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("idCardElements".equals(String.valueOf(ruleMap.get("method")))) {//身份证核验
+                        info = String.valueOf(ruleMap.get("info"));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("operatorThreeElements".equals(String.valueOf(ruleMap.get("method")))) {//客户运营商三要素
+                        info = String.valueOf(ruleMap.get("info"));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("operatorTwoElementsA".equals(String.valueOf(ruleMap.get("method")))) {//紧急联系人A运营商三要素
+                        info = String.valueOf(ruleMap.get("info"));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("operatorTwoElementsB".equals(String.valueOf(ruleMap.get("method")))) {//紧急联系人B运营商三要素
+                        info = String.valueOf(ruleMap.get("info"));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("inTheNetworkTime".equals(String.valueOf(ruleMap.get("method")))) {//手机在网时长
+                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("inTheNetworkTimeA".equals(String.valueOf(ruleMap.get("method")))) {//紧急联系人A手机在网时长
+                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("inTheNetworkTimeB".equals(String.valueOf(ruleMap.get("method")))) {//紧急联系人B手机在网时长
+                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("personalEnterprise".equals(String.valueOf(ruleMap.get("method")))) {//个人名下关联企业起诉
+                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("personalEnterprise2".equals(String.valueOf(ruleMap.get("method")))) {//个人名下关联企业行政处罚
+                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("businessData".equals(String.valueOf(ruleMap.get("method")))) {//企业工商数据查询起诉
+                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("businessData2".equals(String.valueOf(ruleMap.get("method")))) {//企业工商数据查询行政处罚
+                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("businessData3".equals(String.valueOf(ruleMap.get("method")))) {//企业工商数据查询严重违法
+                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    } else if ("personalComplaintInquiryC".equals(String.valueOf(ruleMap.get("method")))) {//个人涉诉
+                        info = String.valueOf(ruleMap.get("info")).replaceFirst("\\*param\\*", String.valueOf(riskRuleMap.get("paramA")));
+                        grade = String.valueOf(riskRuleMap.get("grade"));
+                    }
+
+                    Font font;
+                    if ("1".equals(String.valueOf(riskRuleItemsMap.get("flag")))) {
+                        f = "通过";
+                        font = CreateTableUtil.textGreenFont;
+                    } else {
+                        f = "不通过";
+                        font = CreateTableUtil.textRedFont;
+                    }
+                    cell = CreateTableUtil.createCell(info, CreateTableUtil.textfont);
+                    cell.setColspan(4);
+                    table.addCell(cell);
+                    cell = CreateTableUtil.createCell(grade, CreateTableUtil.textfont);
+                    table.addCell(cell);
+                    cell = CreateTableUtil.createCell(f, font);
+                    table.addCell(cell);
+                }
+                document.add(table);
+
+                //################################################蜜罐数据############################################################
+                table = CreateTableUtil.createTable(8);
+                table.setSpacingBefore(5f); //和上一个表格间距5f
+                cell = CreateTableUtil.createCell("综合风险", CreateTableUtil.headfontsecond); //表格中添加的文字
+                cell.setColspan(8); //合并列
+                cell.setBackgroundColor(CreateTableUtil.tatleTitle); //表格底色
+                table.addCell(cell);
+
+                num = 0;
+                flag = true;
+                for (Object item : itemListArray) {
+                    Map<String, Object> itemMap = JSON.parseObject(String.valueOf(item));
+                    if ("honeyportData".equals(String.valueOf(itemMap.get("type")))) {//蜜罐数据
+                        HoneyportData honeyportData = JSONObject.parseObject(String.valueOf(itemMap.get("resultJson")),HoneyportData.class);
+                        if("10000".equals(honeyportData.getCode())) {
+                            Result result = honeyportData.getResult();
+                            Data data = result.getData();
+                            if (result.getSuccess()) {
+//                                cell = CreateTableUtil.createCell("蜜罐编号",  CreateTableUtil.textfont); //表格中添加的文字
+//                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+//                                table.addCell(cell);
+//                                cell = CreateTableUtil.createCell(data.getUser_grid_id(),  CreateTableUtil.textfont); //表格中添加的文字
+//                                cell.setColspan(3);
+//                                table.addCell(cell);
+//                                cell = CreateTableUtil.createCell("授权机构",  CreateTableUtil.textfont); //表格中添加的文字
+//                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+//                                table.addCell(cell);
+//                                cell = CreateTableUtil.createCell(data.getAuth_org(),  CreateTableUtil.textfont); //表格中添加的文字
+//                                cell.setColspan(3);
+//                                table.addCell(cell);
+                                UserBasic userBasic = data.getUser_basic();//基本信息
+                                cell = CreateTableUtil.createCell("基本信息", CreateTableUtil.keyLightBlue); //表格中添加的文字
+                                cell.setColspan(8); //合并列
+                                table.addCell(cell);
+
+                                cell = CreateTableUtil.createCell("姓名",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBasic.getUser_name(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("年龄",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBasic.getUser_age(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+
+                                cell = CreateTableUtil.createCell("性别",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBasic.getUser_gender(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("身份证号",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBasic.getUser_idcard(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+
+                                cell = CreateTableUtil.createCell("城市",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBasic.getUser_city(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("身份证是否有效",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("true".equals(userBasic.getUser_idcard_valid())?"是":"否",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+
+                                cell = CreateTableUtil.createCell("出生省份",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBasic.getUser_phone_province(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("出生城市",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBasic.getUser_city(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+
+                                cell = CreateTableUtil.createCell("手机号",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBasic.getUser_phone(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("手机号城市",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBasic.getUser_phone_city(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+
+                                cell = CreateTableUtil.createCell("运营商",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBasic.getUser_phone_operator(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("手机号归属地",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBasic.getUser_phone_province(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+
+                                UserBlacklist userBlacklist = data.getUser_blacklist();//黑名单信息
+                                cell = CreateTableUtil.createCell("黑名单信息", CreateTableUtil.keyLightBlue); //表格中添加的文字
+                                cell.setColspan(8); //合并列
+                                table.addCell(cell);
+
+                                cell = CreateTableUtil.createCell("身份证和姓名是否在黑名单",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("true".equals(userBlacklist.getBlacklist_name_with_idcard())?"是":"否",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("更新时间",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBlacklist.getBlacklist_update_time_name_idcard(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+
+                                List<String> blacklistCategoryList = userBlacklist.getBlacklist_category();//黑名单类型
+                                if(blacklistCategoryList.size()>0){
+                                    num = 0;
+                                    StringBuilder stb = new StringBuilder();
+                                    for(String blacklistCategory:blacklistCategoryList){
+                                        if(num > 0){
+                                            stb.append("，");
+                                        }
+                                        stb.append(blacklistCategory);
+                                        num++;
+                                    }
+                                    cell = CreateTableUtil.createCell("黑名单类型",  CreateTableUtil.textfont); //表格中添加的文字
+                                    cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                    table.addCell(cell);
+                                    cell = CreateTableUtil.createCell(stb.toString(),  CreateTableUtil.textfont); //表格中添加的文字
+                                    cell.setColspan(7);
+                                    table.addCell(cell);
+                                }
+
+                                cell = CreateTableUtil.createCell("手机号和姓名是否在黑名单",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("true".equals(userBlacklist.getBlacklist_name_with_phone())?"是":"否",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("更新时间",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userBlacklist.getBlacklist_update_time_name_phone(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+
+                                List<BlacklistDetails> blacklistDetailsList = userBlacklist.getBlacklist_details();
+                                if(blacklistDetailsList.size()>0){
+                                    for(BlacklistDetails blacklistDetails:blacklistDetailsList){
+                                        cell = CreateTableUtil.createCell(blacklistDetails.getDetails_key(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(blacklistDetails.getDetails_value(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(7);
+                                        table.addCell(cell);
+                                    }
+                                }
+
+                                UserGray userGray = data.getUser_gray();//灰度分
+                                cell = CreateTableUtil.createCell("灰度分", CreateTableUtil.keyLightBlue); //表格中添加的文字
+                                cell.setColspan(8); //合并列
+                                table.addCell(cell);
+
+                                cell = CreateTableUtil.createCell("手机号",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userGray.getUser_phone(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(5);
+                                table.addCell(cell);
+
+                                cell = CreateTableUtil.createCell("一阶联系人总数",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userGray.getContacts_class1_cnt(),  CreateTableUtil.textfont); //表格中添加的文字
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("直接联系人在黑名单的数量",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userGray.getContacts_class1_blacklist_cnt(),  CreateTableUtil.textfont); //表格中添加的文字
+                                table.addCell(cell);
+
+                                cell = CreateTableUtil.createCell("间接联系人在黑名单的数量",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userGray.getContacts_class2_blacklist_cnt(),  CreateTableUtil.textfont); //表格中添加的文字
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("引起二阶黑名单人数",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userGray.getContacts_router_cnt(),  CreateTableUtil.textfont); //表格中添加的文字
+                                table.addCell(cell);
+
+                                cell = CreateTableUtil.createCell("引起占比(引起二阶黑名单人数/一阶联系人总数)",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userGray.getContacts_router_ratio(),  CreateTableUtil.textfont); //表格中添加的文字
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("灰度分",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userGray.getPhone_gray_score(),  CreateTableUtil.textfont); //表格中添加的文字
+                                table.addCell(cell);
+
+
+                                UserIdcardIuspicion userIdcardIuspicion = data.getUser_idcard_suspicion();//身份证存疑
+                                List<IdcardWithOtherNames> idcardWithOtherNamesList = userIdcardIuspicion.getIdcard_with_other_names();//用这个身份证号码绑定的其他姓名
+                                if(idcardWithOtherNamesList.size()>0){
+                                    cell = CreateTableUtil.createCell("身份证绑定的其他姓名", CreateTableUtil.keyLightBlue); //表格中添加的文字
+                                    cell.setColspan(8); //合并列
+                                    table.addCell(cell);
+                                    for(IdcardWithOtherNames idcardWithOtherNames:idcardWithOtherNamesList){
+                                        cell = CreateTableUtil.createCell("绑定姓名",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(idcardWithOtherNames.getSusp_name(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell("更新时间",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(idcardWithOtherNames.getSusp_updt(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                    }
+                                }
+
+                                List<IdcardWithOtherPhones> idcardWithOtherPhonesList = userIdcardIuspicion.getIdcard_with_other_phones();//身份证绑定的其他手机号码
+                                if(idcardWithOtherPhonesList.size()>0){
+                                    cell = CreateTableUtil.createCell("身份证绑定的其他手机号码", CreateTableUtil.keyLightBlue); //表格中添加的文字
+                                    cell.setColspan(8); //合并列
+                                    table.addCell(cell);
+                                    for(IdcardWithOtherPhones idcardWithOtherPhones:idcardWithOtherPhonesList){
+                                        cell = CreateTableUtil.createCell("手机号码",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(idcardWithOtherPhones.getSusp_phone(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(7);
+                                        table.addCell(cell);
+
+                                        cell = CreateTableUtil.createCell("运营商",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(idcardWithOtherPhones.getSusp_phone_operator(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell("手机号城市",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(idcardWithOtherPhones.getSusp_phone_city(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+
+                                        cell = CreateTableUtil.createCell("手机号归属地",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(idcardWithOtherPhones.getSusp_phone_province(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell("更新时间",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(idcardWithOtherPhones.getSusp_updt(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                    }
+                                }
+
+                                List<IdcardAppliedInOrgs> idcardAppliedInOrgsList = userIdcardIuspicion.getIdcard_applied_in_orgs();//身份证在那些类型的机构中使用过
+                                if(idcardAppliedInOrgsList.size()>0){
+                                    cell = CreateTableUtil.createCell("身份证在那些类型的机构中使用过", CreateTableUtil.keyLightBlue); //表格中添加的文字
+                                    cell.setColspan(8); //合并列
+                                    table.addCell(cell);
+                                    for (IdcardAppliedInOrgs idcardAppliedInOrgs:idcardAppliedInOrgsList){
+                                        cell = CreateTableUtil.createCell("机构所属分类",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(idcardAppliedInOrgs.getSusp_org_type(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell("更新时间",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(idcardAppliedInOrgs.getSusp_updt(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                    }
+                                }
+
+                                UserPhoneSuspicion userPhoneSuspicion = data.getUser_phone_suspicion();//手机号存疑
+                                List<PhoneWithOtherIdcards> phoneWithOtherIdcardsList = userPhoneSuspicion.getPhone_with_other_idcards(); //手机号码绑定的其他身份证
+                                if(phoneWithOtherIdcardsList.size()>0){
+                                    cell = CreateTableUtil.createCell("手机号码绑定的其他身份证", CreateTableUtil.keyLightBlue); //表格中添加的文字
+                                    cell.setColspan(8); //合并列
+                                    table.addCell(cell);
+                                    for(PhoneWithOtherIdcards phoneWithOtherIdcards:phoneWithOtherIdcardsList){
+                                        cell = CreateTableUtil.createCell("身份证号",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(phoneWithOtherIdcards.getSusp_idcard(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell("更新时间",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(phoneWithOtherIdcards.getSusp_updt(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                    }
+                                }
+
+                                List<PhoneWithOtherNames> phoneWithOtherNamesList = userPhoneSuspicion.getPhone_with_other_names(); //手机号码绑定的其他姓名
+                                if(phoneWithOtherNamesList.size()>0){
+                                    cell = CreateTableUtil.createCell("手机号码绑定的其他身份证", CreateTableUtil.keyLightBlue); //表格中添加的文字
+                                    cell.setColspan(8); //合并列
+                                    table.addCell(cell);
+                                    for(PhoneWithOtherNames phoneWithOtherNames:phoneWithOtherNamesList){
+                                        cell = CreateTableUtil.createCell("身份证号",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(phoneWithOtherNames.getSusp_name(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell("更新时间",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(phoneWithOtherNames.getSusp_updt(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                    }
+                                }
+
+                                List<PhoneAppliedInOrgs> phoneAppliedInOrgsList = userPhoneSuspicion.getPhone_applied_in_orgs(); //手机号码在那些类型的机构中使用过
+                                if(phoneAppliedInOrgsList.size()>0){
+                                    cell = CreateTableUtil.createCell("手机号码在那些类型的机构中使用过", CreateTableUtil.keyLightBlue); //表格中添加的文字
+                                    cell.setColspan(8); //合并列
+                                    table.addCell(cell);
+                                    for(PhoneAppliedInOrgs phoneAppliedInOrgs:phoneAppliedInOrgsList){
+                                        cell = CreateTableUtil.createCell("身份证号",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(phoneAppliedInOrgs.getSusp_org_type(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell("更新时间",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(phoneAppliedInOrgs.getSusp_updt(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                    }
+                                }
+
+                                List<UserSearchedHistoryByOrgs> userSearchedHistoryByOrgsList = data.getUser_searched_history_by_orgs(); //用户被机构查询历史
+                                if(userSearchedHistoryByOrgsList.size()>0){
+                                    cell = CreateTableUtil.createCell("用户被机构查询历史", CreateTableUtil.keyLightBlue); //表格中添加的文字
+                                    cell.setColspan(8); //合并列
+                                    table.addCell(cell);
+                                    for(UserSearchedHistoryByOrgs userSearchedHistoryByOrgs:userSearchedHistoryByOrgsList){
+                                        cell = CreateTableUtil.createCell("机构类型",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(userSearchedHistoryByOrgs.getSearched_org(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(2);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell("更新时间",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(userSearchedHistoryByOrgs.getSearched_date(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell("是否是本机构查询",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(2);
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell("true".equals(userSearchedHistoryByOrgs.getOrg_self())?"是":"否",  CreateTableUtil.textfont); //表格中添加的文字
+                                        table.addCell(cell);
+                                    }
+                                    UserSearchedStatistic userSearchedStatistic = data.getUser_searched_statistic();//被机构查询数量
+                                    cell = CreateTableUtil.createCell("被机构查询数量",  CreateTableUtil.textfont); //表格中添加的文字
+                                    cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                    table.addCell(cell);
+                                    cell = CreateTableUtil.createCell(userSearchedStatistic.getSearched_org_cnt(),  CreateTableUtil.textfont); //表格中添加的文字
+                                    cell.setColspan(7);
+                                    table.addCell(cell);
+                                }
+
+                                UserRegisterOrgs userRegisterOrgs = data.getUser_register_orgs();//用户注册信息情况
+                                List<RegisterOrgs> registerOrgsList = userRegisterOrgs.getRegister_orgs();//注册机构
+                                List<RegisterOrgsStatistics> registerOrgsStatisticsList = userRegisterOrgs.getRegister_orgs_statistics();//统计
+                                cell = CreateTableUtil.createCell("用户注册信息情况", CreateTableUtil.keyLightBlue); //表格中添加的文字
+                                cell.setColspan(8); //合并列
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("手机号",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userRegisterOrgs.getPhone_num(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell("计数",  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                table.addCell(cell);
+                                cell = CreateTableUtil.createCell(userRegisterOrgs.getRegister_cnt(),  CreateTableUtil.textfont); //表格中添加的文字
+                                cell.setColspan(3);
+                                table.addCell(cell);
+                                if(registerOrgsList.size()>0){
+                                    //TODO 注册结构
+                                }
+                                if (registerOrgsStatisticsList.size()>0){
+                                    for(RegisterOrgsStatistics registerOrgsStatistics:registerOrgsStatisticsList){
+                                        cell = CreateTableUtil.createCell("计数",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(registerOrgsStatistics.getCount(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell("类型",  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setBackgroundColor(CreateTableUtil.tableBody);
+                                        table.addCell(cell);
+                                        cell = CreateTableUtil.createCell(registerOrgsStatistics.getLabel(),  CreateTableUtil.textfont); //表格中添加的文字
+                                        cell.setColspan(3);
+                                        table.addCell(cell);
+                                    }
+                                }
+                                flag = false;
+                            }
+                        }
+                    }
+                    num ++;
+                    if(flag && num >= itemListArray.size()){
+                        cell = CreateTableUtil.createCell("无数据", CreateTableUtil.textfont); //表格中添加的文字
+                        cell.setColspan(8); //合并列
+                        table.addCell(cell);
+                    }
+                }
+                document.add(table);
+
                 //################################################企业工商数据############################################################
                 table = CreateTableUtil.createTable(8);
                 table.setSpacingBefore(5f); //和上一个表格间距5f
@@ -3852,6 +4317,388 @@ public class WindControlReportUtil {
                     }
                 }
                 document.add(table);
+
+                //################################################车辆详情############################################################
+                table = CreateTableUtil.createTable(8);
+                table.setSpacingBefore(5f); //和上一个表格间距5f
+                cell = CreateTableUtil.createCell("车辆详情", CreateTableUtil.headfontsecond); //表格中添加的文字
+                cell.setColspan(8); //合并列
+                cell.setBackgroundColor(CreateTableUtil.tatleTitle); //表格底色
+                table.addCell(cell);
+
+                num = 0;
+                flag = true;
+                for (Object item : itemListArray) {
+                    Map<String, Object> itemMap = JSON.parseObject(String.valueOf(item));
+                    if ("4".equals(String.valueOf(itemMap.get("type")))) {//车辆详情
+                        VehicleDetailsEnquiry vehicleDetailsEnquiry = JSONObject.parseObject(String.valueOf(itemMap.get("resultJson")),VehicleDetailsEnquiry.class);
+                        if(vehicleDetailsEnquiry.getSuccess()){
+                            com.rip.load.otherPojo.vehicleDetailsEnquiry.Data vehicleDetailsEnquiryData = vehicleDetailsEnquiry.getData();
+                            cell = CreateTableUtil.createCell("查询状态",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            String status = "";
+                            if ("EXIST".equals(vehicleDetailsEnquiryData.getStatus())){
+                                status = "查询成功";
+                            } else if("NO_DATA".equals(vehicleDetailsEnquiryData.getStatus())){
+                                status = "无数据";
+                            } else if("DIFFERENT".equals(vehicleDetailsEnquiryData.getStatus())){
+                                status = "姓名不匹配";
+                            } else if("NOT_MATCH".equals(vehicleDetailsEnquiryData.getStatus())){
+                                status = "参数不正确";
+                            }
+                            cell = CreateTableUtil.createCell(status,  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(7);
+                            table.addCell(cell);
+
+                            cell = CreateTableUtil.createCell("车辆所有人",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getOwner(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(7);
+                            table.addCell(cell);
+
+                            cell = CreateTableUtil.createCell("车牌号",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getLicensePlate(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            int type = Integer.valueOf(vehicleDetailsEnquiryData.getLicensePlateType());
+                            String licensePlateType = "";
+                            switch (type){
+                                case 1:
+                                    licensePlateType = "大型汽车";
+                                    break;
+                                case 2:
+                                    licensePlateType = "小型汽车";
+                                    break;
+                                case 3:
+                                    licensePlateType = "使馆汽车";
+                                    break;
+                                case 4:
+                                    licensePlateType = "领馆汽车";
+                                    break;
+                                case 5:
+                                    licensePlateType = "境外汽车";
+                                    break;
+                                case 6:
+                                    licensePlateType = "外籍汽车";
+                                    break;
+                                case 7:
+                                    licensePlateType = "普通摩托车";
+                                    break;
+                                case 8:
+                                    licensePlateType = "轻便摩托车";
+                                    break;
+                                case 9:
+                                    licensePlateType = "使馆摩托车";
+                                    break;
+                                case 10:
+                                    licensePlateType = "领馆摩托车";
+                                    break;
+                                case 11:
+                                    licensePlateType = "境外摩托车";
+                                    break;
+                                case 12:
+                                    licensePlateType = "外籍摩托车";
+                                    break;
+                                case 13:
+                                    licensePlateType = "低速车";
+                                    break;
+                                case 14:
+                                    licensePlateType = "拖拉机";
+                                    break;
+                                case 15:
+                                    licensePlateType = "挂车";
+                                    break;
+                                case 16:
+                                    licensePlateType = "教练汽车";
+                                    break;
+                                case 17:
+                                    licensePlateType = "教练摩托车";
+                                    break;
+                                case 20:
+                                    licensePlateType = "临时入境汽车";
+                                    break;
+                                case 21:
+                                    licensePlateType = "临时入境摩托车";
+                                    break;
+                                case 22:
+                                    licensePlateType = "临时行驶车";
+                                    break;
+                                case 23:
+                                    licensePlateType = "警用汽车";
+                                    break;
+                                case 24:
+                                    licensePlateType = "大型汽车";
+                                    break;
+                            }
+                            cell = CreateTableUtil.createCell("车牌类型",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(licensePlateType,  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            cell = CreateTableUtil.createCell("车辆品牌名称",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getBrands(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell("车辆型号",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getVehicleModel(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            cell = CreateTableUtil.createCell("车架号",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getVIN(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell("发动机号",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getEngineNo(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            cell = CreateTableUtil.createCell("车辆类型",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            String vehicleType = "";
+                            switch (vehicleDetailsEnquiryData.getVehicleType()){
+                                case "K21":
+                                    vehicleType = "中型普通客车";
+                                    break;
+                                case "K22":
+                                    vehicleType = "中型双层客车";
+                                    break;
+                                case "K23":
+                                    vehicleType = "中型卧铺客车";
+                                    break;
+                                case "K24":
+                                    vehicleType = "中型铰接客车";
+                                    break;
+                                case "K25":
+                                    vehicleType = "中型越野客车";
+                                    break;
+                                case "K26":
+                                    vehicleType = "中型轿车";
+                                    break;
+                                case "K27":
+                                    vehicleType = "中型专用客车";
+                                    break;
+                                case "K28":
+                                    vehicleType = "中型专用校车";
+                                    break;
+                                case "K31":
+                                    vehicleType = "小型普通客车";
+                                    break;
+                                case "K32":
+                                    vehicleType = "小型越野客车";
+                                    break;
+                                case "K33":
+                                    vehicleType = "小型轿车";
+                                    break;
+                                case "K34":
+                                    vehicleType = "小型专用客车";
+                                    break;
+                                case "K38":
+                                    vehicleType = "小型专用校车";
+                                    break;
+                                case "K41":
+                                    vehicleType = "微型普通客车";
+                                    break;
+                                case "K42":
+                                    vehicleType = "微型越野客车";
+                                    break;
+                                case "K43":
+                                    vehicleType = "微型轿车";
+                                    break;
+                                default:
+                                    vehicleType = "";
+                                    break;
+
+                            }
+                            cell = CreateTableUtil.createCell(vehicleType,  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell("车身颜色",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getVehicleColor(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            cell = CreateTableUtil.createCell("使用性质",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getUsingCharacter(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell("初次登记日期",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getRegisterDate(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            cell = CreateTableUtil.createCell("检验有效期止",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getValidTo(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell("强制报废时间",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getScrapTo(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            String vehicleStatus = "";
+                            switch (vehicleDetailsEnquiryData.getVehicleStatus()){
+                                case "A": vehicleStatus = "正常";break;
+                                case "B": vehicleStatus = "转出";break;
+                                case "C": vehicleStatus = "被盗抢";break;
+                                case "D": vehicleStatus = "停驶";break;
+                                case "E": vehicleStatus = "注销";break;
+                                case "G": vehicleStatus = "违法未处理";break;
+                                case "H": vehicleStatus = "海关监管";break;
+                                case "I": vehicleStatus = "事故未处理";break;
+                                case "J": vehicleStatus = "嫌疑车";break;
+                                case "K": vehicleStatus = "查封";break;
+                                case "L": vehicleStatus = "暂扣";break;
+                                case "M": vehicleStatus = "强制注销";break;
+                                case "N": vehicleStatus = "事故逃逸";break;
+                                case "O": vehicleStatus = "锁定";break;
+                                case "P": vehicleStatus = "机动车达到报废标准，公告牌作废";break;
+                                case "Q": vehicleStatus = "逾期未检验";break;
+                            }
+                            cell = CreateTableUtil.createCell("机动车状态",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleStatus,  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell("发动机型号",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getEngineType(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            String fuelType = "";
+                            switch (vehicleDetailsEnquiryData.getFuelType()){
+                                case "A":fuelType = "汽油";break;
+                                case "B":fuelType = "柴油";break;
+                                case "C":fuelType = "电驱动";break;
+                                case "D":fuelType = "混合油";break;
+                                case "E":fuelType = "天然气";break;
+                                case "F":fuelType = "液化石油气";break;
+                                case "L":fuelType = "甲醇";break;
+                                case "M":fuelType = "乙醇";break;
+                                case "N":fuelType = "太阳能";break;
+                                case "O":fuelType = "混合动力";break;
+                                case "Y":fuelType = "无";break;
+                                case "Z":fuelType = "其他";break;
+                            }
+                            cell = CreateTableUtil.createCell("燃料种类",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(fuelType,  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell("排量(ml)",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getEmissions(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            cell = CreateTableUtil.createCell("发动机最大功率(kw)",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getMaximumPower(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell("轴数",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getNumberAxles(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            cell = CreateTableUtil.createCell("轴距(mm)",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getWheelBase(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell("前轮距(mm)",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getFrontTread(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            cell = CreateTableUtil.createCell("后轮距(mm)",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getRearTread(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell("总质量(kg)",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getTotalMass(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            cell = CreateTableUtil.createCell("整备质量(kg)",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getVoidWeight(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell("核定载客数",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getPassengersVerification(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            cell = CreateTableUtil.createCell("出厂日期",  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(vehicleDetailsEnquiryData.getProductionDate(),  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(null,  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
+                            table.addCell(cell);
+                            cell = CreateTableUtil.createCell(null,  CreateTableUtil.textfont); //表格中添加的文字
+                            cell.setColspan(3);
+                            table.addCell(cell);
+
+                            flag = false;
+                        }
+                    }
+                    num ++;
+                    if(flag && num >= itemListArray.size()){
+                        cell = CreateTableUtil.createCell("无数据", CreateTableUtil.textfont); //表格中添加的文字
+                        cell.setColspan(8); //合并列
+                        table.addCell(cell);
+                    }
+                }
+                document.add(table);
+
+
                 //备注
                 paragraph = new Paragraph("\n\n", CreateTableUtil.keyGreyFont);
                 document.add(paragraph);

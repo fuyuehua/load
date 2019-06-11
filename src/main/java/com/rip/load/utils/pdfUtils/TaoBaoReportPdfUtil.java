@@ -56,7 +56,7 @@ public class TaoBaoReportPdfUtil {
                         JSONArray orderDetailsArray = JSON.parseArray(dataMap.get("orderDetails").toString());//订单信息，商品信息、商家信息
 
                         PdfPTable table = CreateTableUtil.createTable(1);
-                        Image img = Image.getInstance("../img/homepage.jpg");//图片的地址
+                        Image img = Image.getInstance("../img/taobao.jpg");//图片的地址
                         img.scaleAbsolute(CreateTableUtil.mmTopx(200),CreateTableUtil.mmTopx(297));
                         PdfPCell photoCell = new PdfPCell(img);
                         photoCell.setBorder(0);
