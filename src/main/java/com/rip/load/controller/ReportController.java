@@ -87,13 +87,13 @@ public class ReportController {
         Boolean aBoolean = WindControlReportUtil.windControlReport(json, filePath+"/1.pdf");
         Boolean aBoolean1 = OperatorReportPdfUtil.operatorReport(json, filePath+"/2.pdf");
         Boolean aBoolean2 = TaoBaoReportPdfUtil.taoBaoReport(json,filePath+"/3.pdf");
-        if(StringUtils.isEmpty(report.getBaseUrl())){
+        if(!StringUtils.isEmpty(report.getBaseUrl())){
             aBoolean = false;
         }
-        if(StringUtils.isEmpty(report.getBaseUrl())){
+        if(!StringUtils.isEmpty(report.getBaseUrl())){
             aBoolean1 = false;
         }
-        if(StringUtils.isEmpty(report.getBaseUrl())){
+        if(!StringUtils.isEmpty(report.getBaseUrl())){
             aBoolean2 = false;
         }
         if(aBoolean){

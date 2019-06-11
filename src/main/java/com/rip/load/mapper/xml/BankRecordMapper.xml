@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rip.load.mapper.BankRecordMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rip.load.pojo.BankRecord">
+        <id column="id" property="id" />
+        <result column="money" property="money" />
+        <result column="createtime" property="createtime" />
+        <result column="
+drawee" property="
+drawee" />
+        <result column="drawee_id" property="draweeId" />
+        <result column="payee" property="payee" />
+        <result column="payee_id" property="payeeId" />
+        <result column="operator" property="operator" />
+        <result column="operator_id" property="operatorId" />
+        <result column="type" property="type" />
+        <result column="user_id" property="userId" />
+        <result column="order_id" property="orderId" />
+        <result column="poundage_rate" property="poundageRate" />
+    </resultMap>
+
+</mapper>

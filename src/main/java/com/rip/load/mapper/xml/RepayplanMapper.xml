@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.rip.load.mapper.RepayplanMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.rip.load.pojo.Repayplan">
+        <id column="id" property="id" />
+        <result column="type" property="type" />
+        <result column="money_type" property="moneyType" />
+        <result column="start_date" property="startDate" />
+        <result column="end_date" property="endDate" />
+        <result column="last_deal_date" property="lastDealDate" />
+        <result column="next_deal_date" property="nextDealDate" />
+        <result column="amount" property="amount" />
+        <result column="total_amount" property="totalAmount" />
+        <result column="total_times" property="totalTimes" />
+        <result column="deal_day" property="dealDay" />
+        <result column="frequency" property="frequency" />
+    </resultMap>
+
+</mapper>
