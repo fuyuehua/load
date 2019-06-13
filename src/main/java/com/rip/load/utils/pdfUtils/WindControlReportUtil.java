@@ -8,6 +8,7 @@ import com.itextpdf.text.pdf.PdfPCell;
 import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.rip.load.otherPojo.honeyportData.*;
+import com.rip.load.otherPojo.vehicleDetailsEnquiry.VehicleDetailsEnquiry;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -4494,9 +4495,9 @@ public class WindControlReportUtil {
                 for (Object item : itemListArray) {
                     Map<String, Object> itemMap = JSON.parseObject(String.valueOf(item));
                     if ("4".equals(String.valueOf(itemMap.get("type")))) {//车辆详情
-                        VehicleDetailsEnquiry vehicleDetailsEnquiry = JSONObject.parseObject(String.valueOf(itemMap.get("resultJson")),VehicleDetailsEnquiry.class);
+                        VehicleDetailsEnquiry vehicleDetailsEnquiry = JSONObject.parseObject(String.valueOf(itemMap.get("resultJson")), VehicleDetailsEnquiry.class);
                         if(vehicleDetailsEnquiry.getSuccess()){
-                            com.credit.car.entity.vehicleDetailsEnquiry.Data vehicleDetailsEnquiryData = vehicleDetailsEnquiry.getData();
+                            com.rip.load.otherPojo.vehicleDetailsEnquiry.Data vehicleDetailsEnquiryData = vehicleDetailsEnquiry.getData();
                             cell = CreateTableUtil.createCell("查询状态",  CreateTableUtil.textfont); //表格中添加的文字
                             cell.setBackgroundColor(CreateTableUtil.tableBody); //表格底色
                             table.addCell(cell);
