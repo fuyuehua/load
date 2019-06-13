@@ -85,7 +85,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
     }
 
     @Override
-    public List<User> setRoleAndInfo(List<User> allUser, String status) {
+    public List<User> setRoleAndInfo(List<User> allUser) {
         //客户
         List<Integer> list2 = new ArrayList<>();
         //平台商
@@ -112,28 +112,13 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             user.setRoleList(role);
         }
         if(list2.size() > 0) {
-            List<Integer> temp =  new ArrayList<>();
-            if(!StringUtils.isEmpty(status)){
-                if(status.equals("0")){
-                    temp.add(0);
-                    temp.add(1);
-                    temp.add(2);
-                    temp.add(6);
-                }else if(status.equals("1")){
-                    temp.add(4);
-                }else if(status.equals("2")){
-                    temp.add(3);
-                    temp.add(5);
-                }else if(status.equals("3")){
-                    temp.add(7);
-                }
-            }
-            List<UserCustomer> userCustomers = userCustomerService.selectList(new EntityWrapper<UserCustomer>().in("userId",list2)
-                    .in(StringUtils.isEmpty(status),"status",temp));
+            List<UserCustomer> userCustomers = userCustomerService.selectList(new EntityWrapper<UserCustomer>()
+                    .in("userId",list2));
             for (UserCustomer k : userCustomers) {
                 for (User user : allUser) {
                     if (k.getUserId().equals(user.getId())) {
                         user.setInfoObj(k);
+                        break;
                     }
                 }
             }
@@ -144,6 +129,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 for (User user : allUser) {
                     if (k.getUserId().equals(user.getId())) {
                         user.setInfoObj(k);
+                        break;
                     }
                 }
             }
@@ -155,6 +141,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 for (User user : allUser) {
                     if (k.getUserId().equals(user.getId())) {
                         user.setInfoObj(k);
+                        break;
                     }
                 }
             }
@@ -166,6 +153,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 for (User user : allUser) {
                     if (k.getUserId().equals(user.getId())) {
                         user.setInfoObj(k);
+                        break;
                     }
                 }
             }
@@ -177,6 +165,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
                 for (User user : allUser) {
                     if (k.getUserId().equals(user.getId())) {
                         user.setInfoObj(k);
+                        break;
                     }
                 }
             }
@@ -251,6 +240,49 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             resultList.add(uc.getUserId());
         }
         return resultList;
+    }
+
+    @Override
+    public List<Integer> handleStatus(List<Integer> sonList, String status) {
+        List<Integer> temp =  new ArrayList<>();
+        if(!StringUtils.isEmpty(status)){
+            if(status.equals("0")){
+                temp.add(0);
+                temp.add(1);
+                temp.add(2);
+                temp.add(6);
+            }else if(status.equals("1")){
+                temp.add(4);
+            }else if(status.equals("2")){
+                temp.add(3);
+                temp.add(5);
+            }else if(status.equals("3")){
+                temp.add(7);
+            }
+        }
+        List<UserCustomer> userCustomers = userCustomerService.selectList(new EntityWrapper<UserCustomer>()
+                .setSqlSelect("userId as userId")
+                .in(!StringUtils.isEmpty(status),"status",temp));
+        temp = new ArrayList<>();
+        List<Integer> son = new ArrayList<>();
+        if(userCustomers == null || userCustomers.size() == 0){
+            return son;
+        }
+        if(sonList == null || sonList.size() == 0){
+            return son;
+        }
+        for(UserCustomer uc : userCustomers){
+            temp.add(uc.getUserId());
+        }
+        for(Integer i : temp){
+            for(Integer j : sonList){
+                if(i.equals(j)){
+                    son.add(i);
+                    break;
+                }
+            }
+        }
+        return son;
     }
 
 }

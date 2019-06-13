@@ -133,7 +133,14 @@ public class OperatorReportPdfUtil {
                         }
 
                         PdfPTable table = CreateTableUtil.createTable(1);
-                        Image img = Image.getInstance("../img/operator.jpg");//图片的地址
+                        Image img = null;
+                        try{
+                            img = Image.getInstance("../img/operator.jpg");//图片的地址
+                        }catch (Exception e){
+                        }
+                        if(img == null)
+                            img = Image.getInstance("/usr/local/tomcatfangdi-8088/webapps/img/operator.jpg");//图片的地址
+
                         img.scaleAbsolute(CreateTableUtil.mmTopx(200),CreateTableUtil.mmTopx(297));
                         PdfPCell photoCell = new PdfPCell(img);
                         photoCell.setBorder(0);

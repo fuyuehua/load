@@ -142,7 +142,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                         item.setPlanId(repayplan.getId());
                         item.setTime(j);
                         item.setType("PRI");
-                        item.setPlanAmount(perPRIs.get(1).toString());
+                        item.setPlanAmount(perPRIs.get(j).toString());
                         Date dateTemp = DateUtils.addMonths(date, j);
                         item.setStartDate(dateTemp.toString());
                         list.add(item);
@@ -180,7 +180,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                         item.setPlanId(repayplan.getId());
                         item.setTime(j);
                         item.setType("INT");
-                        item.setPlanAmount(perINTs.get(1).toString());
+                        item.setPlanAmount(perINTs.get(j).toString());
                         Date dateTemp = DateUtils.addMonths(date, j);
                         item.setStartDate(dateTemp.toString());
                         list.add(item);
@@ -191,7 +191,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                         item.setPlanId(repayplan.getId());
                         item.setTime(j);
                         item.setType("INT");
-                        item.setPlanAmount(Double.toString(perINTs2.get(1)));
+                        item.setPlanAmount(Double.toString(perINTs2.get(j)));
                         Date dateTemp = DateUtils.addMonths(date, j);
                         item.setStartDate(dateTemp.toString());
                         list.add(item);

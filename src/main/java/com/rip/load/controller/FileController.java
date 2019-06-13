@@ -129,7 +129,7 @@ public class FileController {
 
     }
 
-    @ApiOperation("上传页面地址获得二维码")
+    /*@ApiOperation("上传页面地址获得二维码")
     @PostMapping("/url2qrcode")
     public Result<Object> url2qrcode(String text, String path){
         String s = "";
@@ -139,7 +139,7 @@ public class FileController {
             e.printStackTrace();
         }
         return new ResultUtil<Object>().setData(s);
-    }
+    }*/
 
 
     @Autowired

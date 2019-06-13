@@ -12,7 +12,7 @@ import java.io.OutputStream;
 import java.util.Hashtable;
 import java.util.Random;
 import javax.imageio.ImageIO;
-import com.google.zxing.BarcodeFormat;
+/*import com.google.zxing.BarcodeFormat;
 import com.google.zxing.BinaryBitmap;
 import com.google.zxing.DecodeHintType;
 import com.google.zxing.EncodeHintType;
@@ -22,10 +22,10 @@ import com.google.zxing.Result;
 import com.google.zxing.common.BitMatrix;
 import com.google.zxing.common.HybridBinarizer;
 import com.google.zxing.qrcode.decoder.ErrorCorrectionLevel;
-import com.rip.load.utils.FileUtil;
+import com.rip.load.utils.FileUtil;*/
 
 public class QRCodeUtil {
-    private static final String CHARSET = "utf-8";
+    /*private static final String CHARSET = "utf-8";
     private static final String FORMAT_NAME = "JPG";
     // 二维码尺寸
     private static final int QRCODE_SIZE = 300;
@@ -116,11 +116,11 @@ public class QRCodeUtil {
         QRCodeUtil.encode(content, imgPath, destPath, false);
     }
     // 被注释的方法
-    /*
+    *//*
      * public static void encode(String content, String destPath, boolean
      * needCompress) throws Exception { QRCodeUtil.encode(content, null, destPath,
      * needCompress); }
-     */
+     *//*
 
     public static void encode(String content, String destPath) throws Exception {
         QRCodeUtil.encode(content, null, destPath, false);
@@ -156,13 +156,13 @@ public class QRCodeUtil {
         return QRCodeUtil.decode(new File(path));
     }
 
-    /**
+    *//**
      * 生成二维码图片并转换成网络url返回
      * @param text 存放在二维码中的内容
      * @param imgPath 嵌入二维码的图片路径
      * @return
      * @throws Exception
-     */
+     *//*
     public static String encode2Url(String text, String imgPath)throws Exception{
         String path = "../img";
         File file = new File(path);
@@ -190,5 +190,5 @@ public class QRCodeUtil {
         // 打印出解析出的内容
         System.out.println(str);
 
-    }
+    }*/
 }

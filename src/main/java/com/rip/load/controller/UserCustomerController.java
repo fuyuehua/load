@@ -163,7 +163,7 @@ public class UserCustomerController {
                         .eq("onoff", 1)
                         .eq(!(StringUtils.isEmpty(phone)), "username", phone)
         );
-        users = userService.setRoleAndInfo(users, "0");
+        users = userService.setRoleAndInfo(users);
         return new ResultUtil<User>().setData(users.get(0));
     }
 
@@ -177,7 +177,7 @@ public class UserCustomerController {
         if(userId == 0){
             return new ResultUtil<Object>().setErrorMsg("用户ID不能为空");
         }
-        UserCustomer customer = userCustomerService.selectOne(new EntityWrapper<UserCustomer>().eq("user_id", userId));
+        UserCustomer customer = userCustomerService.selectOne(new EntityWrapper<UserCustomer>().eq("userId", userId));
         if(customer == null){
             return new ResultUtil<Object>().setErrorMsg("该用户不存在");
         }
@@ -186,7 +186,7 @@ public class UserCustomerController {
         }else {
             customer.setStatus(0);
         }
-        boolean b = userCustomerService.insert(customer);
+        boolean b = userCustomerService.update(customer, new EntityWrapper<UserCustomer>().eq("userId",customer.getUserId()));
         if (b) {
             return new ResultUtil<Object>().set();
         } else {

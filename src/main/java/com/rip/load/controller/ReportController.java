@@ -90,10 +90,10 @@ public class ReportController {
         if(!StringUtils.isEmpty(report.getBaseUrl())){
             aBoolean = false;
         }
-        if(!StringUtils.isEmpty(report.getBaseUrl())){
+        if(!StringUtils.isEmpty(report.getOperatorUrl())){
             aBoolean1 = false;
         }
-        if(!StringUtils.isEmpty(report.getBaseUrl())){
+        if(!StringUtils.isEmpty(report.getTaobaoUrl())){
             aBoolean2 = false;
         }
         if(aBoolean){

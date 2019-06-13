@@ -1,5 +1,6 @@
 package com.rip.load.service.serviceImpl;
 
+import com.baomidou.mybatisplus.mapper.EntityWrapper;
 import com.rip.load.mapper.BankFundMapper;
 import com.rip.load.pojo.BankFund;
 import com.rip.load.pojo.User;
@@ -12,6 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 /**
  * <p>
@@ -37,10 +39,9 @@ public class UserDistributorServiceImpl extends ServiceImpl<UserDistributorMappe
         bankFund.setFund(new BigDecimal("0"));
         bankFund.setRiskFund(new BigDecimal("0"));
         bankFund.setUserId(distributor.getUserId());
-
-        Integer insert = bankFundMapper.insert(bankFund);
-        if(insert!=1){
-            return false;
+        List<BankFund> user_id = bankFundMapper.selectList(new EntityWrapper<BankFund>().eq("user_id", distributor.getUserId()));
+        if(user_id.size() == 0) {
+            Integer insert = bankFundMapper.insert(bankFund);
         }
         boolean b = insertOrUpdate(distributor);
         //如果没有存用户类型，存一下

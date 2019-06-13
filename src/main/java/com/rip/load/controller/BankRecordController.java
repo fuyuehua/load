@@ -145,7 +145,9 @@ public class BankRecordController {
         //先查看有没有放款放过了
         BankRecord bankRecord1 = bankRecordService.selectOne(new EntityWrapper<BankRecord>().eq("payee_id", order.getUid())
                 .eq("drawee_id", subordinate.getFatherId())
-                .eq("operator", "上游银行").eq("type", 1));
+                .eq("operator", "上游银行")
+                .eq("type", 1)
+                .eq("order_id",order.getId()));
         if(bankRecord1 != null){
             return new ResultUtil<Object>().setErrorMsg("已经放款成功");
         }

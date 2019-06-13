@@ -112,6 +112,9 @@ public class OrderController {
         User user = UserThreadLocal.get();
         List<Integer> intList = userService.getCustomer4Distributor(user);
         Page<Order> page = new Page<>(currentPage, pageSize);
+        if(intList.size() == 0){
+            return new ResultUtil<Page<Order>>().setData(page);
+        }
         Page<Order> orderPage = orderService.selectPage(page, new EntityWrapper<Order>().in("uid", intList).in("status", temp));
         List<Order> records = orderPage.getRecords();
         List<UserDistributor> distributors = userDistributorService.selectList(new EntityWrapper<UserDistributor>().eq("user_id", user.getId()));
@@ -154,6 +157,9 @@ public class OrderController {
         user.setId(ds.getFatherId());
         List<Integer> intList = userService.getCustomer4Distributor(user);
         Page<Order> page = new Page<>(currentPage, pageSize);
+        if(intList.size() == 0){
+            return new ResultUtil<Page<Order>>().setData(page);
+        }
         Page<Order> orderPage = orderService.selectPage(page, new EntityWrapper<Order>().in("uid", intList).in("status", temp));
         List<Order> records = orderPage.getRecords();
         List<UserDistributor> distributors = userDistributorService.selectList(new EntityWrapper<UserDistributor>().eq("user_id", user.getId()));
@@ -192,6 +198,9 @@ public class OrderController {
         User user = UserThreadLocal.get();
         List<Integer> intList = userService.getCustomer4Platform(user);
         Page<Order> page = new Page<>(currentPage, pageSize);
+        if(intList.size() == 0){
+            return new ResultUtil<Page<Order>>().setData(page);
+        }
         Page<Order> orderPage = orderService.selectPage(page, new EntityWrapper<Order>().in("uid", intList).in("status", temp));
         List<Order> records = orderPage.getRecords();
         List<UserDistributor> distributors = userDistributorService.selectList(new EntityWrapper<UserDistributor>().eq("father_id", user.getId()));

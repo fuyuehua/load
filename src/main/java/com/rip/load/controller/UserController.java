@@ -28,6 +28,7 @@ import org.springframework.stereotype.Controller;
 import javax.management.ObjectName;
 import javax.servlet.ServletRequest;
 import java.util.*;
+import java.util.function.DoubleSupplier;
 
 /**
  * <p>
@@ -181,7 +182,7 @@ public class UserController {
         User user = UserThreadLocal.get();
         List<User> list = new ArrayList<>();
         list.add(user);
-        List<User> users = userService.setRoleAndInfo(list,null);
+        List<User> users = userService.setRoleAndInfo(list);
         return new ResultUtil<User>().setData(users.get(0));
     }
 
@@ -402,7 +403,7 @@ public class UserController {
         boolean insert1 = userCustomerService.insert(userCustomer);
         List<User> users = new ArrayList<>();
         users.add(readyUser);
-        users = userService.setRoleAndInfo(users, "0");
+        users = userService.setRoleAndInfo(users);
         if(insert1){
             return new ResultUtil<Object>().setData(users.get(0));
         }else{
@@ -500,7 +501,7 @@ public class UserController {
                         .eq(!(StringUtils.isEmpty(phone)), "phone", phone)
         );
         List<User> allUser = userPage.getRecords();
-        allUser = userService.setRoleAndInfo(allUser,null);
+        allUser = userService.setRoleAndInfo(allUser);
         userPage.setRecords(allUser);
         return new ResultUtil<Page<User>>().setData(userPage);
     }
@@ -534,6 +535,9 @@ public class UserController {
         User user = UserThreadLocal.get();
         List<Integer> sonList = userService.getSon4Platform(user);
         Page<User> page = new Page<>(currentPage, pageSize);
+        if(sonList.size() == 0){
+            return new ResultUtil<Page<User>>().setData(page);
+        }
         Page<User> userPage = userService.selectPage(page,
                 new EntityWrapper<User>()
                         .eq("onoff", 1)
@@ -544,7 +548,7 @@ public class UserController {
 
         );
         List<User> allUser = userPage.getRecords();
-        allUser = userService.setRoleAndInfo(allUser, null);
+        allUser = userService.setRoleAndInfo(allUser);
         userPage.setRecords(allUser);
         return new ResultUtil<Page<User>>().setData(userPage);
     }
@@ -576,6 +580,9 @@ public class UserController {
         User user = UserThreadLocal.get();
         List<Integer> sonList = userService.getSon4Distributor(user);
         Page<User> page = new Page<>(currentPage, pageSize);
+        if(sonList.size() == 0){
+            return new ResultUtil<Page<User>>().setData(page);
+        }
         Page<User> userPage = userService.selectPage(page,
                 new EntityWrapper<User>()
                         .eq("onoff", 1)
@@ -586,7 +593,7 @@ public class UserController {
 
         );
         List<User> allUser = userPage.getRecords();
-        allUser = userService.setRoleAndInfo(allUser,null);
+        allUser = userService.setRoleAndInfo(allUser);
         userPage.setRecords(allUser);
         return new ResultUtil<Page<User>>().setData(userPage);
     }
@@ -601,21 +608,31 @@ public class UserController {
                                            @RequestParam(required = false) String username,
                                            @ApiParam(value = "手机号精确查询")
                                            @RequestParam(required = false) String phone,
-                                             @ApiParam(value = "* 客户状态1:已审核0：未审核2：黑名单")
+                                             @ApiParam(value = "* 客户状态1:已审核0：未审核2：已拒绝，3:黑名单")
                                                  @RequestParam String status
     ){
         List<Integer> list = new ArrayList<>();
         list.add(2);
+        List<UserCustomer> userCustomers = userCustomerService.selectList(new EntityWrapper<UserCustomer>().setSqlSelect("userId AS userId"));
+        List<Integer> sonList = new ArrayList<>();
+        for (UserCustomer uc : userCustomers){
+            sonList.add(uc.getUserId());
+        }
+        sonList = userService.handleStatus(sonList,status);
         Page<User> page = new Page<>(currentPage, pageSize);
+        if(sonList.size() == 0){
+            return new ResultUtil<Page<User>>().setData(page);
+        }
         Page<User> userPage = userService.selectPage(page,
                 new EntityWrapper<User>()
                         .eq("onoff", 1)
                         .in("type", list)
+                        .in("id", sonList)
                         .like(!(StringUtils.isEmpty(username)), "nickname", username)
                         .eq(!(StringUtils.isEmpty(phone)), "phone", phone)
         );
         List<User> allUser = userPage.getRecords();
-        allUser = userService.setRoleAndInfo(allUser,status);
+        allUser = userService.setRoleAndInfo(allUser);
         userPage.setRecords(allUser);
         return new ResultUtil<Page<User>>().setData(userPage);
     }
@@ -630,7 +647,7 @@ public class UserController {
                                                      @RequestParam(required = false) String username,
                                                      @ApiParam(value = "手机号精确查询")
                                                      @RequestParam(required = false) String phone,
-                                                       @ApiParam(value = "* 客户状态1:已审核0：未审核2：黑名单")
+                                                       @ApiParam(value = "* 客户状态1:已审核0：未审核2：已拒绝，3:黑名单")
                                                            @RequestParam String status
     ){
         List<Integer> list = new ArrayList<>();
@@ -638,8 +655,11 @@ public class UserController {
         //平台商看到的下级
         User user = UserThreadLocal.get();
         List<Integer> sonList = userService.getCustomer4Platform(user);
-
+        sonList = userService.handleStatus(sonList, status);
         Page<User> page = new Page<>(currentPage, pageSize);
+        if(sonList.size() == 0){
+            return new ResultUtil<Page<User>>().setData(page);
+        }
         Page<User> userPage = userService.selectPage(page,
                 new EntityWrapper<User>()
                         .eq("onoff", 1)
@@ -650,7 +670,7 @@ public class UserController {
 
         );
         List<User> allUser = userPage.getRecords();
-        allUser = userService.setRoleAndInfo(allUser,status);
+        allUser = userService.setRoleAndInfo(allUser);
         userPage.setRecords(allUser);
         return new ResultUtil<Page<User>>().setData(userPage);
     }
@@ -665,7 +685,7 @@ public class UserController {
                                                         @RequestParam(required = false) String username,
                                                         @ApiParam(value = "手机号精确查询")
                                                         @RequestParam(required = false) String phone,
-                                                          @ApiParam(value = "* 客户状态1:已审核0：未审核2：黑名单")
+                                                          @ApiParam(value = "客户状态1:已审核0：未审核2：已拒绝，3:黑名单")
                                                               @RequestParam String status
     ){
         List<Integer> list = new ArrayList<>();
@@ -673,7 +693,11 @@ public class UserController {
         //渠道商看到的下级
         User user = UserThreadLocal.get();
         List<Integer> sonList = userService.getCustomer4Distributor(user);
+        sonList = userService.handleStatus(sonList, status);
         Page<User> page = new Page<>(currentPage, pageSize);
+        if(sonList.size() == 0){
+            return new ResultUtil<Page<User>>().setData(page);
+        }
         Page<User> userPage = userService.selectPage(page,
                 new EntityWrapper<User>()
                         .eq("onoff", 1)
@@ -683,10 +707,13 @@ public class UserController {
                         .eq(!(StringUtils.isEmpty(phone)), "phone", phone)
         );
         List<User> allUser = userPage.getRecords();
-        allUser = userService.setRoleAndInfo(allUser,status);
+        allUser = userService.setRoleAndInfo(allUser);
         userPage.setRecords(allUser);
         return new ResultUtil<Page<User>>().setData(userPage);
     }
 
+    public static void main(String[] args) {
+
+    }
 }
 
