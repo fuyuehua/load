@@ -23,6 +23,9 @@ public class CreateTableUtil {
     public static Font keyfonfirst; //关键字字体大小
     public static Font keyLightBlue;//关键字字体大小
     public static Font textfont;//正文字体大小
+    public static Font AgreementBlackFont; //协议正文字体黑色
+    public static Font AgreementGreyFont; //协议正文字体灰色
+    public static Font AgreementKeyBlackFont; //协议关键字字体灰色
     public static Font textRedFont;//正文红色字体
     public static Font textGreenFont;//正文绿色字体
     public static Font textOrangeFont; //正文橘色字体
@@ -49,6 +52,11 @@ public class CreateTableUtil {
             textOrangeFont = new Font(bfChinese,8,Font.NORMAL,BaseColorUtil.ORANGE); //橘色
             keyGreyFont = new Font(bfChinese, 10, Font.NORMAL,BaseColorUtil.DARK_GRAY);// 字段字体大小(默认深灰色)
             textwhitefont = new Font(bfChinese, 8, Font.BOLD,BaseColorUtil.WHITE);// 关键标题字体大小和颜色(白色)
+
+            AgreementBlackFont = new Font(bfChinese,10,Font.NORMAL,BaseColorUtil.BLACK);//协议正文字体黑色
+            AgreementGreyFont =  new Font(bfChinese,10,Font.NORMAL,BaseColorUtil.DARK_GRAY);//协议正文字体灰色
+            AgreementKeyBlackFont = new Font(bfChinese,12,Font.NORMAL,BaseColorUtil.BLACK); //协议关键字字体灰色
+
         } catch (Exception e) {
             e.printStackTrace();
         }
