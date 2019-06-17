@@ -9,6 +9,7 @@ import com.itextpdf.text.pdf.PdfPTable;
 import com.itextpdf.text.pdf.PdfWriter;
 import com.rip.load.otherPojo.honeyportData.*;
 import com.rip.load.otherPojo.vehicleDetailsEnquiry.VehicleDetailsEnquiry;
+import org.springframework.util.StringUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -281,7 +282,13 @@ public class WindControlReportUtil {
                         Map<String, Object> dataMap = JSON.parseObject(String.valueOf(resultJsonMap.get("data")));
                         String result = null;
                         Font font = CreateTableUtil.textGreenFont;
-                        if ("0000".equals(String.valueOf(dataMap.get("key")))) {
+                        if(dataMap == null) {
+                            result = "无记录";
+                            font = CreateTableUtil.textOrangeFont;
+                        }else if(dataMap.get("key") == null){
+                            result = "无记录";
+                            font = CreateTableUtil.textOrangeFont;
+                        } else if ("0000".equals(String.valueOf(dataMap.get("key")))) {
                             result = "一致";
                         } else if ("9998".equals(String.valueOf(dataMap.get("key")))) {
                             result = "不一致";
@@ -330,7 +337,13 @@ public class WindControlReportUtil {
 
                         String result = null;
                         Font font = CreateTableUtil.textGreenFont;
-                        if ("0000".equals(String.valueOf(dataMap.get("key")))) {
+                        if(dataMap == null) {
+                            result = "无记录";
+                            font = CreateTableUtil.textOrangeFont;
+                        }else if(dataMap.get("key") == null){
+                            result = "无记录";
+                            font = CreateTableUtil.textOrangeFont;
+                        } else if ("0000".equals(String.valueOf(dataMap.get("key")))) {
                             result = "一致";
                         } else if ("9998".equals(String.valueOf(dataMap.get("key")))) {
                             result = "不一致";
@@ -367,7 +380,11 @@ public class WindControlReportUtil {
                     if ("3".equals(String.valueOf(itemOneMap.get("type")))) {//客户手机在网时长
                         Map<String, Object> resultJsonOneMap = JSON.parseObject(String.valueOf(itemOneMap.get("resultJson")));
                         Map<String, Object> dataOneMap = JSON.parseObject(String.valueOf(resultJsonOneMap.get("data")));
-                        cell = CreateTableUtil.createCell(String.valueOf(dataOneMap.get("OUTPUT1")), CreateTableUtil.textfont);
+                        if(dataOneMap == null || dataOneMap.get("OUTPUT1") == null){
+                            cell = CreateTableUtil.createCell(null, CreateTableUtil.textfont);
+                        }else {
+                            cell = CreateTableUtil.createCell(String.valueOf(dataOneMap.get("OUTPUT1")), CreateTableUtil.textfont);
+                        }
                         cell.setColspan(4);
                         table.addCell(cell);
                         flag = false;
@@ -395,7 +412,11 @@ public class WindControlReportUtil {
                 cell = CreateTableUtil.createCell("手机号：", CreateTableUtil.textfont);
                 //cell.setBackgroundColor(CreateTableUtil.tableBody);//表格底色
                 table.addCell(cell);
-                cell = CreateTableUtil.createCell(String.valueOf(userCustomerMap.get("aPhone")), CreateTableUtil.textfont);
+                String aPhone = String.valueOf(userCustomerMap.get("aPhone"));
+                if(!StringUtils.isEmpty(aPhone)){
+                    aPhone = ProtectingPrivacyUtil.mobileEncrypt(aPhone);
+                }
+                cell = CreateTableUtil.createCell(aPhone, CreateTableUtil.textfont);
                 cell.setColspan(2);
                 table.addCell(cell);
                 num = 0;
@@ -407,7 +428,13 @@ public class WindControlReportUtil {
                         Map<String, Object> dataMap = JSON.parseObject(String.valueOf(resultJsonMap.get("data")));
                         String result = null;
                         Font font = CreateTableUtil.textGreenFont;
-                        if ("0000".equals(String.valueOf(dataMap.get("key")))) {
+                        if(dataMap == null) {
+                            result = "无记录";
+                            font = CreateTableUtil.textOrangeFont;
+                        }else if(dataMap.get("key") == null){
+                            result = "无记录";
+                            font = CreateTableUtil.textOrangeFont;
+                        } else if ("0000".equals(String.valueOf(dataMap.get("key")))) {
                             result = "一致";
                         } else if ("9998".equals(String.valueOf(dataMap.get("key")))) {
                             result = "不一致";
@@ -424,8 +451,11 @@ public class WindControlReportUtil {
                         cell = CreateTableUtil.createCell("运营商：", CreateTableUtil.textfont);
                         //cell.setBackgroundColor(CreateTableUtil.tableBody);//表格底色
                         table.addCell(cell);
-
-                        cell = CreateTableUtil.createCell("".equals(String.valueOf(dataMap.get("isp"))) ? "未知" : String.valueOf(dataMap.get("isp")), CreateTableUtil.textfont);
+                        if(dataMap != null){
+                            cell = CreateTableUtil.createCell("".equals(String.valueOf(dataMap.get("isp"))) ? "未知" : String.valueOf(dataMap.get("isp")), CreateTableUtil.textfont);
+                        }else {
+                            cell = CreateTableUtil.createCell(null, CreateTableUtil.textfont);
+                        }
                         cell.setColspan(2);
                         table.addCell(cell);
                         flag = false;
@@ -456,7 +486,11 @@ public class WindControlReportUtil {
                         table.addCell(cell);
                         Map<String, Object> resultJsonOneMap = JSON.parseObject(String.valueOf(itemOneMap.get("resultJson")));
                         Map<String, Object> dataOneMap = JSON.parseObject(String.valueOf(resultJsonOneMap.get("data")));
-                        cell = CreateTableUtil.createCell(String.valueOf(dataOneMap.get("OUTPUT1")), CreateTableUtil.textfont);
+                        if(dataOneMap == null || dataOneMap.get("OUTPUT1") == null){
+                            cell = CreateTableUtil.createCell(null, CreateTableUtil.textfont);
+                        }else {
+                            cell = CreateTableUtil.createCell(String.valueOf(dataOneMap.get("OUTPUT1")), CreateTableUtil.textfont);
+                        }
                         cell.setColspan(4);
                         table.addCell(cell);
                         flag = false;
@@ -486,7 +520,11 @@ public class WindControlReportUtil {
                 cell = CreateTableUtil.createCell("手机号：", CreateTableUtil.textfont);
                 //cell.setBackgroundColor(CreateTableUtil.tableBody);//表格底色
                 table.addCell(cell);
-                cell = CreateTableUtil.createCell(String.valueOf(userCustomerMap.get("bPhone")), CreateTableUtil.textfont);
+                String bPhone = String.valueOf(userCustomerMap.get("bPhone"));
+                if(!StringUtils.isEmpty(bPhone)){
+                    aPhone = ProtectingPrivacyUtil.mobileEncrypt(bPhone);
+                }
+                cell = CreateTableUtil.createCell(bPhone, CreateTableUtil.textfont);
                 cell.setColspan(2);
                 table.addCell(cell);
                 num = 0;
@@ -498,8 +536,7 @@ public class WindControlReportUtil {
                         Map<String, Object> dataMap = JSON.parseObject(String.valueOf(resultJsonMap.get("data")));
                         String result = null;
                         Font font = CreateTableUtil.textGreenFont;
-                        if(dataMap == null)
-                        {
+                        if(dataMap == null) {
                             result = "无记录";
                             font = CreateTableUtil.textOrangeFont;
                         }else if(dataMap.get("key") == null){
