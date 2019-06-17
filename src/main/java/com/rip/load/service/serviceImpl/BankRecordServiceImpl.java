@@ -57,7 +57,7 @@ public class BankRecordServiceImpl extends ServiceImpl<BankRecordMapper, BankRec
         //添加收款渠道商公司名称
         UserDistributor userDistributor = userDistributorMapper.selectList(new EntityWrapper<UserDistributor>()
                 .setSqlSelect("user_id as userId, corporate_name as corporateName")
-                .eq("user_id", bankRecord.getDraweeId()))
+                .eq("user_id", bankRecord.getPayeeId()))
                 .get(0);
         bankRecord.setPayee(userDistributor.getCorporateName());
         ////增加收款者钱

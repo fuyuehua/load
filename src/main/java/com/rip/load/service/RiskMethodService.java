@@ -270,17 +270,24 @@ public class RiskMethodService {
             int num = Integer.parseInt(paramA);
 
             String resultJson = item.getResultJson();
-            PersonalComplaintInquiryC personalComplaintInquiryC = JSON.parseObject(resultJson, PersonalComplaintInquiryC.class);
-            com.rip.load.otherPojo.personalComplaintInquiryC.Data data = personalComplaintInquiryC.getData();
-            if(data.getCheckStatus().equals("NO_DATA"))
-                return true;
-            List<PageData> pageData = data.getPageData();
-            if(pageData == null){
+            String[] fengexians = resultJson.split("fengexian");
+            int size = 0;
+            for (int i = 0; i < fengexians.length; i++) {
+                resultJson = fengexians[i];
+                PersonalComplaintInquiryC personalComplaintInquiryC = JSON.parseObject(resultJson, PersonalComplaintInquiryC.class);
+                com.rip.load.otherPojo.personalComplaintInquiryC.Data data = personalComplaintInquiryC.getData();
+                if(data.getCheckStatus().equals("NO_DATA") && i == 0)
+                    return true;
+                List<PageData> pageData = data.getPageData();
+                if(pageData == null && i == 0){
+                    return true;
+                }
+                size = size + pageData.size();
+            }
+            if(num > size){
                 return true;
             }
-            if(num > pageData.size()){
-                return true;
-            }
+
         }catch (Exception e){
             logger.error("RiskMethodService: personalEnterpriseCheck");
             e.printStackTrace();
@@ -333,6 +340,13 @@ public class RiskMethodService {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public static void main(String[] args) {
+        String k = "1111k";
+        String[] ks = k.split("k");
+        System.out.println(ks.length);
+        System.out.println(ks[0]);
     }
 }
 

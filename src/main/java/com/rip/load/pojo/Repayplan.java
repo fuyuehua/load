@@ -33,6 +33,7 @@ public class Repayplan extends Model<Repayplan> {
 2-等额本金
 3-一次性还本付息
 4-先息后本(即按频率付息、一次还本)
+     5_手续费模式
      */
     private Integer type;
 
@@ -40,6 +41,7 @@ public class Repayplan extends Model<Repayplan> {
      * PRI-本金
     INT-利息
     ODP-罚息
+     INS-保险
      */
     @TableField("money_type")
     private String moneyType;

@@ -285,7 +285,6 @@ public class OrderController {
             return new ResultUtil<Object>().setErrorMsg("该客户不存在");
         }
         //查询客户
-
         User user = UserThreadLocal.get();
         order.setSecondRejectMan(user.getId());
         if(result == 1){
@@ -302,7 +301,6 @@ public class OrderController {
         }
         String resultStr = orderService.createOrderAndRepayPlan(order);
         userCustomerService.update(customer, new EntityWrapper<UserCustomer>().eq("userId",customer.getUserId()));
-
         if (resultStr.equals("1")) {
             return new ResultUtil<Object>().set();
         } else {

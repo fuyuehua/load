@@ -247,6 +247,11 @@ public class UserCustomer extends Model<UserCustomer> {
      */
     private Integer status = 0;
 
+    /**
+     * 推荐人
+     */
+    private String people;
+
     @TableField(exist = false)
     private UserDistributor userDistributor;
 
@@ -558,6 +563,14 @@ public class UserCustomer extends Model<UserCustomer> {
 
     public void setStatus(Integer status) {
         this.status = status;
+    }
+
+    public String getPeople() {
+        return people;
+    }
+
+    public void setPeople(String people) {
+        this.people = people;
     }
 
     @Override

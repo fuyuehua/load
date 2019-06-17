@@ -498,7 +498,14 @@ public class WindControlReportUtil {
                         Map<String, Object> dataMap = JSON.parseObject(String.valueOf(resultJsonMap.get("data")));
                         String result = null;
                         Font font = CreateTableUtil.textGreenFont;
-                        if ("0000".equals(String.valueOf(dataMap.get("key")))) {
+                        if(dataMap == null)
+                        {
+                            result = "无记录";
+                            font = CreateTableUtil.textOrangeFont;
+                        }else if(dataMap.get("key") == null){
+                            result = "无记录";
+                            font = CreateTableUtil.textOrangeFont;
+                        } else if ("0000".equals(String.valueOf(dataMap.get("key")))) {
                             result = "一致";
                         } else if ("9998".equals(String.valueOf(dataMap.get("key")))) {
                             result = "不一致";
@@ -515,8 +522,11 @@ public class WindControlReportUtil {
                         cell = CreateTableUtil.createCell("运营商：", CreateTableUtil.textfont);
                         //cell.setBackgroundColor(CreateTableUtil.tableBody);//表格底色
                         table.addCell(cell);
-
-                        cell = CreateTableUtil.createCell("".equals(String.valueOf(dataMap.get("isp"))) ? "未知" : String.valueOf(dataMap.get("isp")), CreateTableUtil.textfont);
+                        if(dataMap != null) {
+                            cell = CreateTableUtil.createCell("".equals(String.valueOf(dataMap.get("isp"))) ? "未知" : String.valueOf(dataMap.get("isp")), CreateTableUtil.textfont);
+                        }else{
+                            cell = CreateTableUtil.createCell(null, CreateTableUtil.textfont);
+                        }
                         cell.setColspan(2);
                         table.addCell(cell);
                         flag = false;

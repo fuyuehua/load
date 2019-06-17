@@ -76,10 +76,10 @@ public class UserCustomerController {
     @GetMapping("/improveOtherInfo")
     public Result<Object> improveOtherInfo(
                                       @RequestParam int userId,
-                                      @RequestParam String plateNumber,
-                                      @RequestParam String workUnit,
-                                      @RequestParam String workAddress,
-                                      @RequestParam String socialSecurity,
+                                       String plateNumber,
+                                       String workUnit,
+                                       String workAddress,
+                                       String socialSecurity,
                                       @RequestParam String aRealname,
                                       @RequestParam String aPhone,
                                       @RequestParam String aRelation,

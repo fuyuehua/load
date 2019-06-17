@@ -128,6 +128,30 @@ public class Config extends Model<Config> {
 
     private String remark;
 
+    /**
+     * 每个月都收的保险
+     */
+    @TableField("insurance_rate_month")
+    private String insuranceRateMonth;
+
+    /**
+     * 第一次收取的保险
+     */
+    @TableField("insurance_rate")
+    private String insuranceRate;
+
+    /**
+     * 每个月都收的保险开关
+     */
+    @TableField("insurance_rate_month_onoff")
+    private Integer insuranceRateMonthOnoff;
+
+    /**
+     * 第一次收取的保险开关
+     */
+    @TableField("insurance_rate_onoff")
+    private Integer insuranceRateOnoff;
+
     public Integer getId() {
         return id;
     }
@@ -262,6 +286,38 @@ public class Config extends Model<Config> {
 
     public void setRemark(String remark) {
         this.remark = remark;
+    }
+
+    public String getInsuranceRateMonth() {
+        return insuranceRateMonth;
+    }
+
+    public void setInsuranceRateMonth(String insuranceRateMonth) {
+        this.insuranceRateMonth = insuranceRateMonth;
+    }
+
+    public String getInsuranceRate() {
+        return insuranceRate;
+    }
+
+    public void setInsuranceRate(String insuranceRate) {
+        this.insuranceRate = insuranceRate;
+    }
+
+    public Integer getInsuranceRateMonthOnoff() {
+        return insuranceRateMonthOnoff;
+    }
+
+    public void setInsuranceRateMonthOnoff(Integer insuranceRateMonthOnoff) {
+        this.insuranceRateMonthOnoff = insuranceRateMonthOnoff;
+    }
+
+    public Integer getInsuranceRateOnoff() {
+        return insuranceRateOnoff;
+    }
+
+    public void setInsuranceRateOnoff(Integer insuranceRateOnoff) {
+        this.insuranceRateOnoff = insuranceRateOnoff;
     }
 
     @Override

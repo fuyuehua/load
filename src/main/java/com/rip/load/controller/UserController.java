@@ -7,10 +7,12 @@ import com.baomidou.mybatisplus.plugins.Page;
 import com.baomidou.mybatisplus.service.IService;
 import com.rip.load.pojo.User;
 import com.rip.load.pojo.UserCustomer;
+import com.rip.load.pojo.UserDistributorSubordinate;
 import com.rip.load.pojo.UserRole;
 import com.rip.load.pojo.nativePojo.Result;
 import com.rip.load.pojo.nativePojo.UserThreadLocal;
 import com.rip.load.service.UserCustomerService;
+import com.rip.load.service.UserDistributorSubordinateService;
 import com.rip.load.service.UserRoleService;
 import com.rip.load.service.UserService;
 import com.rip.load.utils.*;
@@ -51,6 +53,8 @@ public class UserController {
     private UserRoleService userRoleService;
     @Autowired
     private UserCustomerService userCustomerService;
+    @Autowired
+    private UserDistributorSubordinateService userDistributorSubordinateService;
 
     @ApiOperation(value = "新建一个用户（管理员）")
     @PostMapping("/add")
@@ -357,7 +361,9 @@ public class UserController {
             @ApiParam(value = "验证码")
             @RequestParam String str,
             @ApiParam("传一个标识这个客户属于某个渠道商的渠道商ID")
-            @RequestParam Integer distributorId){
+            @RequestParam Integer distributorId,
+            @ApiParam("推荐人")
+            @RequestParam String people){
         if(StringUtils.isEmpty(phone)){
             return new ResultUtil<Object>().setErrorMsg("未传入手机号");
         }
@@ -400,6 +406,8 @@ public class UserController {
         userCustomer.setFatherId(distributorId);
         userCustomer.setInfoStatus("1");
         userCustomer.setCellphone(readyUser.getPhone());
+        userCustomer.setPeople(people);
+
         boolean insert1 = userCustomerService.insert(userCustomer);
         List<User> users = new ArrayList<>();
         users.add(readyUser);
@@ -692,6 +700,46 @@ public class UserController {
         list.add(2);
         //渠道商看到的下级
         User user = UserThreadLocal.get();
+        List<Integer> sonList = userService.getCustomer4Distributor(user);
+        sonList = userService.handleStatus(sonList, status);
+        Page<User> page = new Page<>(currentPage, pageSize);
+        if(sonList.size() == 0){
+            return new ResultUtil<Page<User>>().setData(page);
+        }
+        Page<User> userPage = userService.selectPage(page,
+                new EntityWrapper<User>()
+                        .eq("onoff", 1)
+                        .in("type", list)
+                        .in("id", sonList)
+                        .like(!(StringUtils.isEmpty(username)), "nickname", username)
+                        .eq(!(StringUtils.isEmpty(phone)), "phone", phone)
+        );
+        List<User> allUser = userPage.getRecords();
+        allUser = userService.setRoleAndInfo(allUser);
+        userPage.setRecords(allUser);
+        return new ResultUtil<Page<User>>().setData(userPage);
+    }
+
+    @ApiOperation("渠道商下属查到所有的客户")
+    @GetMapping("/getAllCustomerByDistributorSub")
+    public Result<Page<User>> getAllCustomerByDistributorSub(@ApiParam(value = "想要请求的页码")
+                                                          @RequestParam int currentPage,
+                                                          @ApiParam(value = "一页显示多少数据")
+                                                          @RequestParam int pageSize,
+                                                          @ApiParam(value = "用户名模糊查询")
+                                                          @RequestParam(required = false) String username,
+                                                          @ApiParam(value = "手机号精确查询")
+                                                          @RequestParam(required = false) String phone,
+                                                          @ApiParam(value = "客户状态1:已审核0：未审核2：已拒绝，3:黑名单")
+                                                          @RequestParam String status
+    ){
+        List<Integer> list = new ArrayList<>();
+        list.add(2);
+        //渠道商下属所属上级渠道商看到的下级
+        User user = UserThreadLocal.get();
+        UserDistributorSubordinate subordinate = userDistributorSubordinateService.selectOne(new EntityWrapper<UserDistributorSubordinate>()
+                .eq("user_id", user.getId()));
+        user = userService.selectById(subordinate.getFatherId());
         List<Integer> sonList = userService.getCustomer4Distributor(user);
         sonList = userService.handleStatus(sonList, status);
         Page<User> page = new Page<>(currentPage, pageSize);

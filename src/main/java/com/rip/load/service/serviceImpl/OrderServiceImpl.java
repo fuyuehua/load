@@ -9,6 +9,7 @@ import com.rip.load.utils.AverageCapitalPlusInterestUtils;
 import com.rip.load.utils.AverageCapitalUtils;
 import com.rip.load.utils.DateUtil;
 import org.apache.commons.lang3.time.DateUtils;
+import org.springframework.beans.BeanInfoFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -98,15 +99,26 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         double perPRI2 = 0;
         //当等额本金的时候，每个月要还的利息
         Map<Integer, Double> perINTs2 = null;
-        //一次性还本付息的最后一次的所有利息
+
+        //3一次性还本付息的最后一次的所有利息
         BigDecimal realInterest = null;
 
+        //4:先息后本 每月还的利息
+        BigDecimal monthInterest = null;
+
+        //type5,每月手续费逻辑
+        //每月本金
+        String chargePRI = null;
+        String chargeINT = null;
+
+        //等额本息
         if(repayplan.getType() == 1){
             perPRIs = AverageCapitalPlusInterestUtils.getPerMonthPrincipal(Double.valueOf(order.getBorrowMoney().toString()), Double.valueOf(config.getInterest()) * 0.01, Integer.parseInt(repayplan.getTotalTimes()));
             perINTs = AverageCapitalPlusInterestUtils.getPerMonthInterest(Double.valueOf(order.getBorrowMoney().toString()), Double.valueOf(config.getInterest()) * 0.01, Integer.parseInt(repayplan.getTotalTimes()));
             double interestCount = AverageCapitalPlusInterestUtils.getInterestCount(Double.valueOf(order.getBorrowMoney().toString()), Double.valueOf(config.getInterest()) * 0.01, Integer.parseInt(repayplan.getTotalTimes()));
             totalInt = Double.toString(interestCount);
         }
+        //等额本金
         if(repayplan.getType() == 2){
             perPRI2 = AverageCapitalUtils.getPerMonthPrincipal(Double.valueOf(order.getBorrowMoney().toString()), Integer.parseInt(repayplan.getTotalTimes()));
             perINTs2 = AverageCapitalUtils.getPerMonthInterest(Double.valueOf(order.getBorrowMoney().toString()), Double.valueOf(config.getInterest()) * 0.01, Integer.parseInt(repayplan.getTotalTimes()));
@@ -121,16 +133,25 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     .divide(new BigDecimal("12"))
                     .multiply(new BigDecimal(repayplan.getTotalTimes()))
                     .multiply(order.getBorrowMoney());
-            BigDecimal total = order.getBorrowMoney().add(realInterest);
+            totalInt = realInterest.toString();
         }
         if(repayplan.getType() == 4){
-            perPRI2 = AverageCapitalUtils.getPerMonthPrincipal(Double.valueOf(order.getBorrowMoney().toString()), Integer.parseInt(repayplan.getTotalTimes()));
-            perINTs2 = AverageCapitalUtils.getPerMonthInterest(Double.valueOf(order.getBorrowMoney().toString()), Double.valueOf(config.getInterest()) * 0.01, Integer.parseInt(repayplan.getTotalTimes()));
-            double interestCount = AverageCapitalUtils.getInterestCount(Double.valueOf(order.getBorrowMoney().toString()), Double.valueOf(config.getInterest()) * 0.01, Integer.parseInt(repayplan.getTotalTimes()));
-            totalInt = Double.toString(interestCount);
+            String interest = config.getInterest();
+            monthInterest = new BigDecimal(interest)
+                    .multiply(new BigDecimal("0.01"))
+                    .divide(new BigDecimal("12"))
+                    .multiply(order.getBorrowMoney());
+            totalInt = monthInterest.multiply(new BigDecimal(repayplan.getTotalTimes())).toString();
+        }
+        if(repayplan.getType() == 5){
+            chargePRI = new BigDecimal(totalPRI).divide(new BigDecimal(repayplan.getTotalTimes())).toString();
+            BigDecimal rate = new BigDecimal(config.getInterest()).divide(new BigDecimal(12)).multiply(new BigDecimal(0.01));
+            BigDecimal multiply = new BigDecimal(totalPRI).multiply(rate);
+            chargeINT = multiply.toString();
+            totalInt = multiply.multiply(new BigDecimal(repayplan.getTotalTimes())).toString();
         }
         repayplan.setTotalAmount(new BigDecimal(totalPRI).add(new BigDecimal(totalInt)).toString());
-        for (int i = 0; i < 3; i++) {
+        for (int i = 0; i < 4; i++) {
             if(i == 0){
                 repayplan.setMoneyType("PRI");
                 repayplan.setAmount(totalPRI);
@@ -166,6 +187,27 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     item.setPlanAmount(totalPRI);
                     item.setStartDate(repayplan.getStartDate());
                     list.add(item);
+                }else if(repayplan.getType() == 4){
+                    RepayplanItem item = new RepayplanItem();
+                    item.setPlanId(repayplan.getId());
+                    item.setTime(Integer.parseInt(repayplan.getTotalTimes()));
+                    item.setType("PRI");
+                    item.setPlanAmount(totalPRI);
+                    Date dateTemp = DateUtils.addMonths(date, Integer.parseInt(repayplan.getTotalTimes()));
+                    item.setStartDate(dateTemp.toString());
+                    list.add(item);
+                }
+                else if(repayplan.getType() == 5){
+                    for (int j = 1; j <= Integer.parseInt(repayplan.getTotalTimes()); j++) {
+                        RepayplanItem item = new RepayplanItem();
+                        item.setPlanId(repayplan.getId());
+                        item.setTime(j);
+                        item.setType("PRI");
+                        item.setPlanAmount(chargePRI);
+                        Date dateTemp = DateUtils.addMonths(date, j);
+                        item.setStartDate(dateTemp.toString());
+                        list.add(item);
+                    }
                 }
                 repayplanItemService.insertBatch(list);
             }
@@ -204,12 +246,48 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
                     item.setPlanAmount(realInterest.toString());
                     item.setStartDate(repayplan.getStartDate());
                     list.add(item);
+                } else if(repayplan.getType() == 4){
+                    for (int j = 1; j <= Integer.parseInt(repayplan.getTotalTimes()); j++) {
+                        RepayplanItem item = new RepayplanItem();
+                        item.setPlanId(repayplan.getId());
+                        item.setTime(j);
+                        item.setType("INT");
+                        item.setPlanAmount(monthInterest.toString());
+                        Date dateTemp = DateUtils.addMonths(date, j);
+                        item.setStartDate(dateTemp.toString());
+                        list.add(item);
+                    }
+                }else if(repayplan.getType() == 5){
+                    for (int j = 1; j <= Integer.parseInt(repayplan.getTotalTimes()); j++) {
+                        RepayplanItem item = new RepayplanItem();
+                        item.setPlanId(repayplan.getId());
+                        item.setTime(j);
+                        item.setType("INT");
+                        item.setPlanAmount(chargeINT);
+                        Date dateTemp = DateUtils.addMonths(date, j);
+                        item.setStartDate(dateTemp.toString());
+                        list.add(item);
+                    }
                 }
                 repayplanItemService.insertBatch(list);
             }
+            //逾期
             if(i == 2){
                 repayplan.setMoneyType("ODP");
                 repayplan.setAmount("0");
+            }
+            //保险
+            if(i == 3){
+                if(config.getInsuranceRateOnoff().equals(1)){
+                    BigDecimal multiply = new BigDecimal(totalPRI).multiply(new BigDecimal(config.getInsuranceRate())).multiply(new BigDecimal("0.01"));
+                    repayplan.setTotalAmount(multiply.toString());
+                }
+                if(config.getInsuranceRateMonthOnoff().equals(1)){
+                    BigDecimal multiplyMonth = new BigDecimal(totalPRI).multiply(new BigDecimal(config.getInsuranceRateMonth())).multiply(new BigDecimal("0.01"));
+                    repayplan.setAmount(multiplyMonth.toString());
+                }
+                repayplan.setMoneyType("INS");
+                repayplanService.insert(repayplan);
             }
         }
         updateById(order);
